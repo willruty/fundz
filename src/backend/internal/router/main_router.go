@@ -31,9 +31,39 @@ func SetupMainRouter() *gin.Engine {
 	main.GET("/heath", controller.GetHealth)
 
 	SetupUserRouter(main)
-	SetupAcademicRouter(main)
-	SetupFunRouter(main)
-	SetupFinanceRouter(main)
+	
+	// === Transaction ===
+	transaction := main.Group("/transaction")
+	{
+		// === Transactions CRUD ===
+		transaction.GET("/", controller.GetAllTransactions)
+		transaction.GET("/:id", controller.GetTransactionById)
+		transaction.POST("/", controller.CreateTransaction)
+		transaction.PUT("/", controller.UpdateTransactionById)
+		transaction.DELETE("/:id", controller.DeleteTransactionById)
+	}
+
+	// === Categories ===
+	category := main.Group("/category")
+	{
+		// === Categories CRUD ===
+		category.GET("/", controller.GetAllCategories)
+		category.GET("/:id", controller.GetCategoryById)
+		category.POST("/", controller.CreateCategory)
+		category.PUT("/", controller.UpdateCategoryById)
+		category.DELETE("/:id", controller.DeleteCategoryById)
+	}
+
+	// === Goal ===
+	goal := main.Group("/goal")
+	{
+		// === Goals CRUD ===
+		goal.GET("/", controller.GetAllGoals)
+		goal.GET("/:id", controller.GetGoalById)
+		goal.POST("/", controller.CreateGoal)
+		goal.PUT("/", controller.UpdateGoalById)
+		goal.DELETE("/:id", controller.DeleteGoalById)
+	}
 
 	service.PrintBanner()
 

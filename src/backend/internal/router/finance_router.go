@@ -1,7 +1,7 @@
 package router
 
 import (
-	controller "fundz/internal/controller/finance"
+	controller "fundz/internal/controller"
 
 	"github.com/gin-gonic/gin"
 )

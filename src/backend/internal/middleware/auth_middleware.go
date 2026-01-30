@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	dao "fundz/internal/model/dao/user"
+	dao "fundz/internal/model/dao"
 	"fundz/internal/service"
 	"net/http"
 	"strings"

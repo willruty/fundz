@@ -5,14 +5,15 @@ import (
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type JWTClaims struct {
-	UserId string `json:"user_id"`
+	UserId uuid.UUID `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(id string) (string, error) {
+func GenerateJWT(id uuid.UUID) (string, error) {
 
 	jwtSecret := config.Env.Jwt.JWTSECRET
 	claims := JWTClaims{
@@ -27,7 +28,7 @@ func GenerateJWT(id string) (string, error) {
 	return token.SignedString([]byte(jwtSecret))
 }
 
-func ValidateJWT(tokenString string) (string, error) {
+func ValidateJWT(tokenString string) (uuid.UUID, error) {
 
 	jwtSecret := config.Env.Jwt.JWTSECRET
 	claims := &JWTClaims{}
@@ -37,8 +38,8 @@ func ValidateJWT(tokenString string) (string, error) {
 	token, err := parser.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtSecret), nil
 	})
-	if err != nil || !token.Valid{
-		return "", err
+	if err != nil || !token.Valid {
+		return uuid.UUID{}, err
 	}
 
 	return claims.UserId, nil
