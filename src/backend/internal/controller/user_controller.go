@@ -15,7 +15,7 @@ import (
 // -------
 func Register(c *gin.Context) {
 
-	var user model.User
+	var user model.Users
 
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
@@ -100,7 +100,7 @@ func ValidateToken(c *gin.Context) {
 // -------
 func UpdateUserById(c *gin.Context) {
 
-	var input model.User
+	var input model.Users
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return

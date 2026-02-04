@@ -11,27 +11,27 @@ import (
 // -------
 // Create
 // -------
-func CreateUser(user model.User) error {
+func CreateUser(user model.Users) error {
 	if err := database.DB.Create(&user).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetUserByEmail(email string) (model.User, error) {
-	var user model.User
+func GetUserByEmail(email string) (model.Users, error) {
+	var user model.Users
 
-	if err := database.DB.Model(&model.User{}).Where("email = ?", email).First(&user).Error; err != nil {
+	if err := database.DB.Model(&model.Users{}).Where("email = ?", email).First(&user).Error; err != nil {
 		return user, err
 	}
 
 	return user, nil
 }
 
-func GetUserById(id uuid.UUID) (model.User, error) {
-	var user model.User
+func GetUserById(id uuid.UUID) (model.Users, error) {
+	var user model.Users
 
-	if err := database.DB.Model(&model.User{}).Where("user_id = ?", id).First(&user).Error; err != nil {
+	if err := database.DB.Model(&model.Users{}).Where("user_id = ?", id).First(&user).Error; err != nil {
 		return user, err
 	}
 
@@ -41,9 +41,9 @@ func GetUserById(id uuid.UUID) (model.User, error) {
 // -------
 // Update
 // -------
-func UpdateUserById(userUpdated model.User, id uuid.UUID) error {
+func UpdateUserById(userUpdated model.Users, id uuid.UUID) error {
 
-	query := database.DB.Model(&model.User{}).Where("user_id = ?", id).Updates(userUpdated)
+	query := database.DB.Model(&model.Users{}).Where("user_id = ?", id).Updates(userUpdated)
 	if err := query.Error; err != nil {
 		return err
 	} else if query.RowsAffected == 0 {
@@ -57,7 +57,7 @@ func UpdateUserById(userUpdated model.User, id uuid.UUID) error {
 // Delete
 // -------
 func DeleteUserById(id string) error {
-	var user model.User
+	var user model.Users
 
 	query := database.DB.Where("user_id = ?", id).Delete(user)
 	if err := query.Error; err != nil {
