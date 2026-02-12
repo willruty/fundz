@@ -11,8 +11,8 @@ import (
 // -------
 // Create
 // -------
-func CreateUser(user model.Users) error {
-	if err := database.DB.Create(&user).Error; err != nil {
+func CreateUser(user *model.Users) error {
+	if err := database.DB.Create(user).Error; err != nil {
 		return err
 	}
 	return nil

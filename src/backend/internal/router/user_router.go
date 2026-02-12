@@ -19,8 +19,6 @@ func SetupUserRouter(rg *gin.RouterGroup) {
 		validatedUser.Use(middleware.AuthMiddleware)
 		{
 			validatedUser.GET("auth/validate", controller.ValidateToken)
-			validatedUser.PUT("/", controller.UpdateUserById)
-			validatedUser.DELETE("/:id", controller.DeleteUserById)
 		}
 	}
 }
