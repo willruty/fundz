@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+/* 1. CENTRALIZAÇÃO DE VARIÁVEIS NO ROOT */
+:root {
+  /* Identidade Visual */
+  --primary: #1B365D;
+  --primary-hover: #142a4a;
+  --secondary: #FFD100;
+  --secondary-hover: #e6bc00;
+
+  /* Cores de Fundo e Texto */
+  --bg-light: #ffffff;
+  --bg-dark: #121212;
+  --text-light: #333333;
+  --text-dark: #f5f5f5;
+
+  /* Design System */
+  --radius-main: 12px;
+  --radius-button: 8px;
+  --animate-fast: 0.2s ease-in-out;
+  --font-manrope: "Manrope", sans-serif;
+
+  /* Configurações de Comportamento */
+  font-family: var(--font-manrope);
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--text-light);
+  background-color: var(--bg-light);
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--animate-fast), color var(--animate-fast);
+}
+
+/* 2. MAPEAMENTO PARA O TAILWIND (Classes Utilitárias) */
+@theme {
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+
+  --color-bg-light: var(--bg-light);
+  --color-bg-dark: var(--bg-dark);
+  --color-text-light: var(--text-light);
+  --color-text-dark: var(--text-dark);
+
+  --radius-main: var(--radius-main);
+  --radius-button: var(--radius-button);
+
+  --font-manrope: var(--font-manrope);
+}
+
+/* 3. TEMA ESCURO AUTOMÁTICO */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: var(--text-dark);
+    background-color: var(--bg-dark);
+  }
+}
+
+/* 4. RESETS E TIPOGRAFIA GLOBAL */
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+p {
+  font-size: 1rem;
+}
