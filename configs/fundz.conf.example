@@ -1,10 +1,11 @@
-[service]
-port = 8080
+[SERVICE]
+PORT = xxxx
 
-[database]
-port = 5432
-host = host
-user = user
-password = password
-dbname = dbname
-jwtsecret = jwtsecret exmaple
+[DATABASE]
+HOST = aws-1...
+PORT = 6543
+USER = postgres....
+PASSWORD = ...
+DBNAME = postgres
+SSLMODE = disable
+JWTSECRET = "..."

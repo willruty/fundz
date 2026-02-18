@@ -13,7 +13,7 @@ func RegisterUser(user model.Users) (string, string) {
 
 	_, err := dao.GetUserByEmail(user.Email)
 	if err == nil {
-		return "Conta já cadastrada", ""
+		return "Email já cadastrado", ""
 	}
 
 	hashedPassword, err := util.HashPassword(passwordPura)
@@ -39,11 +39,11 @@ func LoginUser(email, password string) (string, string) {
 
 	user, err := dao.GetUserByEmail(email)
 	if err != nil {
-		return "Email ou senha inválidos" + err.Error(), ""
+		return "Email ou senha inválidos", ""
 	}
 
 	if !util.CheckPasswordHash(strings.TrimSpace(password), user.PasswordHash) {
-		return "Email ou senha inválidos - erro na validação do hash", ""
+		return "Email ou senha inválidos", ""
 	}
 
 	token, err := GenerateJWT(user.ID)
