@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 )
 
 type Subscription struct {
@@ -13,9 +14,9 @@ type Subscription struct {
 	AccountID  *uuid.UUID `gorm:"type:uuid"`
 	CategoryID *uuid.UUID `gorm:"type:uuid"`
 
-	Name            string  `gorm:"not null"`
-	Amount          float64 `gorm:"not null"`
-	BillingCycle    string  `gorm:"not null"` // monthly | yearly
+	Name            string          `gorm:"not null"`
+	Amount          decimal.Decimal `gorm:"not null"`
+	BillingCycle    string          `gorm:"not null"` // monthly | yearly
 	NextBillingDate *time.Time
 	Active          bool `gorm:"default:true"`
 

@@ -31,7 +31,18 @@ func SetupMainRouter() *gin.Engine {
 	main.GET("/heath", controller.GetHealth)
 
 	SetupUserRouter(main)
-	
+
+	// // === Account ===
+	account := main.Group("/account")
+	{
+		// === Account CRUD ===
+		account.GET("/", controller.GetAllAccounts)
+		account.GET("/:id", controller.GetAccountById)
+		account.POST("/", controller.CreateAccount)
+		account.PUT("/", controller.UpdateAccountById)
+		account.DELETE("/:id", controller.DeleteAccountById)
+	}
+
 	// === Transaction ===
 	transaction := main.Group("/transaction")
 	{

@@ -9,19 +9,19 @@ import (
 // -------
 // Create
 // -------
-func CreateAccount(account model.Account) error {
+func CreateAccount(account model.Accounts) error {
 	if err := database.DB.Create(&account).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetAllAccount() ([]model.Account, int64, error) {
+func GetAllAccounts() ([]model.Accounts, int64, error) {
 
-	var account []model.Account
+	var account []model.Accounts
 	var count int64
 
-	result := database.DB.Model(&model.Account{}).Count(&count).Find(&account)
+	result := database.DB.Model(&model.Accounts{}).Count(&count).Find(&account)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
@@ -29,10 +29,10 @@ func GetAllAccount() ([]model.Account, int64, error) {
 	return account, result.RowsAffected, nil
 }
 
-func GetAccountById(pk string) (model.Account, error) {
-	var account model.Account
+func GetAccountById(pk string) (model.Accounts, error) {
+	var account model.Accounts
 
-	if err := database.DB.Where("act_id = ?", pk).First(&account).Error; err != nil {
+	if err := database.DB.Where("id = ?", pk).First(&account).Error; err != nil {
 		return account, err
 	}
 
@@ -42,9 +42,9 @@ func GetAccountById(pk string) (model.Account, error) {
 // -------
 // Update
 // -------
-func UpdateAccountById(modelUpdated model.Account, id string) error {
+func UpdateAccountById(modelUpdated model.Accounts) error {
 
-	query := database.DB.Model(&model.Account{}).Where("act_id = ?", id).Updates(modelUpdated)
+	query := database.DB.Model(&model.Accounts{}).Where("id = ?", modelUpdated.ID).Updates(modelUpdated)
 	if err := query.Error; err != nil {
 		return err
 	} else if query.RowsAffected == 0 {
@@ -58,9 +58,9 @@ func UpdateAccountById(modelUpdated model.Account, id string) error {
 // Delete
 // -------
 func DeleteAccountById(id string) error {
-	var account model.Account
+	var account model.Accounts
 
-	query := database.DB.Where("act_id = ?", id).Delete(account)
+	query := database.DB.Where("id = ?", id).Delete(account)
 	if err := query.Error; err != nil {
 		return err
 	} else if query.RowsAffected == 0 {

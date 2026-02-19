@@ -11,50 +11,48 @@ import (
 // -------
 // Create
 // -------
-func CreateTransaction(c *gin.Context) {
+func CreateAccount(c *gin.Context) {
+	var account entity.Accounts
 
-	var transaction entity.Transactions
-
-	if err := c.ShouldBindJSON(&transaction); err != nil {
+	if err := c.ShouldBindJSON(&account); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return
 	}
 
-	if err := dao.CreateTransaction(transaction); err != nil {
+	if err := dao.CreateAccount(account); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": transaction,
+		"data": account,
 	})
 }
 
 // -------
 // GetAll
 // -------
-func GetAllTransactions(c *gin.Context) {
+func GetAllAccounts(c *gin.Context) {
 
-	transactions, rowsAffected, err := dao.GetAllTransaction()
+	accounts, rowsAffected, err := dao.GetAllAccounts()
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"erro": "Nenhum registro encontrado"})
+		c.JSON(http.StatusNotFound, gin.H{"erro": "Nenhum registro encontrado: " + err.Error()})
 		return
 	}
 
 	c.IndentedJSON(http.StatusOK,
 		gin.H{
-			"results":      transactions,
+			"results":      accounts,
 			"RowsAffected": rowsAffected,
-			"RecordCount":  len(transactions),
+			"RecordCount":  len(accounts),
 		})
 }
 
 // -------
 // GetById
 // -------
-func GetTransactionById(c *gin.Context) {
-
-	result, err := dao.GetTransactionById(c.Param("id"))
+func GetAccountById(c *gin.Context) {
+	result, err := dao.GetAccountById(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return
@@ -66,15 +64,15 @@ func GetTransactionById(c *gin.Context) {
 // -------
 // UpdateById
 // -------
-func UpdateTransactionById(c *gin.Context) {
-
-	var input entity.Transactions
+func UpdateAccountById(c *gin.Context) {
+	var input entity.Accounts
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return
 	}
 
-	if err := dao.UpdateTransactionById(input, input.ID); err != nil {
+	// Seguindo seu padrão de passar a entidade e o ID separadamente
+	if err := dao.UpdateAccountById(input); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erro": "Failed to update record " + err.Error()})
 		return
 	}
@@ -85,16 +83,8 @@ func UpdateTransactionById(c *gin.Context) {
 // -------
 // DeleteById
 // -------
-func DeleteTransactionById(c *gin.Context) {
-
-	id := c.Param("id")
-
-	if _, err := dao.GetTransactionById(id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
-		return
-	}
-
-	if err := dao.DeleteTransactionById(id); err != nil {
+func DeleteAccountById(c *gin.Context) {
+	if err := dao.DeleteAccountById(c.Param("id")); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erro": "Failed to delete record " + err.Error()})
 		return
 	}
