@@ -8,7 +8,7 @@ import (
 // -------
 // Create
 // -------
-func CreateGoal(goal entity.Goal) error {
+func CreateGoal(goal entity.Goals) error {
 	if err := database.DB.Create(&goal).Error; err != nil {
 		return err
 	}
@@ -18,12 +18,12 @@ func CreateGoal(goal entity.Goal) error {
 // -------
 // ReadAll
 // -------
-func FindAllGoals() ([]entity.Goal, int64, error) {
+func FindAllGoals() ([]entity.Goals, int64, error) {
 
-	var goals []entity.Goal
+	var goals []entity.Goals
 	var count int64
 
-	result := database.DB.Model(&entity.Category{}).Count(&count).Find(&goals)
+	result := database.DB.Model(&entity.Categories{}).Count(&count).Find(&goals)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
@@ -34,9 +34,9 @@ func FindAllGoals() ([]entity.Goal, int64, error) {
 // -------
 // Read
 // -------
-func FindGoalById(id string) (entity.Goal, error) {
-	var goal entity.Goal
-	if err := database.DB.Where("goal_id = ?", id).First(&goal).Error; err != nil {
+func FindGoalById(id string) (entity.Goals, error) {
+	var goal entity.Goals
+	if err := database.DB.Where("id = ?", id).First(&goal).Error; err != nil {
 		return goal, err
 	}
 
@@ -46,9 +46,9 @@ func FindGoalById(id string) (entity.Goal, error) {
 // -------
 // Update
 // -------
-func UpdateGoalById(input entity.Goal, id string) error {
-	var goal entity.Goal
-	if err := database.DB.Model(&goal).Where("goal_id = ?", id).Updates(input).Error; err != nil {
+func UpdateGoalById(input entity.Goals) error {
+	var goal entity.Goals
+	if err := database.DB.Model(&goal).Where("id = ?", input.ID).Updates(input).Error; err != nil {
 		return err
 	}
 
@@ -59,8 +59,8 @@ func UpdateGoalById(input entity.Goal, id string) error {
 // Delete
 // -------
 func DeleteGoalById(id string) error {
-	var goal entity.Goal
-	if err := database.DB.Model(&goal).Where("goal_id = ?", id).Delete(goal).Error; err != nil {
+	var goal entity.Goals
+	if err := database.DB.Model(&goal).Where("id = ?", id).Delete(goal).Error; err != nil {
 		return err
 	}
 

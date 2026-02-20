@@ -10,7 +10,7 @@ import (
 // -------
 // Create
 // -------
-func CreateCategory(category entity.Category) error {
+func CreateCategory(category entity.Categories) error {
 	if err := database.DB.Create(&category).Error; err != nil {
 		return err
 	}
@@ -20,12 +20,12 @@ func CreateCategory(category entity.Category) error {
 // -------
 // ReadAll
 // -------
-func GetAllCategories() ([]entity.Category, int64, error) {
+func GetAllCategories() ([]entity.Categories, int64, error) {
 
-	var categories []entity.Category
+	var categories []entity.Categories
 	var count int64
 
-	result := database.DB.Model(&entity.Category{}).Count(&count).Find(&categories)
+	result := database.DB.Model(&entity.Categories{}).Count(&count).Find(&categories)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
@@ -36,10 +36,10 @@ func GetAllCategories() ([]entity.Category, int64, error) {
 // -------
 // Read
 // -------
-func GetCategoryById(id string) (entity.Category, error) {
+func GetCategoryById(id string) (entity.Categories, error) {
 
-	var category entity.Category
-	if err := database.DB.Where("category_id = ?", id).First(&category).Error; err != nil {
+	var category entity.Categories
+	if err := database.DB.Where("id = ?", id).First(&category).Error; err != nil {
 		return category, err
 	}
 
@@ -49,10 +49,10 @@ func GetCategoryById(id string) (entity.Category, error) {
 // -------
 // Update
 // -------
-func UpdateCategoryById(input entity.Category, id uuid.UUID) error {
+func UpdateCategoryById(input entity.Categories, id uuid.UUID) error {
 
-	var category entity.Category
-	if err := database.DB.Model(&category).Where("category_id = ?", id).Updates(input).Error; err != nil {
+	var category entity.Categories
+	if err := database.DB.Model(&category).Where("id = ?", id).Updates(input).Error; err != nil {
 		return err
 	}
 
@@ -64,8 +64,8 @@ func UpdateCategoryById(input entity.Category, id uuid.UUID) error {
 // -------
 func DeleteCategoryById(id string) error {
 
-	var category entity.Category
-	if err := database.DB.Model(&category).Where("category_id = ?", id).Delete(category).Error; err != nil {
+	var category entity.Categories
+	if err := database.DB.Model(&category).Where("id = ?", id).Delete(category).Error; err != nil {
 		return err
 	}
 

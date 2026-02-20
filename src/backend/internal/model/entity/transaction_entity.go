@@ -15,7 +15,7 @@ type Transactions struct {
 	CategoryID *uuid.UUID `json:"category_id" gorm:"type:uuid"`
 
 	Amount      decimal.Decimal `json:"amount" gorm:"not null"`
-	Type        string          `json:"type" gorm:"not null"`
+	Type        string          `json:"type" gorm:"not null"` // income | expense
 	Description string          `json:"description"`
 	OccurredAt  time.Time       `json:"occured_at" gorm:"not null"`
 

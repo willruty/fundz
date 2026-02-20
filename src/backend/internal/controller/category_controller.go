@@ -13,7 +13,7 @@ import (
 // -------
 func CreateCategory(c *gin.Context) {
 
-	var category entity.Category
+	var category entity.Categories
 
 	if err := c.ShouldBindJSON(&category); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
@@ -69,7 +69,7 @@ func GetCategoryById(c *gin.Context) {
 // -------
 func UpdateCategoryById(c *gin.Context) {
 
-	var input entity.Category
+	var input entity.Categories
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return

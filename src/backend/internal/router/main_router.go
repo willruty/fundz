@@ -76,6 +76,17 @@ func SetupMainRouter() *gin.Engine {
 		goal.DELETE("/:id", controller.DeleteGoalById)
 	}
 
+	// === Subscription ===
+	subscription := main.Group("/subscription")
+	{
+		// === Subscription CRUD ===
+		subscription.GET("/", controller.GetAllSubscriptions)
+		subscription.GET("/:id", controller.GetSubscriptionById)
+		subscription.POST("/", controller.CreateSubscription)
+		subscription.PUT("/", controller.UpdateSubscriptionById)
+		subscription.DELETE("/:id", controller.DeleteSubscriptionById)
+	}
+
 	service.PrintBanner()
 
 	return route

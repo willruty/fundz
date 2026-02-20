@@ -13,7 +13,7 @@ import (
 // -------
 func CreateGoal(c *gin.Context) {
 
-	var goal entity.Goal
+	var goal entity.Goals
 
 	if err := c.ShouldBindJSON(&goal); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
@@ -69,20 +69,18 @@ func GetGoalById(c *gin.Context) {
 // -------
 func UpdateGoalById(c *gin.Context) {
 
-	id := c.Param("id")
-
-	if _, err := dao.FindGoalById(id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
-		return
-	}
-
-	var input entity.Goal
+	var input entity.Goals
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return
 	}
 
-	if err := dao.UpdateGoalById(input, id); err != nil {
+	if _, err := dao.FindGoalById(input.ID.String()); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		return
+	}
+
+	if err := dao.UpdateGoalById(input); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erro": "Failed to update record " + err.Error()})
 		return
 	}
