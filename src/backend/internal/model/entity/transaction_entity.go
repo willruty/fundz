@@ -17,7 +17,7 @@ type Transactions struct {
 	Amount      decimal.Decimal `json:"amount" gorm:"not null"`
 	Type        string          `json:"type" gorm:"not null"` // income | expense
 	Description string          `json:"description"`
-	OccurredAt  time.Time       `json:"occured_at" gorm:"not null"`
+	OccurredAt  time.Time       `json:"occurred_at" gorm:"not null"`
 
 	CreatedAt time.Time `json:"created_at"`
 }

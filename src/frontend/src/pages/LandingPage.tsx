@@ -1,217 +1,271 @@
-import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
-import {
-    ArrowRight,
-    Beer,
-    Car,
-    Home,
-    TrendingUp,
-    Wallet,
-    CreditCard
-} from "lucide-react";
-import {
-    AreaChart,
-    Area,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    PieChart,
-    Pie,
-    Cell
-} from 'recharts';
+import { Beer, ShieldCheck, Gamepad2, Plane } from "lucide-react";
 
-// Dados fictícios para os gráficos
-const dataEvolution = [
-    { name: 'Jan', saldo: 1200 },
-    { name: 'Fev', saldo: 1500 },
-    { name: 'Mar', saldo: 1100 },
-    { name: 'Abr', saldo: 1800 },
-    { name: 'Mai', saldo: 2400 },
-    { name: 'Jun', saldo: 3200 },
-];
-
-const dataExpenses = [
-    { name: 'Rolês', value: 400, color: '#FFD100' }, // Secondary
-    { name: 'Carro/Uber', value: 300, color: '#1B365D' }, // Primary
-    { name: 'Contas/Aluguel', value: 800, color: '#333333' },
-    { name: 'Comida', value: 500, color: '#142a4a' },
-];
-
-export function LandingPage() {
-    const navigate = useNavigate();
-
-    return (
-        <div className="min-h-screen bg-bg-light dark:bg-bg-dark font-manrope text-text-light overflow-x-hidden">
-            {/* Background Decorativo Neon */}
-            <div className="fixed inset-0 z-0">
-                <div className="absolute top-[-5%] right-[-5%] w-[400px] h-[400px] rounded-full bg-secondary/20 blur-[100px]" />
-                <div className="absolute bottom-[5%] left-[-5%] w-[400px] h-[400px] rounded-full bg-primary/10 blur-[100px]" />
-            </div>
-
-            {/* Navbar Glass */}
-            <nav className="fixed top-0 w-full z-50 px-6 py-4">
-                <div className="max-w-7xl mx-auto flex justify-between items-center backdrop-blur-md bg-white/40 dark:bg-black/20 border border-white/20 p-4 rounded-main shadow-lg">
-                    <div className="flex items-center gap-2">
-                        <h1 className="text-2xl font-black text-primary tracking-tighter">Fundz</h1>
-                    </div>
-                    <button
-                        onClick={() => navigate('/auth')}
-                        className="bg-primary text-white px-6 py-2 rounded-button font-bold text-sm hover:bg-primary-hover transition-all flex items-center gap-2 group"
-                    >
-                        Entrar
-                        <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                    </button>
-                </div>
-            </nav>
-
-            {/* Hero Section */}
-            <section className="relative z-10 pt-40 pb-20 px-6">
-                <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-                    <motion.div
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <span className="inline-block px-4 py-1 mb-4 text-xs font-bold bg-secondary/30 text-primary border border-secondary/50 rounded-full">
-                            FINANÇAS PARA A VIDA REAL
-                        </span>
-                        <h2 className="text-5xl md:text-7xl font-black text-primary mb-6 leading-[1.1]">
-                            Pague o aluguel sem <br />
-                            <span className="text-secondary drop-shadow-md">perder o rolê.</span>
-                        </h2>
-                        <p className="text-lg text-text-light/70 mb-8 max-w-lg">
-                            Gerencie suas contas, manutenção do carro e gastos de festa em um só lugar. Feito para quem está começando agora.
-                        </p>
-                        <button
-                            onClick={() => navigate('/auth')}
-                            className="bg-primary text-white px-10 py-4 rounded-button font-black text-lg shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
-                        >
-                            Começar a economizar
-                        </button>
-                    </motion.div>
-
-                    {/* Gráfico no Hero (Visual) */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-white/40 backdrop-blur-xl border border-white/40 p-6 rounded-main shadow-2xl h-[350px]"
-                    >
-                        <p className="font-bold text-primary mb-4 flex items-center gap-2">
-                            <TrendingUp size={20} /> Evolução do seu saldo
-                        </p>
-                        <ResponsiveContainer width="100%" height="85%">
-                            <AreaChart data={dataEvolution}>
-                                <defs>
-                                    <linearGradient id="colorSaldo" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#FFD100" stopOpacity={0.8} />
-                                        <stop offset="95%" stopColor="#FFD100" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ccc" />
-                                <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                                <Tooltip />
-                                <Area type="monotone" dataKey="saldo" stroke="#FFD100" strokeWidth={3} fillOpacity={1} fill="url(#colorSaldo)" />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </motion.div>
-                </div>
-            </section>
-
-            {/* Seção de Features/Dores */}
-            <section className="relative z-10 py-24 px-6 bg-primary/5">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-5xl font-black text-primary">Tudo o que você precisa</h2>
-                        <p className="text-text-light/60 mt-4">Organização de verdade para quem tem vida social.</p>
-                    </div>
-
-                    <div className="grid md:grid-cols-3 gap-8">
-                        <FeatureItem
-                            icon={<Beer className="text-secondary" />}
-                            title="Cota do Rolê"
-                            desc="Defina quanto pode gastar no fim de semana sem comprometer a conta de luz."
-                        />
-                        <FeatureItem
-                            icon={<Car className="text-secondary" />}
-                            title="Reserva do Carro"
-                            desc="Gasolina, IPVA e aquela manutenção surpresa que sempre aparece."
-                        />
-                        <FeatureItem
-                            icon={<Home className="text-secondary" />}
-                            title="Morando Só"
-                            desc="Controle o aluguel e as compras do mês de forma simples e visual."
-                        />
-                    </div>
-                </div>
-            </section>
-
-            {/* Seção Analítica (Gráfico de Pizza) */}
-            <section className="relative z-10 py-24 px-6">
-                <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
-                    <div className="h-[400px] flex items-center justify-center bg-white/20 backdrop-blur-lg rounded-main border border-white/40">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={dataExpenses}
-                                    innerRadius={80}
-                                    outerRadius={120}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                >
-                                    {dataExpenses.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                            </PieChart>
-                        </ResponsiveContainer>
-                        <div className="absolute flex flex-col items-center">
-                            <span className="text-xs font-bold text-primary/40 uppercase">Gasto Médio</span>
-                            <span className="text-2xl font-black text-primary">R$ 2.000</span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h2 className="text-4xl font-black text-primary mb-6">Pare de se perguntar pra onde foi o seu dinheiro.</h2>
-                        <p className="text-lg text-text-light/70 mb-8">
-                            Nossos gráficos mostram exatamente onde está o seu maior gargalo. É na balada ou é na revisão do motor? O Fundz te conta a verdade.
-                        </p>
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center"><Wallet size={20} className="text-primary" /></div>
-                                <p className="font-bold">Controle de entrada e saída simplificado</p>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center"><CreditCard size={20} className="text-primary" /></div>
-                                <p className="font-bold">Aviso de vencimento de boletos</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Footer Final */}
-            <footer className="relative z-10 py-12 border-t border-primary/10 text-center">
-                <p className="font-black text-primary text-xl mb-4">Fundz</p>
-                <p className="text-sm text-text-light/50">&copy; 2026 Fundz - Dinheiro no bolso, pé no rolê.</p>
-            </footer>
-        </div>
-    );
+function RealLifeCard({
+  icon,
+  title,
+  desc,
+  highlight,
+}: {
+  icon: any;
+  title: string;
+  desc: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      className={`p-10 rounded-[40px] border transition-all ${highlight ? "bg-white shadow-2xl border-white scale-105 z-10" : "bg-transparent border-black/5 hover:bg-white/50"}`}
+    >
+      <div
+        className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-8 ${highlight ? "bg-[#08233E] text-[#FFD100]" : "bg-white shadow-sm text-[#08233E]"}`}
+      >
+        {icon}
+      </div>
+      <h3 className="text-2xl font-black mb-4 uppercase tracking-tight">
+        {title}
+      </h3>
+      <p className="opacity-60 text-sm font-bold leading-relaxed">{desc}</p>
+    </div>
+  );
 }
 
-function FeatureItem({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
-    return (
-        <motion.div
-            whileHover={{ y: -10 }}
-            className="p-8 bg-white/60 backdrop-blur-md rounded-main border border-white/60 shadow-sm"
-        >
-            <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mb-6 shadow-xl">
-                {icon}
+export function LandingPage() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] font-manrope text-[#08233E]">
+      {/* 1. NAVBAR COM CTA PRIORITÁRIO */}
+      <nav className="fixed top-0 w-full z-50 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center backdrop-blur-lg bg-white/20 border border-white/20 p-4 rounded-full shadow-sm">
+          <div className="flex items-center">
+            <img
+              src="/yellow-logo.png"
+              alt="Logo Fundz"
+              className="h-12 w-auto object-contain"
+            />
+          </div>
+
+          <div className="flex gap-4">
+            <button
+              onClick={() => navigate("/auth")}
+              className="bg-primary text-white px-6 py-2.5 rounded-full font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+            >
+              Começar Agora
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* 2. HERO SECTION (Fiel à imagem com Polígono Azul) */}
+      <section className="relative h-screen overflow-hidden bg-white">
+        <div className="absolute inset-0 z-0">
+          {/* Agora o Azul é o polígono à esquerda */}
+          <div
+            className="absolute inset-0 bg-primary"
+            style={{ clipPath: "polygon(0 0, 100% 0, 40% 100%, 0% 100%)" }}
+          />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto h-full grid lg:grid-cols-2 px-8 items-center">
+          <div className="space-y-6 text-white">
+            <img
+              src="/yellow-logo.png"
+              alt="Logo Fundz"
+              className="h-24 w-auto object-contain"
+            />
+            <h2 className="text-6xl md:text-8xl font-extrabold leading-[0.9] tracking-tighter">
+              Seu dinheiro.
+              <br />
+              Seu rolê.
+              <br />
+              <span className="text-secondary">Seu controle.</span>
+            </h2>
+            <p className="text-xl text-white/80 max-w-md font-medium">
+              A conta que entende que você tem um intercâmbio pra planejar, mas
+              não quer abrir mão da cerveja de sexta.
+            </p>
+            <button
+              onClick={() => navigate("/auth")}
+              className="bg-[#FFD100] text-[#08233E] px-12 py-5 rounded-2xl font-black text-xl shadow-2xl hover:scale-105 transition-transform uppercase tracking-tight"
+            >
+              PARTIU ORGANIZAR
+            </button>
+          </div>
+
+          {/* Mockup flutuante estilo Glassmorphism */}
+          <div className="relative hidden lg:flex justify-end items-center h-full">
+            <div className="relative w-[320px] h-[580px] bg-white rounded-[48px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.2)] border-[10px] border-black overflow-hidden translate-x-10">
+              <div className="p-8 space-y-8">
+                <div className="flex justify-between items-center">
+                  <div className="w-10 h-10 bg-[#FFD100] rounded-full" />
+                  <div className="w-12 h-2 bg-gray-100 rounded-full" />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs font-bold opacity-30 uppercase">
+                    Saldo disponível
+                  </p>
+                  <div className="text-4xl font-black text-[#08233E]">
+                    R$ 1.250,00
+                  </div>
+                </div>
+                <div className="pt-4 space-y-4">
+                  <div className="h-14 bg-gray-50 rounded-2xl flex items-center px-4 justify-between border border-gray-100">
+                    <div className="flex gap-3 items-center">
+                      <div className="w-8 h-8 bg-secondary/20 rounded-xl flex items-center justify-center text-lg">
+                        🍺
+                      </div>
+                      <div className="w-20 h-2 bg-gray-300 rounded" />
+                    </div>
+                    <div className="w-12 h-2 bg-red-400 rounded" />
+                  </div>
+                  <div className="h-14 bg-gray-50 rounded-2xl flex items-center px-4 justify-between border border-gray-100">
+                    <div className="flex gap-3 items-center">
+                      <div className="w-8 h-8 bg-primary/10 rounded-xl flex items-center justify-center text-lg">
+                        🚗
+                      </div>
+                      <div className="w-20 h-2 bg-gray-300 rounded" />
+                    </div>
+                    <div className="w-12 h-2 bg-red-400 rounded" />
+                  </div>
+                </div>
+              </div>
             </div>
-            <h3 className="text-xl font-black text-primary mb-3">{title}</h3>
-            <p className="text-text-light/60 text-sm leading-relaxed">{desc}</p>
-        </motion.div>
-    );
+            {/* Camada de vidro atrás */}
+            <div className="absolute translate-x-[-20%] w-[350px] h-[450px] bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[40px] -z-10 shadow-2xl" />
+          </div>
+        </div>
+      </section>
+
+      {/* 3. SEÇÃO DE TEXTO DIRETO (Sem vibe IA) */}
+      <section className="py-32 px-8 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <h3 className="text-4xl md:text-6xl font-black tracking-tighter mb-8 leading-none">
+            DINHEIRO NÃO É SOBRE PLANILHA CHATA. <br />
+            <span className="text-gray-300">
+              É SOBRE PODER DIZER SIM PRO ROLÊ.
+            </span>
+          </h3>
+          <p className="text-xl font-medium opacity-60 max-w-2xl leading-relaxed">
+            A gente sabe que ninguém quer ficar horas anotando gasto por gasto.
+            O Fundz automatiza a parte chata pra você focar no que importa:
+            bater a meta do intercâmbio ou dar entrada no seu primeiro carro.
+          </p>
+        </div>
+      </section>
+
+      {/* 4. CARDS DE VIDA REAL */}
+      <section className="py-24 px-8 bg-[#F1F5F9]">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
+          <RealLifeCard
+            icon={<Beer size={28} />}
+            title="Cota da Cerveja"
+            desc="Separou R$ 100 pro fim de semana? A gente avisa quando você estiver chegando no limite pra não precisar pedir PIX pra mãe."
+          />
+          <RealLifeCard
+            icon={<Plane size={28} />}
+            title="Eurotrip 2026"
+            desc="Planejando a Tomorrowland na Bélgica? Calculamos quanto você precisa guardar hoje pra estar lá em julho de 2026."
+            highlight
+          />
+          <RealLifeCard
+            icon={<Gamepad2 size={28} />}
+            title="Setup de Respeito"
+            desc="Quer trocar o notebook pra jogar ou trampar? Organize suas assinaturas e veja o que dá pra cortar pra acelerar o processo."
+          />
+        </div>
+      </section>
+
+      {/* 5. SEÇÃO DE ASSINATURAS (Focado no seu projeto) */}
+      <section className="py-32 px-8">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <div className="space-y-6">
+            <h2 className="text-4xl font-extrabold tracking-tighter">
+              CADÊ OS R$ 40 QUE ESTAVAM AQUI?
+            </h2>
+            <p className="text-lg opacity-70">
+              Sabe aquela assinatura do streaming que você nem usa mais? Ou
+              aquele teste grátis que virou cobrança no cartão? O Fundz lista
+              tudo pra você cancelar em segundos.
+            </p>
+            <div className="pt-4 flex flex-col gap-4">
+              <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  📉
+                </div>
+                <span className="font-bold">
+                  Total em assinaturas: R$ 189,90/mês
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="bg-[#08233E] p-10 rounded-[48px] shadow-2xl rotate-2">
+            <h4 className="text-[#FFD100] font-black text-2xl mb-6">
+              FUNDZ ANALYTICS
+            </h4>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-1 bg-white/10 rounded-full w-full overflow-hidden"
+                >
+                  <div
+                    className="bg-[#FFD100] h-full"
+                    style={{ width: `${Math.random() * 80}%` }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. SEGURANÇA SEM ENROLAÇÃO */}
+      <section className="py-24 px-8 border-y border-gray-100 bg-white">
+        <div className="max-w-3xl mx-auto text-center space-y-8">
+          <div className="inline-block p-4 bg-[#08233E] text-[#FFD100] rounded-3xl">
+            <ShieldCheck size={40} />
+          </div>
+          <h2 className="text-4xl font-black uppercase tracking-tighter">
+            Seu dinheiro tá seguro. Ponto.
+          </h2>
+          <p className="font-medium opacity-60">
+            Usamos criptografia de ponta e não vendemos seus dados pra ninguém.
+            Nossa missão é só fazer você parar de passar vergonha com cartão
+            recusado.
+          </p>
+        </div>
+      </section>
+
+      {/* 7. CTA FINAL IMPACTANTE */}
+      <section className="py-32 px-8">
+        <div className="max-w-6xl mx-auto bg-[#08233E] rounded-[60px] p-16 text-center text-white relative overflow-hidden shadow-[0_40px_80px_-15px_rgba(8,35,62,0.4)]">
+          <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#FFD100] blur-[150px] opacity-10" />
+          <h2 className="text-5xl md:text-7xl font-black mb-10 tracking-tighter leading-none uppercase">
+            VAI FICAR SÓ <br /> OLHANDO O SALDO?
+          </h2>
+          <button
+            onClick={() => navigate("/auth")}
+            className="bg-[#FFD100] text-[#08233E] px-16 py-6 rounded-2xl font-black text-2xl hover:scale-105 transition-all shadow-xl"
+          >
+            CRIAR MINHA CONTA AGORA
+          </button>
+        </div>
+      </section>
+
+      {/* 8. FOOTER LIMPO */}
+      <footer className="py-16 px-8 bg-white">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
+          <div className="space-y-2 text-center md:text-left">
+            <p className="font-black text-3xl tracking-tighter">Fundz</p>
+            <p className="text-sm opacity-40 font-bold uppercase tracking-widest">
+              Dinheiro no bolso, pé no rolê.
+            </p>
+          </div>
+          <p className="text-xs opacity-30 font-bold">
+            &copy; 2026 HR Labs. Todos os direitos reservados.
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
 }

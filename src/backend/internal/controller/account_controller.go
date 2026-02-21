@@ -62,6 +62,22 @@ func GetAccountById(c *gin.Context) {
 }
 
 // -------
+// GetBurrentBalanceById
+// -------
+func GetCurrentBalance(c *gin.Context) {
+
+	userID := c.MustGet("userID").(string)
+
+	balance, err := dao.GetCurrentBalanceById(userID, c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"current_balance": balance})
+}
+
+// -------
 // UpdateById
 // -------
 func UpdateAccountById(c *gin.Context) {

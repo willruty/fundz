@@ -18,12 +18,12 @@ func CreateGoal(goal entity.Goals) error {
 // -------
 // ReadAll
 // -------
-func FindAllGoals() ([]entity.Goals, int64, error) {
+func FindAllGoals(userId string) ([]entity.Goals, int64, error) {
 
 	var goals []entity.Goals
 	var count int64
 
-	result := database.DB.Model(&entity.Categories{}).Count(&count).Find(&goals)
+	result := database.DB.Model(&entity.Categories{}).Count(&count).Where("user_id = ?", userId).Find(&goals)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}

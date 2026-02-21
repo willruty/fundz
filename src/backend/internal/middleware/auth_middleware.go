@@ -31,7 +31,7 @@ func AuthMiddleware(c *gin.Context) {
 		return
 	}
 
-	c.Set("userID", userId)
+	c.Set("userID", userId.String())
 
 	c.Next()
 }

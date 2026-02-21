@@ -2,6 +2,7 @@ package router
 
 import (
 	"fundz/internal/controller"
+	"fundz/internal/middleware"
 	"fundz/internal/service"
 
 	"github.com/gin-contrib/cors"
@@ -34,10 +35,12 @@ func SetupMainRouter() *gin.Engine {
 
 	// // === Account ===
 	account := main.Group("/account")
+	account.Use(middleware.AuthMiddleware)
 	{
 		// === Account CRUD ===
 		account.GET("/", controller.GetAllAccounts)
 		account.GET("/:id", controller.GetAccountById)
+		account.GET("/balance/:id", controller.GetCurrentBalance)
 		account.POST("/", controller.CreateAccount)
 		account.PUT("/", controller.UpdateAccountById)
 		account.DELETE("/:id", controller.DeleteAccountById)
@@ -45,9 +48,11 @@ func SetupMainRouter() *gin.Engine {
 
 	// === Transaction ===
 	transaction := main.Group("/transaction")
+	transaction.Use(middleware.AuthMiddleware)
 	{
 		// === Transactions CRUD ===
 		transaction.GET("/", controller.GetAllTransactions)
+		transaction.GET("/last-month", controller.GetLastMonthTransactions)
 		transaction.GET("/:id", controller.GetTransactionById)
 		transaction.POST("/", controller.CreateTransaction)
 		transaction.PUT("/", controller.UpdateTransactionById)
@@ -56,6 +61,7 @@ func SetupMainRouter() *gin.Engine {
 
 	// === Categories ===
 	category := main.Group("/category")
+	category.Use(middleware.AuthMiddleware)
 	{
 		// === Categories CRUD ===
 		category.GET("/", controller.GetAllCategories)
@@ -67,9 +73,11 @@ func SetupMainRouter() *gin.Engine {
 
 	// === Goal ===
 	goal := main.Group("/goal")
+	goal.Use(middleware.AuthMiddleware)
 	{
 		// === Goals CRUD ===
 		goal.GET("/", controller.GetAllGoals)
+		goal.GET("/next", controller.GetNextGoal)
 		goal.GET("/:id", controller.GetGoalById)
 		goal.POST("/", controller.CreateGoal)
 		goal.PUT("/", controller.UpdateGoalById)
@@ -78,6 +86,7 @@ func SetupMainRouter() *gin.Engine {
 
 	// === Subscription ===
 	subscription := main.Group("/subscription")
+	subscription.Use(middleware.AuthMiddleware)
 	{
 		// === Subscription CRUD ===
 		subscription.GET("/", controller.GetAllSubscriptions)

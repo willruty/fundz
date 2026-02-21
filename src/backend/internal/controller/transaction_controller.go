@@ -3,6 +3,7 @@ package controller
 import (
 	dao "fundz/internal/model/dao"
 	entity "fundz/internal/model/entity"
+	"fundz/internal/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -47,6 +48,18 @@ func GetAllTransactions(c *gin.Context) {
 			"RowsAffected": rowsAffected,
 			"RecordCount":  len(transactions),
 		})
+}
+
+func GetLastMonthTransactions(c *gin.Context) {
+
+	userID := c.MustGet("userID").(string)
+
+	transactions, err := service.GetLastMonthTransactions(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"erro": "Erro ao buscar transações"})
+	}
+
+	c.JSON(http.StatusOK, transactions)
 }
 
 // -------

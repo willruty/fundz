@@ -1,79 +1,57 @@
 @import "tailwindcss";
 
-/* 1. CENTRALIZAÇÃO DE VARIÁVEIS NO ROOT */
-:root {
-  /* Identidade Visual */
-  --primary: #1B365D;
-  --primary-hover: #142a4a;
-  --secondary: #FFD100;
-  --secondary-hover: #e6bc00;
-
-  /* Cores de Fundo e Texto */
-  --bg-light: #ffffff;
-  --bg-dark: #121212;
-  --text-light: #333333;
-  --text-dark: #f5f5f5;
-
-  /* Design System */
-  --radius-main: 12px;
-  --radius-button: 8px;
-  --animate-fast: 0.2s ease-in-out;
-  --font-manrope: "Manrope", sans-serif;
-
-  /* Configurações de Comportamento */
-  font-family: var(--font-manrope);
-  line-height: 1.6;
-  font-weight: 400;
-  color: var(--text-light);
-  background-color: var(--bg-light);
-
-  text-rendering: optimizeLegibility;
+/* --- Resets Importantes --- */
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #fff;
+  color: var(--black);
+  font-family: "Manrope", sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  transition: background-color var(--animate-fast), color var(--animate-fast);
+  text-rendering: optimizeLegibility;
 }
 
-/* 2. MAPEAMENTO PARA O TAILWIND (Classes Utilitárias) */
+:root {
+  /* --- Colors --- */
+  --primary: #08233e; /* Dark Blue */
+  --primary-hover: #0c3156;
+
+  --secondary: #ffd100; /* Yellow */
+  --secondary-hover: #e6bc00;
+
+  --main-bg: #fffaf0; /* Off-white */
+
+  --black: #000000;
+  --black-muted: rgba(0, 0, 0, 0.7);
+  --black-light: rgba(0, 0, 0, 0.4);
+
+  /* --- Design System (Neo-Brutalism Style) --- */
+  --radius-main: 12px;
+  --radius-card: 16px;
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Sombra típica do Neo-brutalismo: Sólida e deslocada */
+  --neo-shadow: 4px 4px 0px 0px #000000;
+  --neo-shadow-hover: 2px 2px 0px 0px #000000;
+}
+
+/* --- Mapeamento Tailwind --- */
 @theme {
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
+
   --color-secondary: var(--secondary);
   --color-secondary-hover: var(--secondary-hover);
 
-  --color-bg-light: var(--bg-light);
-  --color-bg-dark: var(--bg-dark);
-  --color-text-light: var(--text-light);
-  --color-text-dark: var(--text-dark);
+  --color-off-white: var(--main-bg);
+
+  --color-blackzão: var(--black);
+  --color-black-muted: var(--black-muted);
+  --color-black-light: var(--black-light);
 
   --radius-main: var(--radius-main);
-  --radius-button: var(--radius-button);
+  --radius-card: var(--radius-card);
 
-  --font-manrope: var(--font-manrope);
-}
-
-/* 3. TEMA ESCURO AUTOMÁTICO */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: var(--text-dark);
-    background-color: var(--bg-dark);
-  }
-}
-
-/* 4. RESETS E TIPOGRAFIA GLOBAL */
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 2.5rem;
-}
-
-h2 {
-  font-size: 2rem;
-}
-
-p {
-  font-size: 1rem;
+  --shadow-neo: var(--neo-shadow);
+  --shadow-neo-hover: var(--neo-shadow-hover);
 }

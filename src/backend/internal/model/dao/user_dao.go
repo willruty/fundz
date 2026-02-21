@@ -31,7 +31,7 @@ func GetUserByEmail(email string) (model.Users, error) {
 func GetUserById(id uuid.UUID) (model.Users, error) {
 	var user model.Users
 
-	if err := database.DB.Model(&model.Users{}).Where("user_id = ?", id).First(&user).Error; err != nil {
+	if err := database.DB.Model(&model.Users{}).Where("id = ?", id).First(&user).Error; err != nil {
 		return user, err
 	}
 
@@ -43,7 +43,7 @@ func GetUserById(id uuid.UUID) (model.Users, error) {
 // -------
 func UpdateUserById(userUpdated model.Users, id uuid.UUID) error {
 
-	query := database.DB.Model(&model.Users{}).Where("user_id = ?", id).Updates(userUpdated)
+	query := database.DB.Model(&model.Users{}).Where("id = ?", id).Updates(userUpdated)
 	if err := query.Error; err != nil {
 		return err
 	} else if query.RowsAffected == 0 {
@@ -59,7 +59,7 @@ func UpdateUserById(userUpdated model.Users, id uuid.UUID) error {
 func DeleteUserById(id string) error {
 	var user model.Users
 
-	query := database.DB.Where("user_id = ?", id).Delete(user)
+	query := database.DB.Where("id = ?", id).Delete(user)
 	if err := query.Error; err != nil {
 		return err
 	} else if query.RowsAffected == 0 {

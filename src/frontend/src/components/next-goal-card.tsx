@@ -1,0 +1,105 @@
+import { useEffect, useState } from "react";
+import { Target, Calendar } from "lucide-react";
+
+interface Goal {
+  id: string;
+  name: string;
+  target_amount: string;
+  current_amount: string;
+  due_date: string;
+  percentage: number;
+}
+
+export function NextGoalCard() {
+  const [goal, setGoal] = useState<Goal | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNextGoal = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:8000/fundz/goal/next", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        setGoal(data.data);
+      } catch (err) {
+        console.error("Erro ao carregar meta:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNextGoal();
+  }, []);
+
+  if (loading)
+    return (
+      <div className="h-[200px] w-full bg-primary/50 animate-pulse rounded-[32px]" />
+    );
+  if (!goal) return null;
+
+  const target = Number(goal.target_amount);
+  const current = Number(goal.current_amount);
+  const percentage = Number(Math.round(goal.percentage));
+
+  return (
+    <div className="bg-[#08233E] border border-white/5 rounded-[32px] p-8 w-full h-full shadow-2xl relative overflow-hidden group">
+      {/* Glow de fundo indicando progresso */}
+      <div
+        className="absolute -right-4 -top-4 w-24 h-24 bg-[#FFD100] opacity-5 rounded-full blur-3xl transition-all duration-500 group-hover:opacity-10"
+        style={{ opacity: 0.05 + percentage / 1000 }}
+      />
+
+      <div className="relative z-10">
+        <header className="flex justify-between items-center mb-6">
+          <span className="text-[10px] font-black uppercase text-white/40 tracking-[0.2em]">
+            Próximo Objetivo
+          </span>
+          <div className="flex items-center gap-1.5 text-[#FFD100] bg-[#FFD100]/10 px-3 py-1 rounded-full">
+            <Target size={12} />
+            <span className="text-[10px] font-black uppercase">
+              {percentage}%
+            </span>
+          </div>
+        </header>
+
+        <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-1">
+          {goal.name}
+        </h2>
+
+        <div className="flex items-center gap-2 text-white/40 mb-6">
+          <Calendar size={12} />
+          <span className="text-[10px] font-bold">
+            Prazo: {new Date(goal.due_date).toLocaleDateString("pt-BR")}
+          </span>
+        </div>
+
+        {/* Barra de Progresso "Ácida" */}
+        <div className="space-y-3">
+          <div className="flex justify-between items-end">
+            <span className="text-xl font-black text-[#FFD100]">
+              {new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }).format(current)}
+            </span>
+            <span className="text-[10px] font-bold text-white/30 uppercase">
+              Alvo:{" "}
+              {new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }).format(target)}
+            </span>
+          </div>
+
+          <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden border border-white/5">
+            <div
+              className="h-full bg-[#FFD100] rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(255,209,0,0.3)]"
+              style={{ width: `${percentage}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
