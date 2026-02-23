@@ -11,19 +11,19 @@ import (
 // -------
 // Create
 // -------
-func CreateTransaction(transaction model.Transactions) error {
+func CreateTransaction(transaction model.Transactions, userID string) error {
 	if err := database.DB.Model(&model.Transactions{}).Create(&transaction).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetAllTransaction() ([]model.Transactions, int64, error) {
+func GetAllTransaction(userId string) ([]model.Transactions, int64, error) {
 
 	var transaction []model.Transactions
 	var count int64
 
-	result := database.DB.Model(&model.Transactions{}).Count(&count).Find(&transaction)
+	result := database.DB.Model(&model.Transactions{}).Count(&count).Find(&transaction).Where("user_id = ?", userId)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}

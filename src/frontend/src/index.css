@@ -45,7 +45,7 @@ body {
 
   --color-off-white: var(--main-bg);
 
-  --color-blackzão: var(--black);
+  --color-black: var(--black);
   --color-black-muted: var(--black-muted);
   --color-black-light: var(--black-light);
 
@@ -54,4 +54,12 @@ body {
 
   --shadow-neo: var(--neo-shadow);
   --shadow-neo-hover: var(--neo-shadow-hover);
+}
+
+@font-face {
+  font-family: "Catchland";
+  src: url("./assets/Catchland.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }

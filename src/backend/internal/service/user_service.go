@@ -4,52 +4,55 @@ import (
 	"fundz/internal/model/dao"
 	model "fundz/internal/model/entity"
 	"fundz/internal/util"
+	"log"
 	"strings"
 )
 
-func RegisterUser(user model.Users) (string, string) {
+func RegisterUser(user model.Users) (string, string, string) {
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
 	passwordPura := strings.TrimSpace(user.PasswordHash)
 
 	_, err := dao.GetUserByEmail(user.Email)
 	if err == nil {
-		return "Email já cadastrado", ""
+		return "", "Email já cadastrado", ""
 	}
 
 	hashedPassword, err := util.HashPassword(passwordPura)
 	if err != nil {
-		return "Erro ao processar segurança da senha", ""
+		return "", "Erro ao processar segurança da senha", ""
 	}
 
 	user.PasswordHash = hashedPassword
 
 	if err := dao.CreateUser(&user); err != nil {
-		return "Erro ao salvar usuário: " + err.Error(), ""
+		return "", "Erro ao salvar usuário: " + err.Error(), ""
 	}
 
 	token, err := GenerateJWT(user.ID)
 	if err != nil {
-		return "Usuário criado, mas erro ao gerar acesso: " + err.Error(), ""
+		return "", "Usuário criado, mas erro ao gerar acesso: " + err.Error(), ""
 	}
 
-	return "", token
+	log.Println(user)
+
+	return user.Name, "", token
 }
 
-func LoginUser(email, password string) (string, string) {
+func LoginUser(email, password string) (string, string, string) {
 
 	user, err := dao.GetUserByEmail(email)
 	if err != nil {
-		return "Email ou senha inválidos", ""
+		return "", "Email ou senha inválidos", ""
 	}
 
 	if !util.CheckPasswordHash(strings.TrimSpace(password), user.PasswordHash) {
-		return "Email ou senha inválidos", ""
+		return "", "Email ou senha inválidos", ""
 	}
 
 	token, err := GenerateJWT(user.ID)
 	if err != nil {
-		return "Erro ao gerar token" + err.Error(), ""
+		return "", "Erro ao gerar token" + err.Error(), ""
 	}
 
-	return "", token
+	return user.Name, "", token
 }

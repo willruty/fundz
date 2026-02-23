@@ -44,16 +44,13 @@ export function Auth() {
         return;
       }
 
-      // 1. Limpa tudo antes de salvar o novo estado
       localStorage.clear();
 
-      // 2. Salva o novo token
       if (data.token) {
         localStorage.setItem("token", data.token);
 
-        // Opcional: Salvar o nome do user para o AppHeader não precisar de outro fetch
-        if (data.user?.fullname) {
-          localStorage.setItem("user_name", data.user.fullname);
+        if (data.full_name) {
+          localStorage.setItem("user_name", data.full_name);
         }
       }
 
@@ -94,8 +91,9 @@ export function Auth() {
             <span className="text-secondary">rolê.</span>
           </h2>
           <p className="text-white/70 text-lg font-medium leading-relaxed ">
-            Da conta do buteco à sua próxima viagem internacional. Controle seus
-            gastos diários e planeje suas metas sem complicação.
+            Da conta do buteco à sua próxima viagem internacional.
+            <br />
+            Controle seus gastos diários e planeje suas metas sem complicação.
           </p>
         </div>
       </div>

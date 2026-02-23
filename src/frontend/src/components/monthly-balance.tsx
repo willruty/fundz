@@ -111,7 +111,7 @@ export function MonthlyBalanceCard() {
   const themeColor = isPositive ? "#10b981" : "#ef4444";
 
   return (
-    <div className="bg-primary border border-white/5 rounded-[32px] p-8 w-full h-full shadow-2xl relative overflow-hidden">
+    <div className="bg-primary border border-white/5 rounded-4xl p-8 w-full h-full shadow-2xl relative overflow-hidden">
       <header className="flex justify-between items-start mb-8 relative z-10">
         <div>
           <span className="text-[10px] font-black uppercase text-white/40 tracking-[0.2em] block mb-1">
@@ -136,61 +136,94 @@ export function MonthlyBalanceCard() {
         </div>
         <div className="flex items-center gap-2 text-white/30 bg-white/5 px-3 py-1.5 rounded-full border border-white/5">
           <Calendar size={12} />
-          <span className="text-[10px] font-black uppercase">30 Dias</span>
+          <span className="text-[10px] font-black uppercase">
+            Últimos 30 Dias
+          </span>
         </div>
       </header>
 
-      <div className="h-[250px] w-full min-h-[250px]">
+      <div className="h-[185px] w-full">
+        
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
+          <AreaChart
+            data={data}
+            margin={{ top: 0, right: 15, left: 15, bottom: 0 }}
+          >
             <defs>
               <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={themeColor} stopOpacity={0.3} />
-                <stop offset="95%" stopColor={themeColor} stopOpacity={0} />
+                {/* Degrade mais suave: começa mais opaco e morre antes do fim */}
+                <stop offset="5%" stopColor={themeColor} stopOpacity={0.4} />
+                <stop offset="75%" stopColor={themeColor} stopOpacity={0.05} />
+                <stop offset="100%" stopColor={themeColor} stopOpacity={0} />
               </linearGradient>
             </defs>
+
             <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.03)"
+              strokeDasharray="0" // Linha sólida fica mais clean se for bem sutil
+              stroke="rgba(255,255,255,0.05)"
               vertical={false}
             />
+
             <XAxis
               dataKey="date"
               axisLine={false}
               tickLine={false}
+              interval={4} // Mostra de 5 em 5 (0, 5, 10...)
               tick={{
-                fill: "rgba(255,255,255,0.3)",
-                fontSize: 10,
-                fontWeight: "bold",
+                fill: "rgba(255,255,255,0.4)",
+                fontSize: 11,
+                fontWeight: "500",
               }}
               dy={10}
             />
-            <YAxis hide domain={["auto", "auto"]} />
+
+            {/* YAxis oculto para manter o foco no shape do gráfico */}
+            <YAxis hide domain={["dataMin", "auto"]} />
+
             <Tooltip
-              cursor={{ stroke: "rgba(255,255,255,0.1)", strokeWidth: 2 }}
-              contentStyle={{
-                backgroundColor: "#08233E",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "16px",
-                fontSize: "12px",
-                fontWeight: "900",
+              cursor={{
+                stroke: themeColor,
+                strokeWidth: 1,
+                strokeDasharray: "4 4",
+                opacity: 0.5,
               }}
-              itemStyle={{ color: themeColor }}
+              contentStyle={{
+                backgroundColor: "#0F172A", // Tom levemente mais escuro/clássico
+                border: "none",
+                borderRadius: "12px",
+                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)",
+                padding: "8px 12px",
+              }}
+              itemStyle={{
+                color: "#FFF",
+                fontSize: "13px",
+                fontWeight: "bold",
+                textTransform: "capitalize",
+              }}
+              labelStyle={{
+                color: "rgba(255,255,255,0.5)",
+                fontSize: "14px",
+              }}
+              formatter={(value) => [`R$ ${value}`, "Balanço"]}
             />
+
             <Area
               type="monotone"
               dataKey="valor"
               stroke={themeColor}
-              strokeWidth={4}
+              strokeWidth={3} // 4 estava um pouco pesado para um gráfico menor
               fillOpacity={1}
               fill="url(#colorValue)"
-              animationDuration={1500}
+              animationDuration={1000}
+              // Retira os pontos (dots) para um look mais minimalista
+              dot={false}
+              activeDot={{ r: 6, strokeWidth: 0, fill: themeColor }}
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      <footer className="mt-6 pt-6 border-t border-white/5 flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-white/20">
+      <footer className="mt-3 pt-5 border-t border-white/5 flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-white/20">
         <span>Fundz Analytics Engine</span>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1">

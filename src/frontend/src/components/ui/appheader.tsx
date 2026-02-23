@@ -1,11 +1,12 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Bell, ChevronDown, User, Settings, LogOut } from "lucide-react";
 
 interface AppHeaderProps {
-  title: string;
-  subtitle?: string;
+  title: ReactNode;
+  subtitle: string;
 }
 
 export function AppHeader({ title, subtitle }: AppHeaderProps) {
@@ -13,10 +14,7 @@ export function AppHeader({ title, subtitle }: AppHeaderProps) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Simulação de dados do usuário (Pode vir do Context ou Store)
-  const user = {
-    fullname: "HR Labs",
-    avatar: "/icon-logo.png",
-  };
+  const userName = localStorage.getItem("user_name") || "";
 
   const currentDate = new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
@@ -32,8 +30,8 @@ export function AppHeader({ title, subtitle }: AppHeaderProps) {
   return (
     <header className="w-full flex justify-between items-center mb-10">
       {/* LADO ESQUERDO: Títulos */}
-      <div className="flex flex-col">
-        <h1 className="text-3xl font-black text-primary tracking-tighter leading-none">
+      <div className="flex flex-col" >
+        <h1 className="text-3xl font-black text-primary tracking-tighter leading-none" >
           {title}
         </h1>
 
@@ -44,7 +42,6 @@ export function AppHeader({ title, subtitle }: AppHeaderProps) {
 
       {/* LADO DIREITO: Notificação e Perfil Pilled */}
       <div className="flex items-center gap-4">
-
         {/* Data Atual */}
         <span className="text-m font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-300 m-auto">
           {currentDate}
@@ -68,7 +65,7 @@ export function AppHeader({ title, subtitle }: AppHeaderProps) {
             {/* Foto Redonda */}
             <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center overflow-hidden border-2 border-gray-50">
               <img
-                src={user.avatar}
+                src={""}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
@@ -79,8 +76,8 @@ export function AppHeader({ title, subtitle }: AppHeaderProps) {
               <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest leading-none">
                 Bem-vindo de volta
               </p>
-              <p className="text-xs font-black text-primary truncate max-w-[120px]">
-                {user.fullname}
+              <p className="text-xs font-black text-primary truncate max-w-[120px] mt-1">
+                {userName}
               </p>
             </div>
 

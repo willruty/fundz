@@ -19,14 +19,15 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	err, token := service.RegisterUser(user)
+	fullName, err, token := service.RegisterUser(user)
 	if err != "" {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token": token,
+		"token":     token,
+		"full_name": fullName,
 	})
 }
 
@@ -45,14 +46,15 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	err, token := service.LoginUser(req.Email, req.Password)
+	fullName, err, token := service.LoginUser(req.Email, req.Password)
 	if err != "" {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token": token,
+		"token":     token,
+		"full_name": fullName,
 	})
 }
 

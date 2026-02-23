@@ -4,6 +4,7 @@ import (
 	dao "fundz/internal/model/dao"
 	entity "fundz/internal/model/entity"
 	"fundz/internal/service"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,11 +19,16 @@ func CreateTransaction(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&transaction); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		log.Println(err)
 		return
 	}
 
-	if err := dao.CreateTransaction(transaction); err != nil {
+	userID := c.MustGet("userID").(string)
+
+	if err := dao.CreateTransaction(transaction, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
+		log.Println(transaction)
+		log.Println(err.Error())
 		return
 	}
 
@@ -36,7 +42,9 @@ func CreateTransaction(c *gin.Context) {
 // -------
 func GetAllTransactions(c *gin.Context) {
 
-	transactions, rowsAffected, err := dao.GetAllTransaction()
+	userID := c.MustGet("userID").(string)
+
+	transactions, rowsAffected, err := dao.GetAllTransaction(userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"erro": "Nenhum registro encontrado"})
 		return
