@@ -33,7 +33,7 @@ export function Sidebar() {
     <div className="h-screen p-4 flex flex-col z-50">
       <motion.div
         initial={false}
-        animate={{ width: isExpanded ? "280px" : "80px" }}
+        animate={{ width: isExpanded ? "220px" : "80px" }}
         className="h-full bg-primary flex flex-col relative shadow-[0_20px_50px_rgba(8,35,62,0.3)] rounded-[20px]"
       >
         {/* Header - Logos */}
