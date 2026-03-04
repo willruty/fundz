@@ -3,7 +3,7 @@ package router
 import (
 	"fundz/internal/controller"
 	"fundz/internal/middleware"
-	"fundz/internal/service"
+	"fundz/internal/util"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -96,7 +96,7 @@ func SetupMainRouter() *gin.Engine {
 		subscription.DELETE("/:id", controller.DeleteSubscriptionById)
 	}
 
-	service.PrintBanner()
+	util.PrintBanner()
 
 	return route
 }

@@ -27,3 +27,5 @@ func FilterNextGoal(userId string) (entity.Goals, decimal.Decimal, error) {
 
 	return goal, percentage, nil
 }
+
+func GetGoalsSummary() {}
