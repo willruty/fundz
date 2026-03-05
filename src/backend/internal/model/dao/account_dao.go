@@ -16,7 +16,7 @@ func CreateAccount(account model.Accounts) error {
 	return nil
 }
 
-func GetAllAccounts() ([]model.Accounts, int64, error) {
+func GetAllAccounts(userID string) ([]model.Accounts, int64, error) {
 
 	var account []model.Accounts
 	var count int64

@@ -1,20 +1,30 @@
-package service
+package application
 
 import (
 	"fundz/internal/model/dto"
 	"fundz/internal/service"
-	"log"
 )
 
 type DashboardService struct {
-	Account service.AccountService
+	Account     service.AccountService
+	Goal        service.GoalService
+	Transaction service.TransactionService
+	Category    service.CategoryService
 }
 
-func (d DashboardService) GetDashboardInfo() dto.DashboardDTO {
+func (d DashboardService) GetDashboardOverview(userID string) (dto.DashboardDTO, error) {
 
-	accounts := d.Account.GetAccountsSummary()
+	var dashboard dto.DashboardDTO
+	var err error
 
-	log.Println(accounts)
+	dashboard.Accounts, err = d.Account.GetAccountsSummary(userID)
+	dashboard.Goal, err = d.Goal.FilterNextGoal(userID)
+	dashboard.LastMonthTransactions, err = d.Transaction.GetLastMonthTransactions(userID)
+	dashboard.Categories, err = d.Category.GetCategorySummary(userID)
 
-	return dto.DashboardDTO{}
+	if err != nil {
+		return dto.DashboardDTO{}, err
+	}
+
+	return dashboard, nil
 }

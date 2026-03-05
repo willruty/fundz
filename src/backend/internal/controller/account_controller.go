@@ -34,7 +34,9 @@ func CreateAccount(c *gin.Context) {
 // -------
 func GetAllAccounts(c *gin.Context) {
 
-	accounts, rowsAffected, err := dao.GetAllAccounts()
+	userID := c.MustGet("userID").(string)
+	
+	accounts, rowsAffected, err := dao.GetAllAccounts(userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"erro": "Nenhum registro encontrado: " + err.Error()})
 		return

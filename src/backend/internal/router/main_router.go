@@ -32,6 +32,7 @@ func SetupMainRouter() *gin.Engine {
 	main.GET("/heath", controller.GetHealth)
 
 	SetupUserRouter(main)
+	SetupApplicationRouter(main)
 
 	// // === Account ===
 	account := main.Group("/account")
@@ -77,7 +78,6 @@ func SetupMainRouter() *gin.Engine {
 	{
 		// === Goals CRUD ===
 		goal.GET("/", controller.GetAllGoals)
-		goal.GET("/next", controller.GetNextGoal)
 		goal.GET("/:id", controller.GetGoalById)
 		goal.POST("/", controller.CreateGoal)
 		goal.PUT("/", controller.UpdateGoalById)

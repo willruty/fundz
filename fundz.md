@@ -249,9 +249,9 @@ Principais entidades:
   - [ ] Configurar o S3 do supabase para armazenar as fotos de perfil de cada user
     - [ ] Criar a coluna de account_id nas tabelas que precisam ser divididas por conta (transactions, goals, subscriptions)
 - Backend:
-  - [ ] Implementar o endpoint GET dashboard/overview/ que retorna as informações gerais para a página de dashboard
-  - [ ] Terminar a estrutura da service no banco de dados
-    - [ ] Implementar e melhorar as funções a seguir:
+  - [X] Implementar o endpoint GET dashboard/overview/ que retorna as informações gerais para a página de dashboard
+  - [X] Terminar a estrutura da service no banco de dados
+    - [X] Implementar e melhorar as funções a seguir:
       - GetAccountsSummary()
       - GetMostUsedCategory()
       - GetCategoryDistribution()

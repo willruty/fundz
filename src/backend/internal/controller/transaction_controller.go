@@ -62,7 +62,8 @@ func GetLastMonthTransactions(c *gin.Context) {
 
 	userID := c.MustGet("userID").(string)
 
-	transactions, err := service.GetLastMonthTransactions(userID)
+	var transactionService service.TransactionService
+	transactions, err := transactionService.GetLastMonthTransactions(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erro": "Erro ao buscar transações"})
 	}

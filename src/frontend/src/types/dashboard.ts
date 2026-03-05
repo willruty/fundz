@@ -1,0 +1,41 @@
+export type DashboardDTO = {
+  accounts: AccountSummary[];
+  goals: GoalSummary;
+  last_month_transactions: TransactionSummary[];
+  categories: CategorySummary;
+};
+
+export type AccountSummary = {
+  name: string;
+  balance: string;
+};
+
+export type GoalSummary = {
+  name: string;
+  target: string;
+  current: string;
+  date: string;
+  percentage: string;
+};
+
+export type TransactionSummary = {
+  date: string;
+  value: string;
+  type: string;
+};
+
+export type CategorySummary = {
+  most_used: CategoryMostUsed;
+  distribution: CategoryDistribution[];
+};
+
+export type CategoryMostUsed = {
+  name: string;
+  amount: string;
+};
+
+export type CategoryDistribution = {
+  name: string;
+  amount: string;
+  percentage: string;
+};

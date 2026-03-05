@@ -3,7 +3,6 @@ package controller
 import (
 	dao "fundz/internal/model/dao"
 	entity "fundz/internal/model/entity"
-	"fundz/internal/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -65,28 +64,6 @@ func GetGoalById(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": result})
-}
-
-// -------
-// GetNextGoalByToken
-// -------
-func GetNextGoal(c *gin.Context) {
-
-	userID := c.MustGet("userID").(string)
-
-	goal, percentage, err := service.FilterNextGoal(userID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK, gin.H{"data": gin.H{
-		"name":           goal.Name,
-		"target_amount":   goal.TargetAmount,
-		"current_amount": goal.CurrentAmount,
-		"due_date":       goal.DueDate,
-		"percentage":     percentage,
-	}})
 }
 
 // -------

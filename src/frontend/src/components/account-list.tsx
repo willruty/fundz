@@ -1,70 +1,23 @@
 import { useEffect, useState } from "react";
 import { Wallet, Plus, AlertCircle } from "lucide-react";
+import type { AccountSummary } from "../types/dashboard";
 
-interface Account {
-  id: string;
-  name: string;
-  balance: string;
-  type: string;
-}
+type Props = {
+  accounts: AccountSummary[];
+};
 
-export function AccountList() {
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const token = localStorage.getItem("token");
-
-        const response = await fetch("http://localhost:8000/fundz/account/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Falha ao sincronizar contas.");
-        }
-
-        const data = await response.json();
-
-        // Acessando a chave 'results' do seu JSON
-        setAccounts(data.results || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Erro desconhecido");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAccounts();
-  }, []);
-
-  if (loading)
+export function AccountList({ accounts }: Props) {
+  if (!accounts.length) {
     return (
-      <div className="flex items-center gap-2 text-gray-400 font-bold animate-pulse">
-        <div className="w-2 h-2 bg-secondary rounded-full animate-bounce" />
-        Sincronizando seus ativos...
-      </div>
+      <div className="text-gray-400 font-bold">Nenhuma conta encontrada.</div>
     );
-
-  if (error)
-    return (
-      <div className="flex items-center gap-2 text-red-500 font-bold bg-red-50 p-4 rounded-2xl border border-red-100">
-        <AlertCircle size={20} />
-        {error}
-      </div>
-    );
+  }
 
   return (
     <div className="flex flex-wrap gap-3 p-0 m-0">
       {accounts.map((acc) => (
         <div
-          key={acc.id}
+          key={acc.name}
           className="flex items-center gap-5 bg-primary border border-white/10 px-3 py-3 rounded-full shadow-lg hover:shadow-secondary/5 hover:border-secondary/30 transition-all group cursor-default"
         >
           {/* Ícone com Contraste Realçado */}

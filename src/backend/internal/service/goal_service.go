@@ -1,13 +1,20 @@
 package service
 
 import (
+	"errors"
 	"fundz/internal/database"
+	"fundz/internal/model/dto"
 	entity "fundz/internal/model/entity"
+	"time"
 
+	"github.com/jinzhu/gorm"
 	"github.com/shopspring/decimal"
 )
 
-func FilterNextGoal(userId string) (entity.Goals, decimal.Decimal, error) {
+type GoalService struct{}
+
+func (g GoalService) FilterNextGoal(userId string) (dto.GoalSummaryDTO, error) {
+
 	var goal entity.Goals
 
 	err := database.DB.Model(&entity.Goals{}).
@@ -16,16 +23,28 @@ func FilterNextGoal(userId string) (entity.Goals, decimal.Decimal, error) {
 		First(&goal).Error
 
 	if err != nil {
-		return entity.Goals{}, decimal.Zero, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return dto.GoalSummaryDTO{}, nil
+		}
+		return dto.GoalSummaryDTO{}, err
 	}
 
 	if goal.TargetAmount.IsZero() {
-		return goal, decimal.Zero, nil
+		return dto.GoalSummaryDTO{}, nil
 	}
 
-	percentage := goal.CurrentAmount.Div(goal.TargetAmount).Mul(decimal.NewFromInt(100))
+	percentage := goal.CurrentAmount.Div(goal.TargetAmount).Mul(decimal.NewFromInt(100)).Round(2)
 
-	return goal, percentage, nil
+	var dueDate time.Time
+	if goal.DueDate != nil {
+		dueDate = *goal.DueDate
+	}
+
+	return dto.GoalSummaryDTO{
+		Name:       goal.Name,
+		Target:     goal.TargetAmount,
+		Current:    goal.CurrentAmount,
+		Date:       dueDate,
+		Percentage: percentage,
+	}, nil
 }
-
-func GetGoalsSummary() {}

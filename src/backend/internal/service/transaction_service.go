@@ -2,25 +2,37 @@ package service
 
 import (
 	"fundz/internal/database"
+	"fundz/internal/model/dto"
 	model "fundz/internal/model/entity"
 	"time"
 )
 
-func GetLastMonthTransactions(userId string) ([]model.Transactions, error) {
+type TransactionService struct{}
+
+func (t TransactionService) GetLastMonthTransactions(userId string) ([]dto.TransactionSummaryDTO, error) {
+
 	var transactions []model.Transactions
-	var count int64
 
 	thirtyDaysAgo := time.Now().AddDate(0, 0, -30)
 
-	err := database.DB.Model(&model.Transactions{}).
+	err := database.DB.
 		Where("user_id = ? AND occurred_at >= ?", userId, thirtyDaysAgo).
 		Order("occurred_at ASC").
-		Find(&transactions).
-		Count(&count).Error
+		Find(&transactions).Error
 
 	if err != nil {
 		return nil, err
 	}
 
-	return transactions, nil
+	var summary []dto.TransactionSummaryDTO
+
+	for _, tx := range transactions {
+		summary = append(summary, dto.TransactionSummaryDTO{
+			Date:  tx.OccurredAt,
+			Value: tx.Amount,
+			Type:  tx.Type,
+		})
+	}
+
+	return summary, nil
 }
