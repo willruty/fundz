@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   AreaChart,
   Area,
@@ -9,104 +8,33 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { TrendingUp, TrendingDown, Calendar } from "lucide-react";
+import type { TransactionSummary } from "../types/dashboard";
 
-interface Transaction {
-  occurred_at: string;
-  amount: string;
-  type: "income" | "expense";
-}
+type Props = {
+  last_month_transactions: TransactionSummary[];
+};
 
-export function MonthlyBalanceCard() {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isPositive, setIsPositive] = useState(true);
-  const [totalDiff, setTotalDiff] = useState(0);
+export function MonthlyBalanceCard({ last_month_transactions = [] }: Props) {
+  const chartData = [...last_month_transactions]
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .map((t) => ({
+      date: new Date(t.date).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+      }),
+      value: Number(t.value) * (t.type === "expense" ? -1 : 1),
+    }))
+    .reduce((acc: any[], curr) => {
+      const last = acc.length ? acc[acc.length - 1].value : 0;
+      acc.push({
+        ...curr,
+        value: last + curr.value,
+      });
+      return acc;
+    }, []);
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          console.warn("Token não encontrado");
-          setLoading(false);
-          return;
-        }
-
-        const response = await fetch(
-          "http://localhost:8000/fundz/transaction/last-month",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        if (!response.ok) {
-          if (response.status === 401) console.error("Sessão expirada (401)");
-          throw new Error(`Erro na requisição: ${response.status}`);
-        }
-
-        const rawData = await response.json();
-
-        const transactions: Transaction[] = Array.isArray(rawData)
-          ? rawData
-          : rawData.transactions || [];
-
-        if (transactions.length === 0) {
-          setData([]);
-          setLoading(false);
-          return;
-        }
-
-        const groupedData: Record<string, number> = {};
-
-        transactions.forEach((t: Transaction) => {
-          const dateObj = new Date(t.occurred_at);
-          const date = isNaN(dateObj.getTime())
-            ? "Data Inválida"
-            : dateObj.toLocaleDateString("pt-BR", {
-                day: "2-digit",
-                month: "2-digit",
-              });
-
-          const amountValue = parseFloat(String(t.amount));
-          const val = t.type === "income" ? amountValue : -amountValue;
-
-          groupedData[date] = (groupedData[date] || 0) + val;
-        });
-
-        const chartData = Object.keys(groupedData)
-          .map((date) => ({
-            date,
-            valor: Math.round(groupedData[date]),
-          }))
-
-          .sort((a, b) => {
-            const [dayA, monthA] = a.date.split("/").map(Number);
-            const [dayB, monthB] = b.date.split("/").map(Number);
-            return monthA !== monthB ? monthA - monthB : dayA - dayB;
-          });
-
-        setData(chartData);
-
-        if (chartData.length > 0) {
-          const first = chartData[0].valor;
-          const last = chartData[chartData.length - 1].valor;
-          setIsPositive(last >= first);
-          setTotalDiff(last - first);
-        }
-      } catch (err) {
-        console.error("Erro ao carregar gráfico:", err);
-        setData([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTransactions();
-  }, []);
+  const monthlyBalance = chartData.reduce((acc, t) => acc + t.value, 0);
+  const isPositive = monthlyBalance >= 0;
 
   const themeColor = isPositive ? "#10b981" : "#ef4444";
 
@@ -117,23 +45,30 @@ export function MonthlyBalanceCard() {
           <span className="text-[10px] font-black uppercase text-white/40 tracking-[0.2em] block mb-1">
             Performance Mensal
           </span>
+
           <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
             Fluxo de Caixa
             <div
-              className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[12px] ${isPositive ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"}`}
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[12px] ${
+                isPositive
+                  ? "bg-emerald-500/10 text-emerald-500"
+                  : "bg-red-500/10 text-red-500"
+              }`}
             >
               {isPositive ? (
                 <TrendingUp size={14} />
               ) : (
                 <TrendingDown size={14} />
               )}
+
               {new Intl.NumberFormat("pt-BR", {
                 style: "currency",
                 currency: "BRL",
-              }).format(Math.abs(totalDiff))}
+              }).format(Math.abs(monthlyBalance))}
             </div>
           </h2>
         </div>
+
         <div className="flex items-center gap-2 text-white/30 bg-white/5 px-3 py-1.5 rounded-full border border-white/5">
           <Calendar size={12} />
           <span className="text-[10px] font-black uppercase">
@@ -143,17 +78,15 @@ export function MonthlyBalanceCard() {
       </header>
 
       <div className="h-[185px] w-full">
-        
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={data}
+            data={chartData}
             margin={{ top: 0, right: 15, left: 15, bottom: 0 }}
           >
             <defs>
               <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                {/* Degrade mais suave: começa mais opaco e morre antes do fim */}
-                <stop offset="5%" stopColor={themeColor} stopOpacity={0.4} />
-                <stop offset="75%" stopColor={themeColor} stopOpacity={0.05} />
+                <stop offset="0%" stopColor={themeColor} stopOpacity={0.7} />
+                <stop offset="55%" stopColor={themeColor} stopOpacity={0.25} />
                 <stop offset="100%" stopColor={themeColor} stopOpacity={0} />
               </linearGradient>
             </defs>
@@ -204,20 +137,30 @@ export function MonthlyBalanceCard() {
                 color: "rgba(255,255,255,0.5)",
                 fontSize: "14px",
               }}
-              formatter={(value) => [`R$ ${value}`, "Balanço"]}
+              formatter={(value: number | undefined) => [
+                new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(value ?? 0),
+                "Saldo",
+              ]}
             />
 
             <Area
               type="monotone"
-              dataKey="valor"
+              dataKey="value"
               stroke={themeColor}
-              strokeWidth={3} // 4 estava um pouco pesado para um gráfico menor
+              strokeWidth={3}
               fillOpacity={1}
               fill="url(#colorValue)"
-              animationDuration={1000}
-              // Retira os pontos (dots) para um look mais minimalista
               dot={false}
-              activeDot={{ r: 6, strokeWidth: 0, fill: themeColor }}
+              // A MÁGICA ESTÁ AQUI:
+              activeDot={{
+                r: 6,
+                strokeWidth: 0,
+                fill: themeColor,
+              }}
+              isAnimationActive={true}
             />
           </AreaChart>
         </ResponsiveContainer>

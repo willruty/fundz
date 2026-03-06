@@ -8,24 +8,21 @@ import {
   Cell,
 } from "recharts";
 import { TrendingUp, TrendingDown } from "lucide-react";
+import type { CategoryDistribution } from "../types/dashboard";
 
 const COLORS = [
-  "var(--primary)",
-  "var(--secondary)",
-  "#64748b",
-  "#94a3b8",
-  "#cbd5e1",
+  "#c9c9c9",
+  "#ffd100", 
+  "#08233e", 
+  "#0c3156", 
+  "#000", 
 ];
 
-export function CategoryDistributionCard() {
-  const data = [
-    { name: "Lazer", value: 850 },
-    { name: "Contas", value: 1200 },
-    { name: "Saúde", value: 300 },
-    { name: "Mercado", value: 650 },
-    { name: "Transporte", value: 150 },
-  ].sort((a, b) => b.value - a.value);
+type Props = {
+  distribution: CategoryDistribution[];
+};
 
+export function CategoryDistributionCard({ distribution = [] }: Props) {
   return (
     <div className="bg-white border border-white/5 rounded-[32px] p-8 w-full h-[220px] shadow-2xl relative overflow-hidden group flex flex-col justify-between">
       <header className="flex justify-between items-center relative z-10">
@@ -35,10 +32,11 @@ export function CategoryDistributionCard() {
           </span>
           <div className="flex gap-4 mt-1">
             <div className="flex items-center gap-1.5 text-[11px] font-black text-emerald-600 uppercase italic">
-              <TrendingUp size={12} /> {data[0].name}
+              <TrendingUp size={12} /> {distribution[0].name}
             </div>
             <div className="flex items-center gap-1.5 text-[11px] font-black text-red-500 uppercase italic">
-              <TrendingDown size={12} /> {data[data.length - 1].name}
+              <TrendingDown size={12} />{" "}
+              {distribution[distribution.length - 1].name}
             </div>
           </div>
         </div>
@@ -47,22 +45,23 @@ export function CategoryDistributionCard() {
 
       {/* Container do Gráfico - Ajustei o margin para dar mais espaço interno */}
       <div className="flex-1 w-full mt-6 mb-2">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minHeight={0}>
           <BarChart
-            data={data}
+            data={distribution}
             layout="vertical"
-            margin={{ left: -30, right: 20 }}
-            barCategoryGap="25%" // Adiciona o espaçamento entre as categorias
+            margin={{ left: 0, right: 20, top: 0, bottom: 0 }} // Comece do zero
+            barCategoryGap="25%"
           >
             <XAxis type="number" hide />
             <YAxis dataKey="name" type="category" hide />
             <Tooltip
-              cursor={{ fill: "rgba(0,0,0,0.02)" }}
+              cursor={{ fill: "rgba(0,0,0,0.04)" }} // Cursor arredondado também!
               contentStyle={{
                 backgroundColor: "#fff",
-                border: "none",
-                borderRadius: "16px",
-                boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1)",
+                border: "1px solid rgba(0,0,0,0.05)",
+                borderRadius: "12px",
+                padding: "8px 12px",
+                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
               }}
               formatter={(value: string | number | undefined) => {
                 if (value === undefined) return ["R$ 0,00", ""];
@@ -77,10 +76,16 @@ export function CategoryDistributionCard() {
                 ];
               }}
             />
-            <Bar dataKey="value" radius={[0, 12, 12, 0]} barSize={12}>
-              {data.map((entry, index) => (
+            <defs>
+              <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8} />
+                <stop offset="100%" stopColor="#2563eb" stopOpacity={1} />
+              </linearGradient>
+            </defs>
+            <Bar dataKey="amount" radius={[0, 12, 12, 0]} barSize={12}>
+              {distribution.map((entry, index) => (
                 <Cell
-                  key={`cell-${index}`}
+                  key={`cell-${entry.name}`} // Agora 'entry' está sendo lida!
                   fill={COLORS[index % COLORS.length]}
                 />
               ))}
@@ -91,7 +96,7 @@ export function CategoryDistributionCard() {
 
       {/* Legendas Aumentadas e com mais peso visual */}
       <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2 border-t border-black/5 pt-5">
-        {data.map((item, index) => (
+        {distribution.map((item, index) => (
           <div key={item.name} className="flex items-center gap-2.5">
             <div
               className="w-2 h-2 rounded-full border border-black/5"
@@ -102,7 +107,9 @@ export function CategoryDistributionCard() {
             </span>
             <span className="text-[10px] font-bold text-black-light">
               {Math.round(
-                (item.value / data.reduce((a, b) => a + b.value, 0)) * 100,
+                (Number(item.amount) /
+                  distribution.reduce((a, b) => a + Number(b.amount), 0)) *
+                  100,
               )}
               %
             </span>

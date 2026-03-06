@@ -247,7 +247,7 @@ Principais entidades:
   - [ ] Criar a coluna de icon na tabela de accounts
   - [ ] Criar a coluna de cor na tabela de accounts
   - [ ] Configurar o S3 do supabase para armazenar as fotos de perfil de cada user
-    - [ ] Criar a coluna de account_id nas tabelas que precisam ser divididas por conta (transactions, goals, subscriptions)
+  - [ ] Criar a coluna de account_id nas tabelas que precisam ser divididas por conta (transactions, subscriptions)
 - Backend:
   - [X] Implementar o endpoint GET dashboard/overview/ que retorna as informações gerais para a página de dashboard
   - [X] Terminar a estrutura da service no banco de dados
@@ -261,7 +261,7 @@ Principais entidades:
 - Frontend:
   - [ ] Fazer o crud de transação funcionar de cabo a rabo usando a tabela de overview ou da página de transações (mesmo endpoint, páginas diferentes)
   - [ ] Criar a página de configuração de perfil que dá pra mudar nome, foto de perfil, apagar conta...
-  - [ ] Colocar um fetch geral na página Home e passar as informações para os componentes secundários como parâmetros
+  - [X] Colocar um fetch geral na página Home e passar as informações para os componentes secundários como parâmetros
   - [ ] Refazer o layout da Landing page para acompanhar o restante do projeto
   - [ ] Refazer a estilização da página de login e colocar efeito de transição/loading para dentro do sistema
   - [ ] Criar um MVP da página Home

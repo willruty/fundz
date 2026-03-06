@@ -1,6 +1,11 @@
 import { TrendingUp, AlertTriangle } from "lucide-react";
+import type { CategoryMostUsed } from "../types/dashboard";
 
-export function CategoryAnalysisCard() {
+type Props = {
+  most_used: CategoryMostUsed;
+};
+
+export function CategoryAnalysisCard({ most_used }: Props) {
   const topCategory = { name: "Alimentação", value: 1250.8, trend: 12 };
 
   return (
@@ -25,13 +30,13 @@ export function CategoryAnalysisCard() {
 
         <div className="flex flex-col">
           <h2 className="text-4xl font-black text-primary tracking-tighter uppercase leading-none">
-            {topCategory.name}
+            {most_used.name}
           </h2>
           <p className="text-primary/60 font-bold text-lg mt-1">
             {new Intl.NumberFormat("pt-BR", {
               style: "currency",
               currency: "BRL",
-            }).format(topCategory.value)}
+            }).format(Number(most_used.amount))}
           </p>
         </div>
 

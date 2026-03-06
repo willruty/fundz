@@ -1,6 +1,6 @@
 export type DashboardDTO = {
   accounts: AccountSummary[];
-  goals: GoalSummary;
+  goal: GoalSummary;
   last_month_transactions: TransactionSummary[];
   categories: CategorySummary;
 };

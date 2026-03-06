@@ -25,10 +25,10 @@ export function Home() {
             },
           },
         );
-        const data = await res.json();
+        const json = await res.json();
 
         setLoading(true);
-        setDashboard(data);
+        setDashboard(json.data);
       } catch (err) {
         console.error("Erro ao buscar dashboard:", err);
       } finally {
@@ -54,22 +54,26 @@ export function Home() {
         {/* Linha 2: Resumo Geral */}
         <div className="flex flex-row gap-5">
           <div className="flex-1">
-            <BalanceCard accountId="e36bd0c1-89de-462f-8c06-02917dac1f95" />
+            <BalanceCard accounts={dashboard.accounts} />
           </div>
           <div className="flex-1">
-            <NextGoalCard />
+            <NextGoalCard goal={dashboard.goal} />
           </div>
         </div>
         <div className="w-full">
-          <MonthlyBalanceCard />
+          <MonthlyBalanceCard
+            last_month_transactions={dashboard.last_month_transactions}
+          />
         </div>
 
         {/* Linha 3: Categorias */}
         <div className="w-full">
-          <CategoryAnalysisCard />
+          <CategoryAnalysisCard most_used={dashboard.categories.most_used} />
         </div>
         <div className="w-full">
-          <CategoryDistributionCard />
+          <CategoryDistributionCard
+            distribution={dashboard.categories.distribution}
+          />
         </div>
 
         {/* Linha 4: Transações */}

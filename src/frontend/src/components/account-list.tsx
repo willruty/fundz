@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
-import { Wallet, Plus, AlertCircle } from "lucide-react";
+import { Wallet } from "lucide-react";
 import type { AccountSummary } from "../types/dashboard";
 
 type Props = {
   accounts: AccountSummary[];
 };
 
-export function AccountList({ accounts }: Props) {
+export function AccountList({ accounts = [] }: Props) {
   if (!accounts.length) {
     return (
       <div className="text-gray-400 font-bold">Nenhuma conta encontrada.</div>
