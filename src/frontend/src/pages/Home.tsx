@@ -54,7 +54,10 @@ export function Home() {
         {/* Linha 2: Resumo Geral */}
         <div className="flex flex-row gap-5">
           <div className="flex-1">
-            <BalanceCard accounts={dashboard.accounts} />
+            <BalanceCard
+              accounts={dashboard.accounts}
+              transactions={dashboard?.last_month_transactions}
+            />
           </div>
           <div className="flex-1">
             <NextGoalCard goal={dashboard.goal} />

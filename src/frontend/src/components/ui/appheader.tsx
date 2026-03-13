@@ -30,8 +30,8 @@ export function AppHeader({ title, subtitle }: AppHeaderProps) {
   return (
     <header className="w-full flex justify-between items-center mb-10">
       {/* LADO ESQUERDO: Títulos */}
-      <div className="flex flex-col" >
-        <h1 className="text-3xl font-black text-primary tracking-tighter leading-none" >
+      <div className="flex flex-col">
+        <h1 className="text-3xl font-black text-primary tracking-tighter leading-none">
           {title}
         </h1>
 
@@ -131,20 +131,6 @@ export function AppHeader({ title, subtitle }: AppHeaderProps) {
                       className="text-gray-300 group-hover:text-primary transition-colors"
                     />
                     Configurações
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      navigate("/profile");
-                      setIsProfileOpen(false);
-                    }}
-                    className="flex items-center gap-3 p-3 w-full rounded-xl hover:bg-gray-50 transition-colors text-sm font-bold text-primary group cursor-pointer"
-                  >
-                    <User
-                      size={18}
-                      className="text-gray-300 group-hover:text-primary transition-colors"
-                    />
-                    Meu Perfil
                   </button>
 
                   <div className="h-px bg-gray-100 my-1 mx-2" />

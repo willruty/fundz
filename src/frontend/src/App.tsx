@@ -12,7 +12,6 @@ import { Investments } from "./pages/Investments";
 import { Expenses } from "./pages/Expenses";
 import { Categories } from "./pages/Categories";
 import { Subscriptions } from "./pages/Subscriptions";
-import { Profile } from "./pages/Profile";
 import { Configs } from "./pages/Configs";
 import { Toaster } from "react-hot-toast";
 import Platform from "./components/ui/plataform-interface";
@@ -35,7 +34,6 @@ function App() {
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/subscriptions" element={<Subscriptions />} />
-          <Route path="/profile" element={<Profile />} />
           <Route path="/configs" element={<Configs />} />
         </Route>
       </Routes>

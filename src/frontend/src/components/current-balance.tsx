@@ -1,22 +1,39 @@
 import { TrendingUp } from "lucide-react";
-import type { AccountSummary } from "../types/dashboard";
+import type { AccountSummary, TransactionSummary } from "../types/dashboard";
 
 type BalanceCardProps = {
   accounts?: AccountSummary[];
+  transactions?: TransactionSummary[];
 };
 
-export function BalanceCard({ accounts = [] }: BalanceCardProps) {
+export function BalanceCard({
+  accounts = [],
+  transactions = [],
+}: BalanceCardProps) {
+  // 1. Cálculo do Saldo
   const balance =
     accounts?.reduce((acc, account) => {
       return acc + Number(account.balance ?? 0);
     }, 0) ?? 0;
 
-  // dados mockados temporários
-  const summary = {
-    income: 5000,
-    expense: 3200,
-  };
+  // 2. Cálculo dinâmico de Receitas e Despesas
+  const summary = transactions.reduce(
+    (acc, transaction) => {
+      // Usando Number() para garantir que não vamos concatenar strings caso a API retorne texto
+      const amount = Number(transaction.value ?? 0);
 
+      if (transaction.type === "income") {
+        acc.income += amount;
+      } else if (transaction.type === "expense") {
+        acc.expense += amount;
+      }
+
+      return acc;
+    },
+    { income: 0, expense: 0 }, // Estado inicial do acumulador
+  );
+
+  // 3. Cálculo da Taxa de Poupança
   const savingsRate =
     summary.income > 0
       ? Math.round(((summary.income - summary.expense) / summary.income) * 100)
