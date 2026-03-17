@@ -34,7 +34,8 @@ export function Sidebar() {
       <motion.div
         initial={false}
         animate={{ width: isExpanded ? "220px" : "80px" }}
-        className="h-full bg-primary flex flex-col relative shadow-[0_20px_50px_rgba(8,35,62,0.3)] rounded-[20px]"
+        // Removida a borda e suavizada a sombra para deixar a navegação mais leve
+        className="h-full bg-[var(--primary)] flex flex-col relative shadow-xl rounded-[24px]"
       >
         {/* Header - Logos */}
         <div className="h-24 flex items-center px-8 mb-4 relative">
@@ -67,86 +68,89 @@ export function Sidebar() {
           </motion.div>
         </div>
 
-        {/* Botão Toggle */}
+        {/* Botão Toggle (Único elemento com borda dura para servir como puxador físico) */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="absolute -right-0 top-12 translate-x-1/2 bg-secondary text-[#08233E] rounded-full p-1.5 shadow-xl hover:scale-110 transition-transform z-20 cursor-pointer"
+          className="absolute -right-3 top-12 bg-[var(--secondary)] text-[var(--primary)] rounded-full p-1.5 border-2 border-[var(--black)] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all z-20 cursor-pointer"
         >
-          {isExpanded ? <ChevronLeft size={18} /> : <Menu size={18} />}
+          {isExpanded ? (
+            <ChevronLeft size={16} strokeWidth={3} />
+          ) : (
+            <Menu size={16} strokeWidth={3} />
+          )}
         </button>
 
         {/* Navegação */}
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <button
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              className={`w-full flex items-center p-3.5 rounded-2xl transition-colors duration-300 group relative cursor-pointer ${
-                isActive
-                  ? "text-[#FFD100]"
-                  : "text-[#FFFAF0] hover:text-[#FFD100]/80"
-              } ${!isExpanded ? "justify-center" : "justify-start px-6"}`} // Centraliza se fechado, padding lateral se aberto
-            >
-              {/* Borda Lateral Animada */}
-              {isActive && (
-                <motion.div
-                  layoutId="activeBorder"
-                  className="absolute left-0 w-1.5 h-8 bg-[#FFD100] rounded-r-full"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
-              )}
-
-              {/* Ícone centralizado */}
-              <div className="flex items-center justify-center min-w-[22px]">
-                <item.icon
-                  size={22}
-                  className={`${isActive ? "text-[#FFD100]" : "text-[#FFD100] opacity-70 group-hover:opacity-100"}`}
-                />
-              </div>
-
-              <AnimatePresence>
-                {isExpanded && (
-                  <motion.span
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: "auto" }}
-                    exit={{ opacity: 0, width: 0 }}
-                    className="font-bold text-sm tracking-tight overflow-hidden whitespace-nowrap ml-4"
-                  >
-                    {item.name}
-                  </motion.span>
+        <div className="flex flex-col gap-1 px-2 mt-2">
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={`w-full flex items-center p-3 rounded-xl transition-all duration-200 group relative cursor-pointer ${
+                  isActive
+                    ? "bg-white/10 text-[var(--secondary)]" // Fundo sutil ao invés de bordas
+                    : "text-[var(--main-bg)] hover:bg-white/5 hover:text-[var(--secondary)]"
+                } ${!isExpanded ? "justify-center" : "justify-start px-4"}`}
+              >
+                {/* Borda Lateral Animada (Mais quadrada para combinar com o tema) */}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeBorder"
+                    className="absolute left-0 w-1.5 h-6 bg-[var(--secondary)] rounded-r-md"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
                 )}
-              </AnimatePresence>
 
-              {/* Tooltip */}
-              {!isExpanded && (
-                <div className="absolute left-20 bg-[#08233E] text-[#FFFAF0] px-4 py-2 rounded-xl text-xs font-black opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 border border-white/10 shadow-2xl z-[100] translate-x-2 group-hover:translate-x-4 uppercase tracking-widest">
-                  {item.name}
+                {/* Ícone */}
+                <div className="flex items-center justify-center min-w-[22px]">
+                  <item.icon
+                    size={20}
+                    strokeWidth={isActive ? 2.5 : 2}
+                    className={`${isActive ? "text-[var(--secondary)]" : "text-[var(--secondary)] opacity-70 group-hover:opacity-100 transition-opacity"}`}
+                  />
                 </div>
-              )}
-            </button>
-          );
-        })}
 
-        {/* Footer de Perfil */}
-        <div className="p-4 mt-auto border-t border-white/5">
-          <motion.button
-            whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.08)" }}
-            whileTap={{ scale: 0.98 }}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.span
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: "auto" }}
+                      exit={{ opacity: 0, width: 0 }}
+                      className="font-black text-[10px] uppercase tracking-widest overflow-hidden whitespace-nowrap ml-4 mt-0.5"
+                    >
+                      {item.name}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+
+                {/* Tooltip Brutalista (Aparece apenas quando fechado) */}
+                {!isExpanded && (
+                  <div className="absolute left-16 bg-[var(--secondary)] text-[var(--primary)] px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 border-2 border-[var(--black)] shadow-[var(--neo-shadow)] z-[100] translate-x-2 group-hover:translate-x-4">
+                    {item.name}
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Footer de Perfil / Configurações */}
+        <div className="p-2 mt-auto border-t-2 border-white/10 mb-2">
+          <button
             onClick={() => navigate("/configs")}
-            className={`w-full flex items-center p-3.5 rounded-2xl transition-all duration-300 group relative cursor-pointer ${
-              !isExpanded ? "justify-center" : "justify-start px-6 gap-4"
+            className={`w-full flex items-center p-3 rounded-xl transition-all duration-200 group relative cursor-pointer hover:bg-white/5 text-[var(--main-bg)] hover:text-[var(--secondary)] ${
+              !isExpanded ? "justify-center" : "justify-start px-4"
             }`}
           >
-            {/* Ícone de Engrenagem - Mesma estilização dos outros itens */}
             <div className="flex items-center justify-center min-w-[22px]">
               <Settings
-                size={22}
-                className="text-[#FFD100] opacity-70 group-hover:opacity-100 transition-opacity"
+                size={20}
+                className="text-[var(--secondary)] opacity-70 group-hover:opacity-100 transition-opacity"
               />
             </div>
 
-            {/* Texto com Animação Fluida */}
             <AnimatePresence mode="wait">
               {isExpanded && (
                 <motion.span
@@ -154,20 +158,19 @@ export function Sidebar() {
                   animate={{ opacity: 1, width: "auto" }}
                   exit={{ opacity: 0, width: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="text-[#FFFAF0] text-sm font-bold tracking-tight overflow-hidden whitespace-nowrap"
+                  className="font-black text-[10px] uppercase tracking-widest overflow-hidden whitespace-nowrap ml-4 mt-0.5"
                 >
                   Configurações
                 </motion.span>
               )}
             </AnimatePresence>
 
-            {/* Tooltip para o estado encolhido */}
             {!isExpanded && (
-              <div className="absolute left-20 bg-[#08233E] text-[#FFFAF0] px-4 py-2 rounded-xl text-xs font-black opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 border border-white/10 shadow-2xl uppercase tracking-widest z-[100] translate-x-2 group-hover:translate-x-4">
+              <div className="absolute left-16 bg-[var(--secondary)] text-[var(--primary)] px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 border-2 border-[var(--black)] shadow-[var(--neo-shadow)] z-[100] translate-x-2 group-hover:translate-x-4">
                 Configurações
               </div>
             )}
-          </motion.button>
+          </button>
         </div>
       </motion.div>
     </div>

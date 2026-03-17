@@ -54,7 +54,7 @@ export default function NextBillingCard() {
       </div>
 
       {/* Parte inferior: Informações secundárias */}
-      <div className="flex flex-col gap-3 mt-auto pt-4 border-t-2 border-[var(--black)] border-dashed">
+      <div className="flex flex-col gap-3 mt-auto pt-4 border-t-2 border-white/30 border-dashed">
         {/* Data da cobrança com destaque de "Etiqueta" Neo-brutalista */}
         <div className="flex justify-between items-center">
           <span className="text-[10px] font-black text-[var(--main-bg)] opacity-70 uppercase tracking-wider">

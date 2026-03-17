@@ -260,13 +260,20 @@ Principais entidades:
   - [ ] Fazer o crud de transação funcionar de cabo a rabo usando a tabela de overview ou da página de transações (mesmo endpoint, páginas diferentes)
   - [X] Criar a página de configuração de perfil que dá pra mudar nome, foto de perfil, apagar conta...
   - [ ] Refazer o layout da Landing page para acompanhar o restante do projeto
-  - [ ] Refazer a estilização da página de login e colocar efeito de transição/loading para dentro do sistema
   - [ ] Criar skeletons para o loading de cada componente
   - [ ] Criar um MVP da página Home
     - [ ] Tabela de últimas transações: Filtro por período, Filtro por tipo, Busca por texto
     - [ ] Maior gasto do mês
     - [ ] Média diária de gasto
     - [ ] Projeção de fim do mês (com base na média diária)
+
+  - [ ] Preencher as páginas no front com dados mockados mesmo e condizente com a nova estética:
+    - [ ] Despesas
+    - [ ] Metas
+    - [ ] Investimentos
+    - [ ] Contas
+    - [ ] Categorias
+    - [ ] Landing Page
 
 ---
 
