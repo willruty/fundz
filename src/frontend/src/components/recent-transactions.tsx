@@ -4,7 +4,6 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
-  Maximize2,
   X,
   Plus,
   RefreshCw,
@@ -14,7 +13,6 @@ import {
   Pencil,
   Trash2,
   FileX,
-  Download,
 } from "lucide-react";
 
 interface Transaction {
@@ -34,7 +32,6 @@ export function RecentTransactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isFullViewOpen, setIsFullViewOpen] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -72,18 +69,15 @@ export function RecentTransactions() {
     fetchTransactions();
   }, []);
 
-  // Handlers CRUD
   const handleSave = async () => {
     const isNew = editingId === "new";
 
-    // Prepara os dados para o Go
     const formattedData = {
       ...editForm,
-      // Converte "2026-02-27" para "2026-02-27T00:00:00Z"
       occurred_at: editForm.occurred_at
         ? `${editForm.occurred_at}T00:00:00Z`
         : new Date().toISOString(),
-      amount: String(editForm.amount), // Garante que o amount vá como string se o Go pedir assim
+      amount: String(editForm.amount),
     };
 
     try {
@@ -99,7 +93,7 @@ export function RecentTransactions() {
       });
 
       if (response.ok) {
-        showToast(isNew ? "Criado!" : "Atualizado!", "success");
+        showToast(isNew ? "Criado com sucesso!" : "Atualizado!", "success");
         setEditingId(null);
         setIsCreating(false);
         fetchTransactions();
@@ -156,69 +150,73 @@ export function RecentTransactions() {
     currentPage * itemsPerPage,
   );
 
-  // Reutilização da Tabela para o Modal Fullscreen
   const TransactionTable = ({ data }: { data: Transaction[] }) => (
-    <table className="w-full text-left">
+    <table className="w-full text-left border-collapse">
       <thead>
-        <tr className="bg-off-white border-b border-black/5">
-          <th className="p-6 text-[10px] font-black uppercase text-black-light tracking-widest w-24">
+        {/* Cabeçalho da tabela neutro para dar destaque aos dados */}
+        <tr className="bg-white border-b-2 border-[var(--black)]">
+          <th className="p-4 sm:p-5 text-[10px] font-black uppercase text-[var(--black-light)] tracking-widest w-24">
             Ações
           </th>
-          <th className="p-6 text-[10px] font-black uppercase text-black-light tracking-widest">
+          <th className="p-4 sm:p-5 text-[10px] font-black uppercase text-[var(--black-light)] tracking-widest whitespace-nowrap">
             Data
           </th>
-          <th className="p-6 text-[10px] font-black uppercase text-black-light tracking-widest">
+          <th className="p-4 sm:p-5 text-[10px] font-black uppercase text-[var(--black-light)] tracking-widest">
             Descrição
           </th>
-          <th className="p-6 text-[10px] font-black uppercase text-black-light tracking-widest text-right">
+          <th className="p-4 sm:p-5 text-[10px] font-black uppercase text-[var(--black-light)] tracking-widest text-right">
             Valor
           </th>
         </tr>
       </thead>
-      <tbody>
+      <tbody className="bg-white">
         {isCreating && (
-          <tr className="bg-emerald-50/50 border-b border-emerald-100 italic">
-            <td className="p-6">
-              <div className="flex gap-3">
+          <tr className="bg-emerald-50 border-b-2 border-[var(--black)]">
+            <td className="p-4 sm:p-5">
+              <div className="flex gap-2">
                 <button
                   onClick={handleSave}
-                  className="text-emerald-600 hover:scale-110"
+                  className="bg-emerald-400 p-1.5 rounded border-2 border-[var(--black)] hover:bg-emerald-500 transition-colors shadow-[var(--neo-shadow-hover)]"
                 >
-                  <Check size={18} />
+                  <Check
+                    size={16}
+                    strokeWidth={3}
+                    className="text-[var(--primary)]"
+                  />
                 </button>
                 <button
                   onClick={() => {
                     setIsCreating(false);
                     setEditingId(null);
                   }}
-                  className="text-red-500 hover:scale-110"
+                  className="bg-red-400 p-1.5 rounded border-2 border-[var(--black)] hover:bg-red-500 transition-colors shadow-[var(--neo-shadow-hover)]"
                 >
-                  <X size={18} />
+                  <X size={16} strokeWidth={3} className="text-white" />
                 </button>
               </div>
             </td>
-            <td className="p-6">
+            <td className="p-4 sm:p-5">
               <input
                 type="date"
                 value={editForm.occurred_at}
                 onChange={(e) =>
                   setEditForm({ ...editForm, occurred_at: e.target.value })
                 }
-                className="bg-white border border-black/10 rounded-lg px-2 py-1 text-[10px] font-black outline-none"
+                className="w-full bg-white border-2 border-[var(--black)] rounded-md px-2 py-1.5 text-xs font-bold outline-none focus:ring-2 focus:ring-[var(--primary)] shadow-[var(--neo-shadow-hover)]"
               />
             </td>
-            <td className="p-6">
+            <td className="p-4 sm:p-5">
               <input
-                placeholder="Descrição da nova transação..."
+                placeholder="Ex: Supermercado"
                 value={editForm.description}
                 onChange={(e) =>
                   setEditForm({ ...editForm, description: e.target.value })
                 }
-                className="w-full bg-white border border-black/10 rounded-lg px-3 py-1 text-sm font-black uppercase outline-none"
+                className="w-full bg-white border-2 border-[var(--black)] rounded-md px-3 py-1.5 text-xs font-black uppercase outline-none focus:ring-2 focus:ring-[var(--primary)] shadow-[var(--neo-shadow-hover)]"
                 autoFocus
               />
             </td>
-            <td className="p-6 text-right">
+            <td className="p-4 sm:p-5 text-right">
               <input
                 type="number"
                 placeholder="0.00"
@@ -226,18 +224,25 @@ export function RecentTransactions() {
                 onChange={(e) =>
                   setEditForm({ ...editForm, amount: e.target.value })
                 }
-                className="w-24 bg-white border border-black/10 rounded-lg px-3 py-1 text-right text-sm font-black outline-none"
+                className="w-24 sm:w-32 bg-white border-2 border-[var(--black)] rounded-md px-3 py-1.5 text-right text-xs font-black outline-none focus:ring-2 focus:ring-[var(--primary)] shadow-[var(--neo-shadow-hover)]"
               />
             </td>
           </tr>
         )}
-        {data.length === 0 ? (
+
+        {data.length === 0 && !isCreating ? (
           <tr>
-            <td colSpan={4} className="p-20 text-center">
+            <td colSpan={4} className="p-16 text-center">
               <div className="flex flex-col items-center gap-4">
-                <FileX size={40} className="text-black/10" />
-                <p className="text-sm font-black text-primary uppercase">
-                  Nenhuma transação encontrada
+                <div className="p-4 bg-white border-2 border-[var(--black)] rounded-full shadow-[var(--neo-shadow)]">
+                  <FileX
+                    size={32}
+                    strokeWidth={2}
+                    className="text-[var(--black-muted)]"
+                  />
+                </div>
+                <p className="text-sm font-black text-[var(--primary)] uppercase tracking-wider">
+                  Nenhuma transação
                 </p>
               </div>
             </td>
@@ -246,23 +251,30 @@ export function RecentTransactions() {
           data.map((t) => (
             <tr
               key={t.id}
-              className={`border-b border-black/5 transition-colors ${editingId === t.id ? "bg-secondary/10" : "hover:bg-off-white"}`}
+              // Aqui aplicamos a leve escurecida no hover: bg-black/5
+              className={`border-b-2 border-[var(--black)] transition-colors hover:bg-black/5 ${
+                editingId === t.id ? "bg-black/5" : ""
+              }`}
             >
-              <td className="p-6">
-                <div className="flex gap-3">
+              <td className="p-4 sm:p-5">
+                <div className="flex gap-2">
                   {editingId === t.id ? (
                     <>
                       <button
                         onClick={() => handleUpdate(t.id)}
-                        className="text-emerald-600"
+                        className="bg-emerald-400 p-1.5 rounded border-2 border-[var(--black)] hover:bg-emerald-500 transition-colors shadow-[var(--neo-shadow-hover)]"
                       >
-                        <Check size={18} />
+                        <Check
+                          size={16}
+                          strokeWidth={3}
+                          className="text-[var(--primary)]"
+                        />
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="text-red-500"
+                        className="bg-red-400 p-1.5 rounded border-2 border-[var(--black)] hover:bg-red-500 transition-colors shadow-[var(--neo-shadow-hover)]"
                       >
-                        <X size={18} />
+                        <X size={16} strokeWidth={3} className="text-white" />
                       </button>
                     </>
                   ) : (
@@ -272,24 +284,24 @@ export function RecentTransactions() {
                           setEditingId(t.id);
                           setEditForm(t);
                         }}
-                        className="text-black/20 hover:text-primary transition-colors"
+                        className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-[var(--primary)]"
                       >
-                        <Pencil size={16} />
+                        <Pencil size={16} strokeWidth={2.5} />
                       </button>
                       <button
                         onClick={() => {
-                          if (window.confirm("Deseja deletar?"))
+                          if (window.confirm("Deseja deletar esta transação?"))
                             handleDelete(t.id);
                         }}
-                        className="text-black/20 hover:text-red-500 transition-colors"
+                        className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-red-500"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={16} strokeWidth={2.5} />
                       </button>
                     </>
                   )}
                 </div>
               </td>
-              <td className="p-6 text-xs font-bold text-black/40">
+              <td className="p-4 sm:p-5 text-xs font-bold text-[var(--black-muted)] whitespace-nowrap">
                 {editingId === t.id ? (
                   <input
                     type="date"
@@ -297,30 +309,28 @@ export function RecentTransactions() {
                     onChange={(e) =>
                       setEditForm({ ...editForm, occurred_at: e.target.value })
                     }
-                    className="bg-white border border-black/10 rounded px-2 py-1 outline-none"
+                    className="w-full bg-white border-2 border-[var(--black)] rounded-md px-2 py-1 outline-none focus:ring-2 focus:ring-[var(--primary)] shadow-[var(--neo-shadow-hover)]"
                   />
                 ) : (
                   new Date(t.occurred_at).toLocaleDateString("pt-BR")
                 )}
               </td>
-              <td className="p-6">
+              <td className="p-4 sm:p-5">
                 {editingId === t.id ? (
                   <input
                     value={editForm.description}
                     onChange={(e) =>
                       setEditForm({ ...editForm, description: e.target.value })
                     }
-                    className="w-full bg-white border border-black/10 rounded px-3 py-1 outline-none font-black uppercase"
+                    className="w-full bg-white border-2 border-[var(--black)] rounded-md px-3 py-1 outline-none font-black uppercase focus:ring-2 focus:ring-[var(--primary)] shadow-[var(--neo-shadow-hover)]"
                   />
                 ) : (
-                  <span className="text-sm font-black text-primary uppercase">
+                  <span className="text-sm font-black text-[var(--primary)] uppercase tracking-tight">
                     {t.description}
                   </span>
                 )}
               </td>
-              <td
-                className={`p-6 text-sm font-black text-right ${t.type === "income" ? "text-emerald-600" : "text-red-500"}`}
-              >
+              <td className="p-4 sm:p-5 text-right">
                 {editingId === t.id ? (
                   <input
                     type="number"
@@ -328,13 +338,21 @@ export function RecentTransactions() {
                     onChange={(e) =>
                       setEditForm({ ...editForm, amount: e.target.value })
                     }
-                    className="w-24 bg-white border border-black/10 rounded px-3 py-1 text-right outline-none"
+                    className="w-24 sm:w-32 bg-white border-2 border-[var(--black)] rounded-md px-3 py-1 text-right outline-none font-black focus:ring-2 focus:ring-[var(--primary)] shadow-[var(--neo-shadow-hover)]"
                   />
                 ) : (
-                  new Intl.NumberFormat("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  }).format(Number(t.amount))
+                  <span
+                    className={`text-sm font-black px-2 py-1 rounded-md border-2 border-[var(--black)] ${
+                      t.type === "income"
+                        ? "bg-emerald-400 text-[var(--primary)]"
+                        : "bg-red-400 text-white"
+                    }`}
+                  >
+                    {new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(Number(t.amount))}
+                  </span>
                 )}
               </td>
             </tr>
@@ -353,33 +371,42 @@ export function RecentTransactions() {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className={`fixed top-10 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 rounded-full border-2 border-blackzão font-black text-[10px] uppercase shadow-neo ${toast.type === "success" ? "bg-emerald-500 text-white" : toast.type === "error" ? "bg-red-500 text-white" : "bg-secondary text-primary"}`}
+            className={`fixed top-8 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 rounded-lg border-2 border-[var(--black)] font-black text-xs uppercase shadow-[var(--neo-shadow)] ${
+              toast.type === "success"
+                ? "bg-emerald-400 text-[var(--primary)]"
+                : toast.type === "error"
+                  ? "bg-red-400 text-white"
+                  : "bg-[var(--secondary)] text-[var(--primary)]"
+            }`}
           >
             {toast.message}
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="bg-white border border-black/5 rounded-[32px] shadow-2xl overflow-hidden flex flex-col">
-        <header className="bg-primary p-5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <h2 className="text-secondary font-black text-2xl uppercase tracking-tighter italic flex items-center gap-3">
+      <div className="bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] overflow-hidden flex flex-col transition-all duration-200 hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]">
+        {/* CABEÇALHO AZUL (Restaurando a paleta original) */}
+        <header className="p-5 sm:p-6 border-b-2 border-[var(--black)] flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[var(--primary)]">
+          <h2 className="text-[var(--secondary)] font-black text-2xl uppercase tracking-tighter italic flex items-center gap-3">
             Últimas Transações
           </h2>
 
-          <div className="flex items-center gap-3 bg-white/5 p-2 rounded-full border border-white/10">
+          <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={fetchTransactions}
-              className={`text-white/60 hover:text-secondary p-2.5 ${loading ? "animate-spin" : ""}`}
+              className={`bg-white text-[var(--primary)] p-2 rounded-md border-2 border-[var(--black)] hover:bg-[var(--secondary)] transition-colors shadow-[var(--neo-shadow-hover)] ${
+                loading ? "animate-spin" : ""
+              }`}
             >
-              <RefreshCw size={18} />
+              <RefreshCw size={18} strokeWidth={2.5} />
             </button>
 
             <div className="relative">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="bg-off-white text-primary px-5 py-2.5 rounded-full text-[11px] font-black uppercase flex items-center gap-2"
+                className="bg-white text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] text-xs font-black uppercase flex items-center gap-2 hover:bg-[var(--secondary)] transition-colors shadow-[var(--neo-shadow-hover)]"
               >
-                <Filter size={14} /> Filtros
+                <Filter size={14} strokeWidth={2.5} /> Filtros
               </button>
 
               <AnimatePresence>
@@ -393,77 +420,71 @@ export function RecentTransactions() {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-4 w-80 bg-white border border-black/5 rounded-[24px] shadow-2xl z-50 overflow-hidden"
+                      className="absolute right-0 mt-3 w-72 sm:w-80 bg-white border-2 border-[var(--black)] rounded-xl shadow-[var(--neo-shadow)] z-50 p-5 space-y-5"
                     >
-                      <div className="p-6 space-y-6">
-                        {/* Período de Datas */}
-                        <div className="space-y-3">
-                          <label className="text-[10px] font-black uppercase text-black/30 tracking-widest flex items-center gap-2">
-                            <Calendar size={12} /> Período
-                          </label>
-                          <div className="grid grid-cols-2 gap-2">
-                            <input
-                              type="date"
-                              className="bg-off-white border-none rounded-xl p-2 text-[10px] font-bold outline-none focus:ring-2 focus:ring-secondary/50"
-                            />
-                            <input
-                              type="date"
-                              className="bg-off-white border-none rounded-xl p-2 text-[10px] font-bold outline-none focus:ring-2 focus:ring-secondary/50"
-                            />
-                          </div>
+                      {/* Filtros Internos */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-[var(--black-muted)] tracking-widest flex items-center gap-2">
+                          <Calendar size={12} strokeWidth={3} /> Período
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            type="date"
+                            className="bg-white border-2 border-[var(--black)] rounded-md p-2 text-[10px] font-bold outline-none focus:ring-2 focus:ring-[var(--primary)] shadow-[var(--neo-shadow-hover)]"
+                          />
+                          <input
+                            type="date"
+                            className="bg-white border-2 border-[var(--black)] rounded-md p-2 text-[10px] font-bold outline-none focus:ring-2 focus:ring-[var(--primary)] shadow-[var(--neo-shadow-hover)]"
+                          />
                         </div>
+                      </div>
 
-                        {/* Tipo de Transação */}
-                        <div className="space-y-3">
-                          <label className="text-[10px] font-black uppercase text-black/30 tracking-widest">
-                            Categoria de Fluxo
-                          </label>
-                          <div className="flex gap-2">
-                            <button className="flex-1 py-2 rounded-xl text-[10px] font-black uppercase border border-black/5 hover:bg-off-white transition-colors">
-                              Ganhos
-                            </button>
-                            <button className="flex-1 py-2 rounded-xl text-[10px] font-black uppercase border border-black/5 hover:bg-off-white transition-colors">
-                              Despesas
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Ordenação por Campos */}
-                        <div className="space-y-3">
-                          <label className="text-[10px] font-black uppercase text-black/30 tracking-widest flex items-center gap-2">
-                            <ArrowUpDown size={12} /> Ordenar por
-                          </label>
-                          <select className="w-full bg-off-white border-none rounded-xl p-2 text-[10px] font-black uppercase outline-none">
-                            <option>Data (Recente)</option>
-                            <option>Data (Antigo)</option>
-                            <option>Valor (Maior)</option>
-                            <option>Valor (Menor)</option>
-                            <option>Descrição (A-Z)</option>
-                          </select>
-                        </div>
-
-                        {/* Ações */}
-                        <div className="flex flex-col gap-2 pt-2">
-                          <button
-                            onClick={() => {
-                              fetchTransactions();
-                              setIsMenuOpen(false);
-                              showToast("Filtros aplicados", "success");
-                            }}
-                            className="w-full bg-primary text-secondary py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-primary-hover transition-colors shadow-lg"
-                          >
-                            Aplicar Filtros
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-[var(--black-muted)] tracking-widest">
+                          Fluxo
+                        </label>
+                        <div className="flex gap-2">
+                          <button className="flex-1 py-1.5 rounded-md text-[10px] font-black uppercase border-2 border-[var(--black)] bg-white hover:bg-emerald-400 hover:text-[var(--primary)] transition-colors shadow-[var(--neo-shadow-hover)]">
+                            Ganhos
                           </button>
-                          <button
-                            onClick={() => {
-                              // Lógica para resetar estados de filtro aqui
-                              showToast("Filtros limpos", "info");
-                            }}
-                            className="w-full py-2 text-[9px] font-black text-black/30 uppercase hover:text-black transition-colors"
-                          >
-                            Limpar Filtros
+                          <button className="flex-1 py-1.5 rounded-md text-[10px] font-black uppercase border-2 border-[var(--black)] bg-white hover:bg-red-400 hover:text-white transition-colors shadow-[var(--neo-shadow-hover)]">
+                            Despesas
                           </button>
                         </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-[var(--black-muted)] tracking-widest flex items-center gap-2">
+                          <ArrowUpDown size={12} strokeWidth={3} /> Ordenar por
+                        </label>
+                        <select className="w-full bg-white border-2 border-[var(--black)] rounded-md p-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-[var(--primary)] shadow-[var(--neo-shadow-hover)]">
+                          <option>Data (Recente)</option>
+                          <option>Data (Antigo)</option>
+                          <option>Valor (Maior)</option>
+                          <option>Valor (Menor)</option>
+                          <option>Descrição (A-Z)</option>
+                        </select>
+                      </div>
+
+                      <div className="flex flex-col gap-2 pt-2 border-t-2 border-[var(--black)] border-dashed">
+                        <button
+                          onClick={() => {
+                            fetchTransactions();
+                            setIsMenuOpen(false);
+                            showToast("Filtros aplicados", "success");
+                          }}
+                          className="w-full bg-[var(--primary)] text-[var(--secondary)] py-2.5 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase tracking-wider hover:bg-[var(--primary-hover)] transition-colors shadow-[var(--neo-shadow-hover)] mt-2"
+                        >
+                          Aplicar Filtros
+                        </button>
+                        <button
+                          onClick={() => {
+                            showToast("Filtros limpos", "info");
+                          }}
+                          className="w-full py-2 text-[10px] font-black text-[var(--black-muted)] uppercase hover:text-[var(--primary)] transition-colors"
+                        >
+                          Limpar Filtros
+                        </button>
                       </div>
                     </motion.div>
                   </>
@@ -473,91 +494,51 @@ export function RecentTransactions() {
 
             <button
               onClick={() => {
-                setIsCreating(true); // Ativa a linha vazia no topo
-                setEditingId("new"); // Define o ID como "novo" para o formulário
+                setIsCreating(true);
+                setEditingId("new");
                 setEditForm({
                   description: "",
                   amount: "",
                   type: "expense",
                   occurred_at: new Date().toISOString().split("T")[0],
                 });
-                // Opcional: rolar para o topo para ver a nova linha
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
-              className="bg-emerald-500 text-white p-2.5 rounded-full hover:bg-emerald-600 transition-all"
+              className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] transition-all shadow-[var(--neo-shadow-hover)]"
             >
-              <Plus size={18} strokeWidth={3} />
-            </button>
-
-            <button
-              onClick={() => setIsFullViewOpen(true)}
-              className="bg-secondary text-primary p-2.5 rounded-full shadow-neo"
-            >
-              <Maximize2 size={18} />
+              <Plus size={16} strokeWidth={3} /> Novo
             </button>
           </div>
         </header>
 
-        <div className="overflow-x-auto min-h-[400px]">
+        {/* ÁREA DA TABELA */}
+        <div className="overflow-x-auto min-h-[300px]">
           <TransactionTable data={currentData} />
         </div>
 
-        <footer className="p-6 flex justify-between items-center bg-off-white/30">
-          <p className="text-[10px] font-black text-black/30 uppercase">
-            Página {currentPage} de {totalPages}
+        {/* RODAPÉ */}
+        <footer className="p-4 sm:p-5 flex justify-between items-center bg-white border-t-2 border-[var(--black)]">
+          <p className="text-[10px] font-black text-[var(--black-muted)] uppercase tracking-wider">
+            Página {currentPage} de {totalPages || 1}
           </p>
-          <div className="flex gap-4">
+          <div className="flex gap-2">
             <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => p - 1)}
-              className="text-primary disabled:opacity-20"
+              className="bg-white text-[var(--primary)] p-1.5 rounded-md border-2 border-[var(--black)] hover:bg-black/5 disabled:opacity-50 transition-colors shadow-[var(--neo-shadow-hover)]"
             >
-              <ChevronLeft />
+              <ChevronLeft strokeWidth={3} size={18} />
             </button>
             <button
-              disabled={currentPage === totalPages}
+              disabled={currentPage === totalPages || totalPages === 0}
               onClick={() => setCurrentPage((p) => p + 1)}
-              className="text-primary disabled:opacity-20"
+              className="bg-white text-[var(--primary)] p-1.5 rounded-md border-2 border-[var(--black)] hover:bg-black/5 disabled:opacity-50 transition-colors shadow-[var(--neo-shadow-hover)]"
             >
-              <ChevronRight />
+              <ChevronRight strokeWidth={3} size={18} />
             </button>
           </div>
         </footer>
       </div>
-
-      {/* FULLSCREEN MODAL */}
-      <AnimatePresence>
-        {isFullViewOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[150] bg-primary/95 backdrop-blur-md p-6 md:p-12 overflow-y-auto"
-          >
-            <div className="max-w-7xl mx-auto bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col">
-              <header className="p-10 border-b border-black/5 flex justify-between items-center bg-primary">
-                <h2 className="text-secondary font-black text-4xl uppercase tracking-tighter italic">
-                  Relatório Geral
-                </h2>
-                <div className="flex gap-4">
-                  <button className="bg-white/10 text-white p-4 rounded-full hover:bg-secondary hover:text-primary transition-all">
-                    <Download size={24} />
-                  </button>
-                  <button
-                    onClick={() => setIsFullViewOpen(false)}
-                    className="bg-off-white p-4 rounded-full hover:bg-red-500 hover:text-white transition-all"
-                  >
-                    <X size={24} />
-                  </button>
-                </div>
-              </header>
-              <div className="p-6">
-                <TransactionTable data={transactions} />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

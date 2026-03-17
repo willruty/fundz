@@ -19,7 +19,6 @@ export function BalanceCard({
   // 2. Cálculo dinâmico de Receitas e Despesas
   const summary = transactions.reduce(
     (acc, transaction) => {
-      // Usando Number() para garantir que não vamos concatenar strings caso a API retorne texto
       const amount = Number(transaction.value ?? 0);
 
       if (transaction.type === "income") {
@@ -30,7 +29,7 @@ export function BalanceCard({
 
       return acc;
     },
-    { income: 0, expense: 0 }, // Estado inicial do acumulador
+    { income: 0, expense: 0 },
   );
 
   // 3. Cálculo da Taxa de Poupança
@@ -41,110 +40,115 @@ export function BalanceCard({
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      {/* CARD 1: BALANÇO Total */}
-      <div className="bg-secondary border border-white/5 rounded-[32px] p-6 w-full shadow-2xl relative overflow-hidden group min-h-[160px] flex flex-col justify-center">
-        <div className="absolute -right-4 -top-4 w-16 h-16 bg-primary opacity-5 rounded-full blur-2xl" />
-
+      {/* CARD 1: BALANÇO Total (Mantido igual) */}
+      <div className="bg-[var(--secondary)] border-2 border-[var(--black)] rounded-[var(--radius-card)] p-6 w-full shadow-[var(--neo-shadow)] relative overflow-hidden group min-h-[160px] flex flex-col justify-center transition-all duration-200 hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]">
         <div className="relative z-10">
           <header className="flex justify-between items-center mb-4">
-            <span className="text-[10px] font-black uppercase text-black tracking-[0.2em]">
+            <span className="text-[10px] font-black uppercase text-[var(--black)] tracking-[0.2em]">
               Saldo Total
             </span>
           </header>
 
-          <h2 className="text-3xl font-black text-primary tracking-tighter leading-none">
+          <h2 className="text-4xl md:text-5xl font-black text-[var(--primary)] tracking-tighter leading-none">
             {new Intl.NumberFormat("pt-BR", {
               style: "currency",
               currency: "BRL",
             }).format(balance)}
           </h2>
 
-          <div className="flex items-center gap-2 mt-3 bg-black/5 w-fit px-2 py-1 rounded-full border border-black/5">
-            <TrendingUp size={10} className="text-primary" />
-            <span className="text-[9px] font-black text-black/70 uppercase">
+          <div className="flex items-center gap-2 mt-4 bg-white w-fit px-3 py-1.5 rounded-full border-2 border-[var(--black)]">
+            <TrendingUp size={12} className="text-[var(--primary)] font-bold" />
+            <span className="text-[9px] font-black text-[var(--primary)] uppercase tracking-wider">
               Saldo em tempo real
             </span>
           </div>
         </div>
       </div>
 
-      {/* CARD 2: RECEITA VS DESPESA */}
-      <div className="bg-white border border-white/5 rounded-[32px] p-6 w-full h-full shadow-2xl relative overflow-hidden flex flex-col justify-between group">
-        <div className="absolute -left-4 -bottom-4 w-20 h-20 bg-black/5 rounded-full blur-3xl" />
-
-        <header className="relative z-10 flex justify-between items-center">
-          <span className="text-[10px] font-black uppercase text-black/40 tracking-[0.2em]">
+      {/* CARD 2: RECEITA VS DESPESA (Compactado) */}
+      {/* Reduzi o padding geral de p-6 para p-4 */}
+      <div className="bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] p-4 w-full h-full shadow-[var(--neo-shadow)] relative flex flex-col justify-between group transition-all duration-200 hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]">
+        {/* Reduzi a margem inferior do header de mb-6 para mb-3 */}
+        <header className="relative z-10 flex justify-between items-center mb-3">
+          <span className="text-xs font-bold uppercase text-[var(--black-muted)] tracking-wider">
             Receita vs Despesa
           </span>
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[var(--black)] animate-pulse" />
         </header>
 
-        <div className="relative z-10 flex flex-col gap-5">
+        {/* Reduzi o gap entre Entradas e Saídas de gap-6 para gap-3 */}
+        <div className="relative z-10 flex flex-col gap-3">
           {/* Receitas */}
-          <div className="flex justify-between items-end">
-            <div>
-              <p className="text-[9px] font-black uppercase text-black/30 mb-1">
-                Entradas
-              </p>
-              <h3 className="text-xl font-black text-emerald-600 leading-none">
+          <div className="flex flex-col">
+            <p className="text-[10px] font-black uppercase text-[var(--black-light)] mb-0.5">
+              Entradas
+            </p>
+            <div className="flex justify-between items-center">
+              {/* Fonte reduzida de text-2xl para text-xl */}
+              <h3 className="text-xl font-black text-emerald-600 leading-none tracking-tighter">
                 {new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                 }).format(summary.income)}
               </h3>
-            </div>
-
-            <div className="h-1 w-20 bg-black/5 rounded-full overflow-hidden mb-1">
-              <div
-                className="h-full bg-emerald-500 transition-all duration-1000"
-                style={{
-                  width: `${Math.min(
-                    100,
-                    (summary.income / (summary.income + summary.expense || 1)) *
+              {/* Barra reduzida de h-3/w-24 para h-2/w-20 */}
+              <div className="h-2 w-20 bg-[var(--main-bg)] border-2 border-[var(--black)] rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-emerald-400 border-r-2 border-[var(--black)] transition-all duration-1000"
+                  style={{
+                    width: `${Math.min(
                       100,
-                  )}%`,
-                }}
-              />
+                      (summary.income /
+                        (summary.income + summary.expense || 1)) *
+                        100,
+                    )}%`,
+                  }}
+                />
+              </div>
             </div>
           </div>
 
           {/* Despesas */}
-          <div className="flex justify-between items-end">
-            <div>
-              <p className="text-[9px] font-black uppercase text-black/30 mb-1">
-                Saídas
-              </p>
-              <h3 className="text-xl font-black text-red-500 leading-none">
+          <div className="flex flex-col">
+            <p className="text-[10px] font-black uppercase text-[var(--black-light)] mb-0.5">
+              Saídas
+            </p>
+            <div className="flex justify-between items-center">
+              {/* Fonte reduzida de text-2xl para text-xl */}
+              <h3 className="text-xl font-black text-red-500 leading-none tracking-tighter">
                 {new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                 }).format(summary.expense)}
               </h3>
-            </div>
-
-            <div className="h-1 w-20 bg-black/5 rounded-full overflow-hidden mb-1">
-              <div
-                className="h-full bg-red-500 transition-all duration-1000"
-                style={{
-                  width: `${Math.min(
-                    100,
-                    (summary.expense /
-                      (summary.income + summary.expense || 1)) *
+              {/* Barra reduzida de h-3/w-24 para h-2/w-20 */}
+              <div className="h-2 w-20 bg-[var(--main-bg)] border-2 border-[var(--black)] rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-red-400 border-r-2 border-[var(--black)] transition-all duration-1000"
+                  style={{
+                    width: `${Math.min(
                       100,
-                  )}%`,
-                }}
-              />
+                      (summary.expense /
+                        (summary.income + summary.expense || 1)) *
+                        100,
+                    )}%`,
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        <footer className="relative z-10 mt-4 pt-4 border-t border-black/5 flex justify-between items-center">
-          <span className="text-[9px] font-bold text-black/40 uppercase">
+        {/* Margens superiores do rodapé reduzidas de mt-6 pt-4 para mt-4 pt-3 */}
+        <footer className="relative z-10 mt-4 pt-3 border-t-2 border-[var(--black)] border-dashed flex justify-between items-center">
+          <span className="text-[10px] font-bold text-[var(--black-muted)] uppercase tracking-wider">
             Taxa de Poupança
           </span>
           <span
-            className={`text-[10px] font-black ${
-              savingsRate >= 0 ? "text-emerald-600" : "text-red-600"
+            className={`text-xs px-2 py-0.5 rounded-md border-2 border-[var(--black)] font-black ${
+              savingsRate >= 0
+                ? "bg-emerald-400 text-[var(--primary)]"
+                : "bg-red-400 text-[var(--main-bg)]"
             }`}
           >
             {savingsRate}%

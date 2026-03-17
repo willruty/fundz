@@ -11,11 +11,11 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 import type { CategoryDistribution } from "../types/dashboard";
 
 const COLORS = [
-  "#c9c9c9",
-  "#ffd100", 
-  "#08233e", 
-  "#0c3156", 
-  "#000", 
+  "#08233e", // --primary
+  "#ffd100", // --secondary
+  "#0c3156", // --primary-hover
+  "#9ca3af", // gray-400
+  "#000000", // --black
 ];
 
 type Props = {
@@ -23,45 +23,68 @@ type Props = {
 };
 
 export function CategoryDistributionCard({ distribution = [] }: Props) {
+  const hasData = distribution && distribution.length > 0;
+  const topCategory = hasData ? distribution[0].name : "N/A";
+  const bottomCategory = hasData
+    ? distribution[distribution.length - 1].name
+    : "N/A";
+
   return (
-    <div className="bg-white border border-white/5 rounded-[32px] p-8 w-full h-[220px] shadow-2xl relative overflow-hidden group flex flex-col justify-between">
-      <header className="flex justify-between items-center relative z-10">
+    // Padding reduzido para p-4 (sm:p-5) e remoção do min-h-[280px]
+    <div className="bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] p-4 sm:p-5 w-full h-full shadow-[var(--neo-shadow)] relative flex flex-col justify-between transition-all duration-200 hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]">
+      {/* Cabeçalho com margem inferior reduzida (mb-3) */}
+      <header className="flex justify-between items-start sm:items-center relative z-10 mb-3">
         <div className="flex flex-col">
-          <span className="text-[10px] font-black uppercase text-black-light tracking-[0.2em]">
+          <span className="text-[9px] sm:text-[10px] font-black uppercase text-[var(--black-muted)] tracking-widest mb-1.5">
             Distribuição
           </span>
-          <div className="flex gap-4 mt-1">
-            <div className="flex items-center gap-1.5 text-[11px] font-black text-emerald-600 uppercase italic">
-              <TrendingUp size={12} /> {distribution[0].name}
+          {/* Badges levemente menores */}
+          <div className="flex flex-wrap gap-2 mt-0.5">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 border-2 border-[var(--black)] rounded-md bg-emerald-400 text-[9px] font-black text-[var(--primary)] uppercase shadow-[var(--neo-shadow-hover)]">
+              <TrendingUp size={10} strokeWidth={3} /> {topCategory}
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] font-black text-red-500 uppercase italic">
-              <TrendingDown size={12} />{" "}
-              {distribution[distribution.length - 1].name}
+            <div className="flex items-center gap-1 px-1.5 py-0.5 border-2 border-[var(--black)] rounded-md bg-red-400 text-[9px] font-black text-[var(--main-bg)] uppercase shadow-[var(--neo-shadow-hover)]">
+              <TrendingDown size={10} strokeWidth={3} /> {bottomCategory}
             </div>
           </div>
         </div>
-        <div className="w-2.5 h-2.5 bg-secondary rounded-full shadow-[0_0_10px_rgba(255,209,0,0.5)] animate-pulse" />
+
+        {/* Ponto pulsante um pouco menor */}
+        <div className="w-2.5 h-2.5 bg-[var(--secondary)] rounded-full border-2 border-[var(--black)] animate-pulse mt-1 sm:mt-0" />
       </header>
 
-      {/* Container do Gráfico - Ajustei o margin para dar mais espaço interno */}
-      <div className="flex-1 w-full mt-6 mb-2">
+      {/* Container do Gráfico - Altura mínima reduzida drasticamente (min-h-[100px]) */}
+      <div className="flex-grow w-full min-h-[100px] sm:min-h-[120px] mt-1 mb-2">
         <ResponsiveContainer width="100%" height="100%" minHeight={0}>
           <BarChart
             data={distribution}
             layout="vertical"
-            margin={{ left: 0, right: 20, top: 0, bottom: 0 }} // Comece do zero
-            barCategoryGap="25%"
+            margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
+            barCategoryGap="20%"
           >
             <XAxis type="number" hide />
             <YAxis dataKey="name" type="category" hide />
+
             <Tooltip
-              cursor={{ fill: "rgba(0,0,0,0.04)" }} // Cursor arredondado também!
+              cursor={{ fill: "var(--black)", opacity: 0.05 }}
               contentStyle={{
-                backgroundColor: "#fff",
-                border: "1px solid rgba(0,0,0,0.05)",
-                borderRadius: "12px",
-                padding: "8px 12px",
-                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                backgroundColor: "var(--main-bg)",
+                border: "2px solid var(--black)",
+                borderRadius: "8px",
+                padding: "6px 10px",
+                boxShadow: "4px 4px 0px 0px var(--black)",
+              }}
+              itemStyle={{
+                color: "var(--primary)",
+                fontSize: "14px",
+                fontWeight: "900",
+              }}
+              labelStyle={{
+                color: "var(--black-muted)",
+                fontSize: "10px",
+                fontWeight: "bold",
+                textTransform: "uppercase",
+                marginBottom: "2px",
               }}
               formatter={(value: string | number | undefined) => {
                 if (value === undefined) return ["R$ 0,00", ""];
@@ -72,20 +95,22 @@ export function CategoryDistributionCard({ distribution = [] }: Props) {
                     style: "currency",
                     currency: "BRL",
                   }).format(val),
-                  "",
+                  "Valor",
                 ];
               }}
             />
-            <defs>
-              <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8} />
-                <stop offset="100%" stopColor="#2563eb" stopOpacity={1} />
-              </linearGradient>
-            </defs>
-            <Bar dataKey="amount" radius={[0, 12, 12, 0]} barSize={12}>
+
+            {/* Espessura da barra reduzida de 18 para 14 */}
+            <Bar
+              dataKey="amount"
+              radius={[0, 4, 4, 0]}
+              barSize={14}
+              stroke="var(--black)"
+              strokeWidth={2}
+            >
               {distribution.map((entry, index) => (
                 <Cell
-                  key={`cell-${entry.name}`} // Agora 'entry' está sendo lida!
+                  key={`cell-${entry.name}`}
                   fill={COLORS[index % COLORS.length]}
                 />
               ))}
@@ -94,27 +119,28 @@ export function CategoryDistributionCard({ distribution = [] }: Props) {
         </ResponsiveContainer>
       </div>
 
-      {/* Legendas Aumentadas e com mais peso visual */}
-      <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2 border-t border-black/5 pt-5">
-        {distribution.map((item, index) => (
-          <div key={item.name} className="flex items-center gap-2.5">
-            <div
-              className="w-2 h-2 rounded-full border border-black/5"
-              style={{ backgroundColor: COLORS[index % COLORS.length] }}
-            />
-            <span className="text-[10px] font-black text-blackzão uppercase tracking-wide">
-              {item.name}
-            </span>
-            <span className="text-[10px] font-bold text-black-light">
-              {Math.round(
-                (Number(item.amount) /
-                  distribution.reduce((a, b) => a + Number(b.amount), 0)) *
-                  100,
-              )}
-              %
-            </span>
-          </div>
-        ))}
+      {/* Legendas mais compactas no rodapé */}
+      <div className="flex flex-wrap gap-x-3 gap-y-2 mt-auto pt-3 border-t-2 border-[var(--black)] border-dashed">
+        {distribution.map((item, index) => {
+          const total = distribution.reduce((a, b) => a + Number(b.amount), 0);
+          const percentage =
+            total > 0 ? Math.round((Number(item.amount) / total) * 100) : 0;
+
+          return (
+            <div key={item.name} className="flex items-center gap-1.5">
+              <div
+                className="w-2.5 h-2.5 rounded-full border-2 border-[var(--black)]"
+                style={{ backgroundColor: COLORS[index % COLORS.length] }}
+              />
+              <span className="text-[9px] font-black text-[var(--primary)] uppercase tracking-wider">
+                {item.name}
+              </span>
+              <span className="text-[9px] font-bold text-[var(--black-muted)] bg-[var(--main-bg)] px-1 py-0.5 rounded border border-[var(--black-light)]">
+                {percentage}%
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
