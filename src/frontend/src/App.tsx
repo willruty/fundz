@@ -10,7 +10,6 @@ import { Accounts } from "./pages/Accounts";
 import { Goals } from "./pages/Goals";
 import { Investments } from "./pages/Investments";
 import { Expenses } from "./pages/Expenses";
-import { Categories } from "./pages/Categories";
 import { Subscriptions } from "./pages/Subscriptions";
 import { Configs } from "./pages/Configs";
 import { Toaster } from "react-hot-toast";
@@ -32,7 +31,6 @@ function App() {
           <Route path="/goals" element={<Goals />} />
           <Route path="/investments" element={<Investments />} />
           <Route path="/expenses" element={<Expenses />} />
-          <Route path="/categories" element={<Categories />} />
           <Route path="/subscriptions" element={<Subscriptions />} />
           <Route path="/configs" element={<Configs />} />
         </Route>

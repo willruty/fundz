@@ -1,3 +1,11 @@
+import { DailyAverageCard } from "../components/daily-average-card";
+import { MonthlyForecastCard } from "../components/monthly-forecast-card";
+
 export function Expenses() {
-    return <h1>Bem-vindo a despesas!</h1>
+  return (
+    <div className="">
+      <DailyAverageCard />
+      <MonthlyForecastCard />
+    </div>
+  );
 }

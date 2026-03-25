@@ -272,12 +272,11 @@ Principais entidades:
     - [ ] Metas
     - [ ] Investimentos
     - [ ] Contas
-    - [ ] Categorias
-    - [ ] Landing Page
+    - [X] Landing Page
 
 ---
 
-## Problemas conhecidos
+## Problemas conhecidos'
 
 - Arquitetura backend ainda em reorganização.
 - Alguns endpoints ainda não implementados.

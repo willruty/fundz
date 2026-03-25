@@ -11,11 +11,15 @@ import { TrendingUp, TrendingDown, Calendar } from "lucide-react";
 import type { TransactionSummary } from "../types/dashboard";
 
 type Props = {
-  last_month_transactions: TransactionSummary[];
+  // 1. Permite que a prop receba null ou undefined sem quebrar o TypeScript
+  last_month_transactions?: TransactionSummary[] | null;
 };
 
 export function MonthlyBalanceCard({ last_month_transactions = [] }: Props) {
-  const chartData = [...last_month_transactions]
+  // 2. Protege o spread operator garantindo que sempre será um array, mesmo se a prop for null
+  const safeTransactions = last_month_transactions ?? [];
+
+  const chartData = [...safeTransactions]
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .map((t) => ({
       date: new Date(t.date).toLocaleDateString("pt-BR", {
