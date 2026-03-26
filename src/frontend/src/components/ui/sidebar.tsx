@@ -17,7 +17,6 @@ import {
 const menuItems = [
   { name: "Home", path: "/home", icon: Home },
   { name: "Contas", path: "/accounts", icon: Wallet },
-  { name: "Categorias", path: "/categories", icon: Tag },
   { name: "Despesas", path: "/expenses", icon: ArrowDownCircle },
   { name: "Metas", path: "/goals", icon: Target },
   { name: "Investimentos", path: "/investments", icon: TrendingUp },

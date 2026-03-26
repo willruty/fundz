@@ -6,30 +6,34 @@ export function MonthlyForecastCard({
   const forecastedAmount = dailyAverage * daysInMonth;
 
   return (
-    <div className="flex flex-col justify-center p-6 bg-white border-[3px] border-black rounded-2xl shadow-[4px_4px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000000] transition-all duration-200 cursor-default">
-      {/* Cabeçalho do Card */}
-      <div className="flex justify-between items-start mb-2">
-        <span className="text-xs font-extrabold tracking-wider text-[#08233e] uppercase">
+    <div className="flex flex-col justify-between p-6 bg-white border-[3px] border-black rounded-2xl shadow-[4px_4px_0px_0px_#000000] hover:bg-gray-50 transition-colors duration-200 cursor-default h-full">
+      {/* Topo: Informação Direta e Hierarquia Limpa */}
+      <div>
+        <h3 className="text-xs font-extrabold text-gray-400 uppercase tracking-widest mb-1">
           Previsão Mensal
-        </span>
-        {/* Tag explicativa neo-brutalista */}
-        <span className="text-[9px] font-bold bg-gray-100 text-black px-2 py-1 rounded border border-black uppercase">
-          Projeção
-        </span>
+        </h3>
+        {/* Tipografia massiva acompanhando o card vizinho */}
+        <h2 className="text-5xl font-black text-black m-0 tracking-tighter">
+          {new Intl.NumberFormat("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+          }).format(forecastedAmount)}
+        </h2>
       </div>
 
-      {/* Valor da Previsão */}
-      <h2 className="text-3xl font-black text-black m-0">
-        {new Intl.NumberFormat("pt-BR", {
-          style: "currency",
-          currency: "BRL",
-        }).format(forecastedAmount)}
-      </h2>
+      {/* Base: Bloco de Contexto (Neutro/Informativo) */}
+      <div className="mt-8 flex items-center justify-between bg-gray-100 border-[3px] border-black p-3 rounded-xl shadow-[2px_2px_0px_0px_#000000]">
+        <span className="text-[11px] font-black text-black uppercase tracking-wide">
+          Base: R$ {dailyAverage.toFixed(2).replace(".", ",")} / dia
+        </span>
 
-      {/* Contexto do cálculo */}
-      <span className="text-xs font-bold text-gray-500 mt-2">
-        Baseado na média de R$ {dailyAverage.toFixed(2).replace(".", ",")} / dia
-      </span>
+        {/* Tag substituindo o gráfico do card anterior para manter o peso visual */}
+        <div className="flex items-center">
+          <span className="text-[9px] font-black text-white bg-black border-2 border-black px-2 py-1.5 rounded shadow-[2px_2px_0px_0px_#000000] uppercase tracking-widest">
+            PROJEÇÃO
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
