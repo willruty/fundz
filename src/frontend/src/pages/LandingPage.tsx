@@ -248,16 +248,6 @@ export function LandingPage() {
             className="h-8 md:h-9 w-auto object-contain cursor-pointer"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           />
-          <div className="hidden md:flex items-center gap-1 bg-[#FFFAF0] border-2 border-[#08233E] rounded-xl p-1">
-            {["Features", "Planos", "Sobre"].map((item) => (
-              <button
-                key={item}
-                className="px-4 py-2 text-[11px] font-black uppercase tracking-widest text-[#08233E] hover:bg-[#08233E] hover:text-[#FFD100] rounded-lg transition-all cursor-pointer"
-              >
-                {item}
-              </button>
-            ))}
-          </div>
           <div className="flex gap-3">
             <button
               onClick={() => navigate("/auth")}
