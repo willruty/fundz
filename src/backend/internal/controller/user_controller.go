@@ -8,20 +8,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// -------
-// Create
-// -------
 func Register(c *gin.Context) {
-
 	var user model.Users
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	fullName, err, token := service.RegisterUser(user)
-	if err != "" {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err})
+	fullName, token, err := service.RegisterUser(user)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -31,24 +27,20 @@ func Register(c *gin.Context) {
 	})
 }
 
-// -------
-// Login
-// -------
 func Login(c *gin.Context) {
-
 	var req struct {
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required,min=6"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	fullName, err, token := service.LoginUser(req.Email, req.Password)
-	if err != "" {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err})
+	fullName, token, err := service.LoginUser(req.Email, req.Password)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 

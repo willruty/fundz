@@ -1,68 +1,77 @@
 package dao
 
 import (
+	"fmt"
 	database "fundz/internal/database"
 	entity "fundz/internal/model/entity"
+
+	"github.com/google/uuid"
 )
 
-// -------
-// Create
-// -------
-func CreateSubscription(subscription entity.Subscriptions) error {
+func CreateSubscription(subscription entity.Subscriptions, userID string) error {
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		return fmt.Errorf("user_id inválido: %w", err)
+	}
+	subscription.UserID = uid
+
 	if err := database.DB.Create(&subscription).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-// -------
-// ReadAll
-// -------
-func FindAllSubscriptions() ([]entity.Subscriptions, int64, error) {
-
+func FindAllSubscriptions(userID string) ([]entity.Subscriptions, int64, error) {
 	var subscriptions []entity.Subscriptions
 	var count int64
 
-	result := database.DB.Model(&entity.Subscriptions{}).Count(&count).Find(&subscriptions)
+	database.DB.Model(&entity.Subscriptions{}).Where("user_id = ?", userID).Count(&count)
+
+	result := database.DB.Where("user_id = ?", userID).Find(&subscriptions)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
 
-	return subscriptions, result.RowsAffected, nil
+	return subscriptions, count, nil
 }
 
-// -------
-// Read
-// -------
-func FindSubscriptionById(id string) (entity.Subscriptions, error) {
+func FindSubscriptionByID(id, userID string) (entity.Subscriptions, error) {
 	var subscription entity.Subscriptions
-	if err := database.DB.Where("id = ?", id).First(&subscription).Error; err != nil {
-		return subscription, err
+
+	if err := database.DB.Where("id = ? AND user_id = ?", id, userID).First(&subscription).Error; err != nil {
+		return subscription, fmt.Errorf("assinatura não encontrada")
 	}
 
 	return subscription, nil
 }
 
-// -------
-// Update
-// -------
-func UpdateSubscriptionById(input entity.Subscriptions) error {
-	var subscription entity.Subscriptions
-	if err := database.DB.Model(&subscription).Where("id = ?", input.ID).Updates(input).Error; err != nil {
+func UpdateSubscriptionByID(input entity.Subscriptions, userID string) error {
+	query := database.DB.Model(&entity.Subscriptions{}).
+		Where("id = ? AND user_id = ?", input.ID, userID).
+		Updates(input)
+
+	if err := query.Error; err != nil {
 		return err
+	}
+	if query.RowsAffected == 0 {
+		return fmt.Errorf("assinatura não encontrada")
 	}
 
 	return nil
 }
 
-// -------
-// Delete
-// -------
-func DeleteSubscriptionById(id string) error {
-	var subscription entity.Subscriptions
-	if err := database.DB.Model(&subscription).Where("id = ?", id).Delete(&subscription).Error; err != nil {
+func DeleteSubscriptionByID(id, userID string) error {
+	query := database.DB.
+		Where("id = ? AND user_id = ?", id, userID).
+		Delete(&entity.Subscriptions{})
+
+	if err := query.Error; err != nil {
 		return err
+	}
+	if query.RowsAffected == 0 {
+		return fmt.Errorf("assinatura não encontrada")
 	}
 
 	return nil
 }
+

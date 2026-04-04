@@ -8,65 +8,68 @@ import (
 	"github.com/google/uuid"
 )
 
-// -------
-// Create
-// -------
 func CreateTransaction(transaction model.Transactions, userID string) error {
-	if err := database.DB.Model(&model.Transactions{}).Create(&transaction).Error; err != nil {
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		return fmt.Errorf("user_id inválido: %w", err)
+	}
+	transaction.UserID = uid
+
+	if err := database.DB.Create(&transaction).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetAllTransaction(userId string) ([]model.Transactions, int64, error) {
-
-	var transaction []model.Transactions
+func GetAllTransactions(userID string) ([]model.Transactions, int64, error) {
+	var transactions []model.Transactions
 	var count int64
 
-	result := database.DB.Model(&model.Transactions{}).Count(&count).Find(&transaction).Where("user_id = ?", userId)
+	database.DB.Model(&model.Transactions{}).Where("user_id = ?", userID).Count(&count)
+
+	result := database.DB.Where("user_id = ?", userID).Order("occurred_at DESC").Find(&transactions)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
 
-	return transaction, result.RowsAffected, nil
+	return transactions, count, nil
 }
 
-func GetTransactionById(pk string) (model.Transactions, error) {
+func GetTransactionByID(id, userID string) (model.Transactions, error) {
 	var transaction model.Transactions
 
-	if err := database.DB.Where("id = ?", pk).First(&transaction).Error; err != nil {
-		return transaction, err
+	if err := database.DB.Where("id = ? AND user_id = ?", id, userID).First(&transaction).Error; err != nil {
+		return transaction, fmt.Errorf("transação não encontrada")
 	}
 
 	return transaction, nil
 }
 
-// -------
-// Update
-// -------
-func UpdateTransactionById(modelUpdated model.Transactions, id uuid.UUID) error {
+func UpdateTransactionByID(input model.Transactions, id uuid.UUID, userID string) error {
+	query := database.DB.Model(&model.Transactions{}).
+		Where("id = ? AND user_id = ?", id, userID).
+		Updates(input)
 
-	query := database.DB.Model(&model.Transactions{}).Where("id = ?", id).Updates(modelUpdated)
 	if err := query.Error; err != nil {
 		return err
-	} else if query.RowsAffected == 0 {
-		return fmt.Errorf("registro não encontrado")
+	}
+	if query.RowsAffected == 0 {
+		return fmt.Errorf("transação não encontrada")
 	}
 
 	return nil
 }
 
-// -------
-// Delete
-// -------
-func DeleteTransactionById(id string) error {
-	var transaction model.Transactions
+func DeleteTransactionByID(id, userID string) error {
+	query := database.DB.
+		Where("id = ? AND user_id = ?", id, userID).
+		Delete(&model.Transactions{})
 
-	query := database.DB.Where("id = ?", id).Delete(transaction)
 	if err := query.Error; err != nil {
 		return err
-	} else if query.RowsAffected == 0 {
-		return fmt.Errorf("registro não encontrado")
+	}
+	if query.RowsAffected == 0 {
+		return fmt.Errorf("transação não encontrada")
 	}
 
 	return nil

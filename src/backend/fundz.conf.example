@@ -1,0 +1,15 @@
+[SERVICE]
+PORT = 8000
+
+[DATABASE]
+; Supabase: Settings > Database > Connection string (direct)
+HOST = db.xxxxxxxxxxxxxxxxxxxx.supabase.co
+PORT = 5432
+USER = postgres
+PASSWORD = your-database-password
+DBNAME = postgres
+SSLMODE = require
+
+[JWT]
+; Supabase: Settings > API > JWT Secret
+JWTSECRET = your-supabase-jwt-secret

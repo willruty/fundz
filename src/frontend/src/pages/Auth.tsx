@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
+import { supabase } from "../lib/supabase";
 
 type AuthMode = "login" | "register";
 
@@ -21,50 +22,50 @@ export function Auth() {
     e.preventDefault();
     setLoading(true);
 
-    const endpoint = mode === "login" ? "/auth/login" : "/auth/register";
-    const payload =
-      mode === "login"
-        ? { email: formData.email, password: formData.password }
-        : formData;
-
     try {
-      const response = await fetch(
-        `http://localhost:8000/fundz/user${endpoint}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        },
-      );
+      if (mode === "login") {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
 
-      const data = await response.json();
+        if (error) throw error;
 
-      if (!response.ok) {
-        toast.error(data.erro || data.error || "Erro inesperado.");
-        return;
-      }
+        const userName =
+          data.user?.user_metadata?.name ||
+          data.user?.email?.split("@")[0] ||
+          "";
 
-      localStorage.clear();
+        localStorage.setItem("user_name", userName);
+        toast.success("Login realizado com sucesso!");
+      } else {
+        const { data, error } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: { name: formData.name },
+          },
+        });
 
-      if (data.token) {
-        localStorage.setItem("token", data.token);
+        if (error) throw error;
 
-        if (data.full_name) {
-          localStorage.setItem("user_name", data.full_name);
+        if (!data.session) {
+          toast.success(
+            "Cadastro realizado! Verifique seu e-mail para confirmar a conta.",
+          );
+          return;
         }
+
+        const userName = formData.name || data.user?.email?.split("@")[0] || "";
+        localStorage.setItem("user_name", userName);
+        toast.success("Cadastro realizado com sucesso!");
       }
 
-      toast.success(
-        mode === "login"
-          ? "Login realizado com sucesso!"
-          : "Cadastro realizado com sucesso!",
-      );
-
-      // 3. Redireciona
       navigate("/home");
-    } catch (error) {
-      console.error("Auth Error:", error);
-      toast.error("Erro ao conectar com o servidor.");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Erro inesperado.";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -74,12 +75,10 @@ export function Auth() {
     <div className="h-screen w-full flex bg-[var(--main-bg)] overflow-hidden">
       {/* LADO ESQUERDO: Painel Visual Neo-Brutalista */}
       <div className="relative hidden md:flex w-[45%] h-[96%] m-auto ml-4 rounded-[var(--radius-card)] bg-[var(--primary)] border-4 border-[var(--black)] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-12 lg:p-16 flex-col justify-between overflow-hidden">
-        {/* Formas Geométricas Sólidas (Substituindo os blurs) */}
         <div className="absolute bottom-[-20%] left-[-10%] w-[80%] h-[60%] bg-[var(--secondary)] rounded-full border-4 border-[var(--black)]" />
         <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[40%] bg-emerald-400 rounded-full border-4 border-[var(--black)]" />
 
         <div className="relative z-10 bg-none w-fit p-3 rounded-xl border-2 border-[var(--black)] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          {/* Caso tenha uma versão preta da logo, ficaria ideal aqui. Mantendo a original por precaução */}
           <img src="/yellow-logo.png" alt="Fundz" className="h-20 w-auto" />
         </div>
 
@@ -103,7 +102,6 @@ export function Auth() {
 
       {/* LADO DIREITO: Auth Section */}
       <div className="w-full md:w-[55%] h-full flex flex-col relative bg-[var(--main-bg)]">
-        {/* Botão Voltar Brutalista */}
         <button
           onClick={() => navigate("/")}
           className="absolute top-8 right-8 z-50 flex items-center gap-2 bg-white text-[var(--primary)] font-black text-[10px] uppercase tracking-widest px-4 py-2 rounded-md border-2 border-[var(--black)] shadow-[var(--neo-shadow-hover)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all group"
@@ -118,7 +116,6 @@ export function Auth() {
 
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="w-full max-w-lg space-y-10">
-            {/* Seletor Estilo Pill Brutalista */}
             <div className="flex bg-white p-1.5 rounded-xl border-2 border-[var(--black)] shadow-[var(--neo-shadow)] relative">
               {(["login", "register"] as AuthMode[]).map((tab) => (
                 <button
@@ -248,7 +245,6 @@ export function Auth() {
                     className="w-full px-5 py-4 rounded-xl border-2 border-[var(--black)] bg-white focus:ring-4 focus:ring-[var(--secondary)] outline-none transition-all font-black text-sm shadow-[var(--neo-shadow-hover)] text-[var(--primary)] pr-14"
                     placeholder="••••••••"
                   />
-
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}

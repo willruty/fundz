@@ -1,72 +1,75 @@
 package dao
 
 import (
+	"fmt"
 	database "fundz/internal/database"
 	entity "fundz/internal/model/entity"
 
 	"github.com/google/uuid"
 )
 
-// -------
-// Create
-// -------
-func CreateCategory(category entity.Categories) error {
+func CreateCategory(category entity.Categories, userID string) error {
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		return fmt.Errorf("user_id inválido: %w", err)
+	}
+	category.UserID = uid
+
 	if err := database.DB.Create(&category).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-// -------
-// ReadAll
-// -------
-func GetAllCategories() ([]entity.Categories, int64, error) {
-
+func GetAllCategories(userID string) ([]entity.Categories, int64, error) {
 	var categories []entity.Categories
 	var count int64
 
-	result := database.DB.Model(&entity.Categories{}).Count(&count).Find(&categories)
+	database.DB.Model(&entity.Categories{}).Where("user_id = ?", userID).Count(&count)
+
+	result := database.DB.Where("user_id = ?", userID).Find(&categories)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
 
-	return categories, result.RowsAffected, nil
+	return categories, count, nil
 }
 
-// -------
-// Read
-// -------
-func GetCategoryById(id string) (entity.Categories, error) {
-
+func GetCategoryByID(id, userID string) (entity.Categories, error) {
 	var category entity.Categories
-	if err := database.DB.Where("id = ?", id).First(&category).Error; err != nil {
-		return category, err
+
+	if err := database.DB.Where("id = ? AND user_id = ?", id, userID).First(&category).Error; err != nil {
+		return category, fmt.Errorf("categoria não encontrada")
 	}
 
 	return category, nil
 }
 
-// -------
-// Update
-// -------
-func UpdateCategoryById(input entity.Categories, id uuid.UUID) error {
+func UpdateCategoryByID(input entity.Categories, id uuid.UUID, userID string) error {
+	query := database.DB.Model(&entity.Categories{}).
+		Where("id = ? AND user_id = ?", id, userID).
+		Updates(input)
 
-	var category entity.Categories
-	if err := database.DB.Model(&category).Where("id = ?", id).Updates(input).Error; err != nil {
+	if err := query.Error; err != nil {
 		return err
+	}
+	if query.RowsAffected == 0 {
+		return fmt.Errorf("categoria não encontrada")
 	}
 
 	return nil
 }
 
-// -------
-// Delete
-// -------
-func DeleteCategoryById(id string) error {
+func DeleteCategoryByID(id, userID string) error {
+	query := database.DB.
+		Where("id = ? AND user_id = ?", id, userID).
+		Delete(&entity.Categories{})
 
-	var category entity.Categories
-	if err := database.DB.Model(&category).Where("id = ?", id).Delete(category).Error; err != nil {
+	if err := query.Error; err != nil {
 		return err
+	}
+	if query.RowsAffected == 0 {
+		return fmt.Errorf("categoria não encontrada")
 	}
 
 	return nil

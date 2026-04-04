@@ -4,12 +4,18 @@ import (
 	"fmt"
 	database "fundz/internal/database"
 	model "fundz/internal/model/entity"
-	"log"
 
+	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 )
 
-func CreateAccount(account model.Accounts) error {
+func CreateAccount(account model.Accounts, userID string) error {
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		return fmt.Errorf("user_id inválido: %w", err)
+	}
+	account.UserID = uid
+
 	if err := database.DB.Create(&account).Error; err != nil {
 		return err
 	}
@@ -17,66 +23,66 @@ func CreateAccount(account model.Accounts) error {
 }
 
 func GetAllAccounts(userID string) ([]model.Accounts, int64, error) {
-
-	var account []model.Accounts
+	var accounts []model.Accounts
 	var count int64
 
-	result := database.DB.Model(&model.Accounts{}).Count(&count).Find(&account)
+	database.DB.Model(&model.Accounts{}).Where("user_id = ?", userID).Count(&count)
+
+	result := database.DB.Where("user_id = ?", userID).Find(&accounts)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
 
-	return account, result.RowsAffected, nil
+	return accounts, count, nil
 }
 
-func GetAccountById(pk string) (model.Accounts, error) {
+func GetAccountByID(id, userID string) (model.Accounts, error) {
 	var account model.Accounts
 
-	log.Println("tá chamando aqui" + pk)
-	if err := database.DB.Where("id = ?", pk).First(&account).Error; err != nil {
-		return account, err
+	if err := database.DB.Where("id = ? AND user_id = ?", id, userID).First(&account).Error; err != nil {
+		return account, fmt.Errorf("conta não encontrada")
 	}
 
 	return account, nil
 }
 
-func GetCurrentBalanceById(userId, accountId string) (decimal.Decimal, error) {
-
+func GetCurrentBalanceByID(userID, accountID string) (decimal.Decimal, error) {
 	var balance decimal.Decimal
 
-	if err := database.DB.Model(&model.Accounts{}).Where("id = ? AND user_id = ?", accountId, userId).Select("balance").Row().Scan(&balance); err != nil {
+	if err := database.DB.Model(&model.Accounts{}).
+		Where("id = ? AND user_id = ?", accountID, userID).
+		Select("balance").Row().Scan(&balance); err != nil {
 		return decimal.Zero, err
 	}
 
 	return balance, nil
 }
 
-// -------
-// Update
-// -------
-func UpdateAccountById(modelUpdated model.Accounts) error {
+func UpdateAccountByID(input model.Accounts, userID string) error {
+	query := database.DB.Model(&model.Accounts{}).
+		Where("id = ? AND user_id = ?", input.ID, userID).
+		Updates(input)
 
-	query := database.DB.Model(&model.Accounts{}).Where("id = ?", modelUpdated.ID).Updates(modelUpdated)
 	if err := query.Error; err != nil {
 		return err
-	} else if query.RowsAffected == 0 {
-		return fmt.Errorf("registro não encontrado")
+	}
+	if query.RowsAffected == 0 {
+		return fmt.Errorf("conta não encontrada")
 	}
 
 	return nil
 }
 
-// -------
-// Delete
-// -------
-func DeleteAccountById(id string) error {
-	var account model.Accounts
+func DeleteAccountByID(id, userID string) error {
+	query := database.DB.
+		Where("id = ? AND user_id = ?", id, userID).
+		Delete(&model.Accounts{})
 
-	query := database.DB.Where("id = ?", id).Delete(account)
 	if err := query.Error; err != nil {
 		return err
-	} else if query.RowsAffected == 0 {
-		return fmt.Errorf("registro não encontrado")
+	}
+	if query.RowsAffected == 0 {
+		return fmt.Errorf("conta não encontrada")
 	}
 
 	return nil

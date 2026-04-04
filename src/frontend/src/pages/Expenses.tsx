@@ -1,10 +1,10 @@
-import { DailyAverageCard } from "../components/daily-average-card";
-import { MonthlyForecastCard } from "../components/monthly-forecast-card";
-import { HighestExpenseCard } from "../components/highest-expense-card";
-import { ImpulsiveSpendingCard } from "../components/impulsive-expense-card";
-import { DailySpendingChart } from "../components/expense-chart-card";
-import { CategoryDistributionCard } from "../components/expense-category-distribuition-card";
-import { TransactionTableCard } from "../components/expenses-table-card";
+import { DailyAverageCard } from "../components/DailyAverageCard";
+import { MonthlyForecastCard } from "../components/MonthlyForecastCard";
+import { HighestExpenseCard } from "../components/HighestExpenseCard";
+import { ImpulsiveSpendingCard } from "../components/ImpulsiveExpenseCard";
+import { DailySpendingChart } from "../components/ExpenseChartCard";
+import { CategoryDistributionCard } from "../components/ExpenseCategoryDistribuitionCard";
+import { TransactionTableCard } from "../components/ExpensesTableCard";
 
 export function Expenses() {
   return (

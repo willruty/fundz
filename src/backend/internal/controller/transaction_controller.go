@@ -1,125 +1,103 @@
 package controller
 
 import (
-	dao "fundz/internal/model/dao"
+	"fundz/internal/model/dao"
 	entity "fundz/internal/model/entity"
 	"fundz/internal/service"
-	"log"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gin-gonic/gin"
 )
 
-// -------
-// Create
-// -------
 func CreateTransaction(c *gin.Context) {
-
 	var transaction entity.Transactions
 
 	if err := c.ShouldBindJSON(&transaction); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
-		log.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	userID := c.MustGet("userID").(string)
 
 	if err := dao.CreateTransaction(transaction, userID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
-		log.Println(transaction)
-		log.Println(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": transaction})
+}
+
+func GetAllTransactions(c *gin.Context) {
+	userID := c.MustGet("userID").(string)
+
+	transactions, rowsAffected, err := dao.GetAllTransactions(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao buscar transações"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": transaction,
+		"results":      transactions,
+		"RowsAffected": rowsAffected,
+		"RecordCount":  len(transactions),
 	})
 }
 
-// -------
-// GetAll
-// -------
-func GetAllTransactions(c *gin.Context) {
-
-	userID := c.MustGet("userID").(string)
-
-	transactions, rowsAffected, err := dao.GetAllTransaction(userID)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"erro": "Nenhum registro encontrado"})
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK,
-		gin.H{
-			"results":      transactions,
-			"RowsAffected": rowsAffected,
-			"RecordCount":  len(transactions),
-		})
-}
-
 func GetLastMonthTransactions(c *gin.Context) {
-
 	userID := c.MustGet("userID").(string)
 
 	var transactionService service.TransactionService
 	transactions, err := transactionService.GetLastMonthTransactions(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"erro": "Erro ao buscar transações"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao buscar transações"})
+		return
 	}
 
 	c.JSON(http.StatusOK, transactions)
 }
 
-// -------
-// GetById
-// -------
 func GetTransactionById(c *gin.Context) {
+	userID := c.MustGet("userID").(string)
 
-	result, err := dao.GetTransactionById(c.Param("id"))
+	result, err := dao.GetTransactionByID(c.Param("id"), userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": result})
 }
 
-// -------
-// UpdateById
-// -------
 func UpdateTransactionById(c *gin.Context) {
-
 	var input entity.Transactions
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := dao.UpdateTransactionById(input, input.ID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"erro": "Failed to update record " + err.Error()})
+	userID := c.MustGet("userID").(string)
+
+	if input.ID == (uuid.UUID{}) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID da transação é obrigatório"})
+		return
+	}
+
+	if err := dao.UpdateTransactionByID(input, input.ID, userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": input})
 }
 
-// -------
-// DeleteById
-// -------
 func DeleteTransactionById(c *gin.Context) {
+	userID := c.MustGet("userID").(string)
 
-	id := c.Param("id")
-
-	if _, err := dao.GetTransactionById(id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+	if err := dao.DeleteTransactionByID(c.Param("id"), userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := dao.DeleteTransactionById(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"erro": "Failed to delete record " + err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"data": "row deleted"})
+	c.JSON(http.StatusOK, gin.H{"data": "transação removida"})
 }

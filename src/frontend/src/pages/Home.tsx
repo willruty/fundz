@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { AccountList } from "../components/account-list";
-import { BalanceCard } from "../components/current-balance";
-import { NextGoalCard } from "../components/next-goal-card";
-import { MonthlyBalanceCard } from "../components/monthly-balance";
-import { CategoryAnalysisCard } from "../components/category-analysis";
-import { CategoryDistributionCard } from "../components/category-distribution";
-import { RecentTransactions } from "../components/recent-transactions";
+import { AccountList } from "../components/AccountList";
+import { BalanceCard } from "../components/CurrentBalance";
+import { NextGoalCard } from "../components/NextGoalCard";
+import { MonthlyBalanceCard } from "../components/MonthlyBalance";
+import { CategoryAnalysisCard } from "../components/CategoryAnalysis";
+import { CategoryDistributionCard } from "../components/CategoryDistribution";
+import { RecentTransactions } from "../components/RecentTransactions";
+import { getDashboardOverview } from "../service/dashboard.service";
 import type { DashboardDTO } from "../types/dashboard";
 
 export function Home() {
@@ -13,30 +14,10 @@ export function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const res = await fetch(
-          "http://localhost:8000/fundz/dashboard/overview",
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-        const json = await res.json();
-
-        setLoading(true);
-        setDashboard(json.data);
-      } catch (err) {
-        console.error("Erro ao buscar dashboard:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboard();
+    getDashboardOverview()
+      .then(setDashboard)
+      .catch((err) => console.error("Erro ao buscar dashboard:", err))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading || !dashboard) {
@@ -48,7 +29,7 @@ export function Home() {
       <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch gap-5">
         {/* Linha 1: Badges das Contas */}
         <div className="lg:col-span-2">
-          <AccountList accounts={dashboard?.accounts} />
+          <AccountList accounts={dashboard.accounts} />
         </div>
 
         {/* Linha 2: Resumo Geral */}
@@ -56,7 +37,7 @@ export function Home() {
           <div className="flex-1">
             <BalanceCard
               accounts={dashboard.accounts}
-              transactions={dashboard?.last_month_transactions}
+              transactions={dashboard.last_month_transactions}
             />
           </div>
           <div className="flex-1">

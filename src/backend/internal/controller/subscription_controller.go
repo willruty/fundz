@@ -1,109 +1,83 @@
 package controller
 
 import (
-	dao "fundz/internal/model/dao"
+	"fundz/internal/model/dao"
 	entity "fundz/internal/model/entity"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-// -------
-// Create
-// -------
 func CreateSubscription(c *gin.Context) {
-
 	var subscription entity.Subscriptions
 
 	if err := c.ShouldBindJSON(&subscription); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := dao.CreateSubscription(subscription); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
+	userID := c.MustGet("userID").(string)
+
+	if err := dao.CreateSubscription(subscription, userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": subscription})
+}
+
+func GetAllSubscriptions(c *gin.Context) {
+	userID := c.MustGet("userID").(string)
+
+	subscriptions, rowsAffected, err := dao.FindAllSubscriptions(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao buscar assinaturas"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": subscription,
+		"results":      subscriptions,
+		"RowsAffected": rowsAffected,
+		"RecordCount":  len(subscriptions),
 	})
 }
 
-// -------
-// GetAll
-// -------
-func GetAllSubscriptions(c *gin.Context) {
-
-	subscriptions, rowsAffected, err := dao.FindAllSubscriptions()
-
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"erro": "Nenhum registro encontrado: " + err.Error()})
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK,
-		gin.H{
-			"results":      subscriptions,
-			"RowsAffected": rowsAffected,
-			"RecordCount":  len(subscriptions),
-		})
-}
-
-// -------
-// GetById
-// -------
 func GetSubscriptionById(c *gin.Context) {
+	userID := c.MustGet("userID").(string)
 
-	result, err := dao.FindSubscriptionById(c.Param("id"))
+	result, err := dao.FindSubscriptionByID(c.Param("id"), userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": result})
 }
 
-// -------
-// UpdateById
-// -------
 func UpdateSubscriptionById(c *gin.Context) {
-
 	var input entity.Subscriptions
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if _, err := dao.FindSubscriptionById(input.ID.String()); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
-		return
-	}
+	userID := c.MustGet("userID").(string)
 
-	if err := dao.UpdateSubscriptionById(input); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"erro": "Failed to update record " + err.Error()})
+	if err := dao.UpdateSubscriptionByID(input, userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": input})
 }
 
-// -------
-// DeleteById
-// -------
 func DeleteSubscriptionById(c *gin.Context) {
+	userID := c.MustGet("userID").(string)
 
-	id := c.Param("id")
-
-	if _, err := dao.FindSubscriptionById(id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+	if err := dao.DeleteSubscriptionByID(c.Param("id"), userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := dao.DeleteSubscriptionById(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"erro": "Failed to delete record " + err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"data": "row deleted"})
+	c.JSON(http.StatusOK, gin.H{"data": "assinatura removida"})
 }

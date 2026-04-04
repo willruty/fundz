@@ -1,8 +1,8 @@
-import CommitmentCard from "../components/commitment-card";
-import ActiveSubscriptionsCard from "../components/active-subscription-card";
-import NextBillingCard from "../components/next-billing-card";
-import AnnualSubscriptionChart from "../components/anual-subscription-chart";
-import SubscriptionTable from "../components/subscriptions-table";
+import CommitmentCard from "../components/CommitmentCard";
+import ActiveSubscriptionsCard from "../components/ActiveSubscriptionCard";
+import NextBillingCard from "../components/NextBillingCard";
+import AnnualSubscriptionChart from "../components/AnualSubscriptionChart";
+import SubscriptionTable from "../components/SubscriptionsTable";
 
 // Componente importado conforme solicitado
 export function Subscriptions() {
