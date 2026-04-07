@@ -22,7 +22,6 @@ import {
   RefreshCw,
   Wallet,
   CreditCard,
-  Landmark,
   ShieldCheck,
   ArrowRightLeft,
 } from "lucide-react";

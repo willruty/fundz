@@ -9,7 +9,6 @@ import {
   BarChart3,
   CreditCard,
   TrendingUp,
-  ArrowDownRight,
   Zap,
   Bell,
   PiggyBank,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Pencil, Trash2, FileX, Plus } from "lucide-react";
 
 export type CommitmentType = "subscription" | "installment";

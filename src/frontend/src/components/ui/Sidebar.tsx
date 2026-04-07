@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
   Wallet,
-  Tag,
   ArrowDownCircle,
   Target,
   CalendarClock,
