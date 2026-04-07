@@ -10,15 +10,14 @@ import (
 
 var (
 	once sync.Once
+	app  http.Handler
 )
 
-func init() {
+func Handler(w http.ResponseWriter, r *http.Request) {
 	once.Do(func() {
 		config.Load()
 		database.DatabaseConnect()
+		app = router.SetupMainRouter()
 	})
-}
-
-func Handler(w http.ResponseWriter, r *http.Request) {
-	router.SetupMainRouter().ServeHTTP(w, r)
+	app.ServeHTTP(w, r)
 }
