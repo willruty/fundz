@@ -3,9 +3,9 @@ package config
 import (
 	"fmt"
 	"os"
-	"path/filepath"
+	"strconv"
 
-	"gopkg.in/ini.v1"
+	"github.com/joho/godotenv"
 )
 
 type service struct {
@@ -34,35 +34,22 @@ type ConfigEnv struct {
 var Env ConfigEnv
 
 func Load() error {
-
-	exe, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	exPath := filepath.Dir(exe)
-
-	fileConf := filepath.Join(exPath, "fundz.conf")
-	cfg, err := ini.Load(fileConf)
-
-	if err != nil {
-		fmt.Println("Não foi possível encontrar ou abrir o arquivo: " + fileConf)
-		return err
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("Arquivo .env não encontrado, usando variáveis de ambiente do sistema")
 	}
 
 	Env = ConfigEnv{}
 
-	// Port
-	Env.Service.Port = cfg.Section("SERVICE").Key("PORT").MustInt(0000)
+	Env.Service.Port, _ = strconv.Atoi(os.Getenv("SERVICE_PORT"))
 
-	// Database
-	Env.Database.Host = cfg.Section("DATABASE").Key("HOST").String()
-	Env.Database.Port = cfg.Section("DATABASE").Key("PORT").MustInt(0000)
-	Env.Database.User = cfg.Section("DATABASE").Key("USER").String()
-	Env.Database.Password = cfg.Section("DATABASE").Key("PASSWORD").String()
-	Env.Database.DatabaseName = cfg.Section("DATABASE").Key("DBNAME").String()
-	Env.Database.SSlMode = cfg.Section("DATABASE").Key("SSLMODE").String()
-	
-	Env.Jwt.JWTSECRET = cfg.Section("JWT").Key("JWTSECRET").String()
+	Env.Database.Host = os.Getenv("DATABASE_HOST")
+	Env.Database.Port, _ = strconv.Atoi(os.Getenv("DATABASE_PORT"))
+	Env.Database.User = os.Getenv("DATABASE_USER")
+	Env.Database.Password = os.Getenv("DATABASE_PASSWORD")
+	Env.Database.DatabaseName = os.Getenv("DATABASE_DBNAME")
+	Env.Database.SSlMode = os.Getenv("DATABASE_SSLMODE")
+
+	Env.Jwt.JWTSECRET = os.Getenv("JWT_SECRET")
 
 	return nil
 }
