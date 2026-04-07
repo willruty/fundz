@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { DailyAverageCard } from "../components/DailyAverageCard";
 import { MonthlyForecastCard } from "../components/MonthlyForecastCard";
 import { HighestExpenseCard } from "../components/HighestExpenseCard";
@@ -5,8 +6,19 @@ import { ImpulsiveSpendingCard } from "../components/ImpulsiveExpenseCard";
 import { DailySpendingChart } from "../components/ExpenseChartCard";
 import { CategoryDistributionCard } from "../components/ExpenseCategoryDistribuitionCard";
 import { TransactionTableCard } from "../components/ExpensesTableCard";
+import { ExpensesSkeleton } from "../components/skeletons/ExpensesSkeleton";
 
 export function Expenses() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Substituir pelo fetch real quando a API estiver pronta
+    const timer = setTimeout(() => setLoading(false), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <ExpensesSkeleton />;
+
   return (
     <div className="min-h-screen">
       {/* Grid Principal - 10 colunas para facilitar proporções de 20% e 40% */}

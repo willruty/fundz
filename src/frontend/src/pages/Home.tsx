@@ -6,6 +6,7 @@ import { MonthlyBalanceCard } from "../components/MonthlyBalance";
 import { CategoryAnalysisCard } from "../components/CategoryAnalysis";
 import { CategoryDistributionCard } from "../components/CategoryDistribution";
 import { RecentTransactions } from "../components/RecentTransactions";
+import { HomeSkeleton } from "../components/HomeSkeleton";
 import { getDashboardOverview } from "../service/dashboard.service";
 import type { DashboardDTO } from "../types/dashboard";
 
@@ -21,7 +22,7 @@ export function Home() {
   }, []);
 
   if (loading || !dashboard) {
-    return <div>Loading dashboard...</div>;
+    return <HomeSkeleton />;
   }
 
   return (

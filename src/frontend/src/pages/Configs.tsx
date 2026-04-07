@@ -1,10 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Lock, Bell, Settings2, Camera, Moon, Sun } from "lucide-react";
+import { ConfigsSkeleton } from "../components/skeletons/ConfigsSkeleton";
 
 type Tab = "profile" | "account" | "notifications" | "preferences";
 
 export function Configs() {
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("profile");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <ConfigsSkeleton />;
 
   // Estados mockados
   const [pushEnabled, setPushEnabled] = useState(true);

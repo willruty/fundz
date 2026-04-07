@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar } from "lucide-react";
+import { GoalsSkeleton } from "../components/skeletons/GoalsSkeleton";
 import {
   BarChart,
   Bar,
@@ -124,7 +125,13 @@ function RitmoTooltip({ active, payload, label }: any) {
 // ── PAGE ───────────────────────────────────────────────────────────────────────
 
 export function Goals() {
+  const [loading, setLoading] = useState(true);
   const [ritmoFilter, setRitmoFilter] = useState<"all" | "atual" | "necessario">("all");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const totalTarget  = mockGoals.reduce((s, g) => s + g.target, 0);
   const totalCurrent = mockGoals.reduce((s, g) => s + g.current, 0);
@@ -153,6 +160,8 @@ export function Goals() {
     atual:     g.monthlyContribution,
     necessario:g.requiredMonthly,
   }));
+
+  if (loading) return <GoalsSkeleton />;
 
   return (
     <main className="min-h-screen mx-auto space-y-8">

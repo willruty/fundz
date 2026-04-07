@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { InvestmentsSkeleton } from "../components/skeletons/InvestmentsSkeleton";
 import { TrendingUp, TrendingDown, Calculator, Wallet, Sparkles } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -77,10 +78,16 @@ const fmtK = (v: number) => {
 // ── COMPONENTE ────────────────────────────────────────────────────────────────
 
 export function Investments() {
+  const [loading, setLoading] = useState(true);
   const [principal,    setPrincipal]    = useState(10000);
   const [monthly,      setMonthly]      = useState(500);
   const [selectedType, setSelectedType] = useState<string>("cdb");
   const [customRate,   setCustomRate]   = useState(10);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const currentType = INVESTMENT_TYPES.find((t) => t.id === selectedType)!;
   const annualRate  = selectedType === "custom" ? customRate : (currentType.rate ?? 10);
@@ -131,6 +138,8 @@ export function Investments() {
       </div>
     );
   };
+
+  if (loading) return <InvestmentsSkeleton />;
 
   return (
     <main className="min-h-screen mx-auto space-y-8">

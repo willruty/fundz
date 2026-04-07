@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { AccountsSkeleton } from "../components/skeletons/AccountsSkeleton";
 import {
   PieChart,
   Pie,
@@ -242,7 +243,15 @@ function BankCard({ account, hidden }: { account: Account; hidden: boolean }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function Accounts() {
+  const [loading, setLoading] = useState(true);
   const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <AccountsSkeleton />;
 
   const totalBalance = mockAccounts.reduce((s, a) => s + a.balance, 0);
   const totalIncome  = mockAccounts.reduce((s, a) => s + a.income, 0);
