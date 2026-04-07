@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 // Dados mockados
@@ -9,12 +9,6 @@ const data = [
   { name: "Lazer", value: 600, color: "#000000" },
   { name: "Outros", value: 300, color: "#9ca3af" }, // Cinza
 ];
-
-interface CategoryData {
-  name: string;
-  value: number;
-  color: string;
-}
 
 export function CategoryDistributionCard() {
   const [activeIndex, setActiveIndex] = useState<number>(-1);

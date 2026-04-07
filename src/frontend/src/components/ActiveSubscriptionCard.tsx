@@ -1,4 +1,3 @@
-import React from "react";
 import { RefreshCw, CreditCard } from "lucide-react";
 
 interface ActiveSubscriptionsData {

@@ -47,7 +47,7 @@ export default function AnnualSubscriptionChart() {
   const avgMonthly = Math.round(
     mockData.reduce((s, d) => s + d.subscriptions + d.installments, 0) / mockData.length
   );
-  const peakMonth = mockData.reduce(
+  const peakMonth = mockData.reduce<MonthlyCommitment & { total: number }>(
     (max, d) => (d.subscriptions + d.installments > max.total ? { ...d, total: d.subscriptions + d.installments } : max),
     { month: "", total: 0, subscriptions: 0, installments: 0 }
   );

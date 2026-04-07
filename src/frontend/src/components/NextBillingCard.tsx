@@ -1,4 +1,3 @@
-import React from "react";
 
 // 1. Interface de tipos para os dados
 interface NextBillingData {

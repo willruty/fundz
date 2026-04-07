@@ -1,4 +1,3 @@
-import React from "react";
 
 export function HighestExpenseCard({
   amount = 1250.75,
