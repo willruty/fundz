@@ -1,13 +1,13 @@
 {
   "functions": {
-    "cmd/fundz/main.go": {
+    "api/index.go": {
       "runtime": "@vercel/go@3.0.0"
     }
   },
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "cmd/fundz/main.go"
+      "dest": "api/index.go"
     }
   ]
 }
