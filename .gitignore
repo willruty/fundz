@@ -22,8 +22,6 @@ id_rsa_bb
 
 # log files
 *.log
-*.mod
-*.sum
 
 # Folders
 bin/
