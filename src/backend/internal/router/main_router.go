@@ -4,14 +4,20 @@ import (
 	"fundz/internal/controller"
 	"fundz/internal/middleware"
 	"fundz/internal/util"
+	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func configRouter() cors.Config {
+	allowedOrigins := []string{"http://localhost:5173"}
+	if origin := os.Getenv("ALLOWED_ORIGIN"); origin != "" {
+		allowedOrigins = append(allowedOrigins, origin)
+	}
+
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:5173"}
+	config.AllowOrigins = allowedOrigins
 	config.AllowMethods = []string{"POST", "GET", "DELETE", "PUT"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
 	config.ExposeHeaders = []string{"Origin", "Content-Type"}
