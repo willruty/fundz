@@ -28,7 +28,7 @@ export function Sidebar() {
   const navigate = useNavigate();
 
   return (
-    <div className="h-screen p-4 flex flex-col z-50">
+    <div className="hidden md:flex flex-col h-screen p-4 z-50">
       <motion.div
         initial={false}
         animate={{ width: isExpanded ? "220px" : "80px" }}

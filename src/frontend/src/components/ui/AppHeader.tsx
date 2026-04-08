@@ -28,10 +28,10 @@ export function AppHeader({ title, subtitle }: AppHeaderProps) {
   };
 
   return (
-    <header className="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+    <header className="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-6 md:mb-10">
       {/* LADO ESQUERDO: Títulos */}
       <div className="flex flex-col">
-        <h1 className="text-3xl md:text-4xl font-black text-[var(--primary)] tracking-tighter leading-none">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--primary)] tracking-tighter leading-none">
           {title}
         </h1>
 

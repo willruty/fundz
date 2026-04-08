@@ -34,7 +34,7 @@ export function Home() {
         </div>
 
         {/* Linha 2: Resumo Geral */}
-        <div className="flex flex-row gap-5">
+        <div className="flex flex-col sm:flex-row gap-5">
           <div className="flex-1">
             <BalanceCard
               accounts={dashboard.accounts}

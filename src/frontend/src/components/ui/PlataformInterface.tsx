@@ -1,6 +1,7 @@
 import { useLocation, Outlet } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { AppHeader } from "./AppHeader";
+import { MobileNav } from "./MobileNav";
 
 function Platform() {
   const location = useLocation();
@@ -85,13 +86,15 @@ function Platform() {
     <div className="flex h-screen w-full bg-[#F8FAFC] overflow-hidden font-manrope">
       <Sidebar />
 
-      <main className="flex-1 h-full flex flex-col overflow-y-auto overflow-x-hidden p-8">
+      <main className="flex-1 h-full flex flex-col overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-8 pb-24 md:pb-8">
         {!isProfilePage && <AppHeader title={title} subtitle={subtitle} />}
 
         <div className="flex-1">
           <Outlet />
         </div>
       </main>
+
+      <MobileNav />
     </div>
   );
 }

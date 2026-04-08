@@ -21,43 +21,40 @@ export function Expenses() {
 
   return (
     <div className="min-h-screen">
-      {/* Grid Principal - 10 colunas para facilitar proporções de 20% e 40% */}
-      <div className="grid grid-cols-10 gap-6">
+      {/* Grid Principal - responsivo: 1 col mobile → 2 cols tablet → 10 cols desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-10 gap-4 lg:gap-6">
         {/* LINHA 1 */}
 
-        {/* 20% (2/10 colunas) */}
-        <div className="col-span-2">
+        {/* 20% desktop / 1 col mobile / 1 de 2 tablet */}
+        <div className="lg:col-span-2">
           <DailyAverageCard />
         </div>
 
-        {/* 20% (2/10 colunas) */}
-        <div className="col-span-2">
+        <div className="lg:col-span-2">
           <MonthlyForecastCard />
         </div>
 
-        {/* 20% (2/10 colunas) */}
-        <div className="col-span-2">
+        <div className="lg:col-span-2">
           <HighestExpenseCard />
         </div>
 
-        {/* 40% (4/10 colunas) */}
-        <div className="col-span-4">
+        {/* 40% desktop / full width tablet e mobile */}
+        <div className="sm:col-span-2 lg:col-span-4">
           <ImpulsiveSpendingCard />
         </div>
 
         {/* LINHA 2 */}
 
-        {/* 50% (5/10 colunas) */}
-        <div className="col-span-5 mt-4">
+        <div className="sm:col-span-2 lg:col-span-5 mt-0 sm:mt-2 lg:mt-4">
           <DailySpendingChart />
         </div>
 
-        <div className="col-span-5 mt-4">
+        <div className="sm:col-span-2 lg:col-span-5 mt-0 sm:mt-2 lg:mt-4">
           <CategoryDistributionCard />
         </div>
 
         {/* LINHA 3 */}
-        <div className="col-span-10 mt-4">
+        <div className="sm:col-span-2 lg:col-span-10 mt-0 sm:mt-2 lg:mt-4">
           <TransactionTableCard />
         </div>
       </div>
