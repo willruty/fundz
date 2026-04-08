@@ -5,19 +5,26 @@ import (
 	"fundz/internal/middleware"
 	"fundz/internal/util"
 	"os"
+	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func configRouter() cors.Config {
-	allowedOrigins := []string{"http://localhost:5173"}
-	if origin := os.Getenv("ALLOWED_ORIGIN"); origin != "" {
-		allowedOrigins = append(allowedOrigins, origin)
-	}
-
 	config := cors.DefaultConfig()
-	config.AllowOrigins = allowedOrigins
+	config.AllowOriginFunc = func(origin string) bool {
+		if origin == "http://localhost:5173" {
+			return true
+		}
+		if strings.HasSuffix(origin, ".vercel.app") {
+			return true
+		}
+		if custom := os.Getenv("ALLOWED_ORIGIN"); custom != "" && origin == custom {
+			return true
+		}
+		return false
+	}
 	config.AllowMethods = []string{"POST", "GET", "DELETE", "PUT"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
 	config.ExposeHeaders = []string{"Origin", "Content-Type"}
