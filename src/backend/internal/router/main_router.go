@@ -6,30 +6,32 @@ import (
 	"fundz/internal/util"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func configRouter() cors.Config {
-	config := cors.DefaultConfig()
-	config.AllowOriginFunc = func(origin string) bool {
-		if origin == "http://localhost:5173" {
-			return true
-		}
-		if strings.HasSuffix(origin, ".vercel.app") {
-			return true
-		}
-		if custom := os.Getenv("ALLOWED_ORIGIN"); custom != "" && origin == custom {
-			return true
-		}
-		return false
+	return cors.Config{
+		AllowOriginFunc: func(origin string) bool {
+			if origin == "http://localhost:5173" || origin == "http://localhost:3000" {
+				return true
+			}
+			if strings.HasSuffix(origin, ".vercel.app") {
+				return true
+			}
+			if custom := os.Getenv("ALLOWED_ORIGIN"); custom != "" && origin == custom {
+				return true
+			}
+			return false
+		},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Content-Length", "Accept", "Authorization", "X-Requested-With"},
+		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
 	}
-	config.AllowMethods = []string{"POST", "GET", "DELETE", "PUT"}
-	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
-	config.ExposeHeaders = []string{"Origin", "Content-Type"}
-	config.AllowCredentials = true
-	return config
 }
 
 func SetupMainRouter() *gin.Engine {
@@ -40,6 +42,11 @@ func SetupMainRouter() *gin.Engine {
 	route.Use(gin.Recovery())
 	route.Use(gin.Logger())
 	route.Use(cors.New(configRouter()))
+
+	// Garante que requests OPTIONS de preflight sempre recebam resposta CORS correta
+	route.OPTIONS("/*path", func(c *gin.Context) {
+		c.Status(204)
+	})
 
 	main := route.Group("/fundz")
 	main.GET("/heath", controller.GetHealth)
