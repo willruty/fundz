@@ -15,6 +15,7 @@ func DashboardOverview(c *gin.Context) {
 	summary, err := dashService.GetDashboardOverview(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{

@@ -18,10 +18,21 @@ func (d DashboardService) GetDashboardOverview(userID string) (dto.DashboardDTO,
 	var err error
 
 	dashboard.Accounts, err = d.Account.GetAccountsSummary(userID)
-	dashboard.Goal, err = d.Goal.FilterNextGoal(userID)
-	dashboard.LastMonthTransactions, err = d.Transaction.GetLastMonthTransactions(userID)
-	dashboard.Categories, err = d.Category.GetCategorySummary(userID)
+	if err != nil {
+		return dto.DashboardDTO{}, err
+	}
 
+	dashboard.Goal, err = d.Goal.FilterNextGoal(userID)
+	if err != nil {
+		return dto.DashboardDTO{}, err
+	}
+
+	dashboard.LastMonthTransactions, err = d.Transaction.GetLastMonthTransactions(userID)
+	if err != nil {
+		return dto.DashboardDTO{}, err
+	}
+
+	dashboard.Categories, err = d.Category.GetCategorySummary(userID)
 	if err != nil {
 		return dto.DashboardDTO{}, err
 	}
