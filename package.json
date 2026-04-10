@@ -1,0 +1,8 @@
+{
+  "name": "fundz",
+  "version": "1.0.0",
+  "scripts": {
+    "backend": "cd src/backend && air",
+    "frontend": "cd src/frontend && npm run dev"
+  }
+}

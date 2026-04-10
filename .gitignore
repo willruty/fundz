@@ -89,3 +89,7 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+.claude
+
+# Legacy Go backend (kept in repo but untracked during Nest migration)
+backend-go/

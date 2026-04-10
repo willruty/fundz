@@ -1,0 +1,169 @@
+// Prisma schema for Fundz (NestJS migration).
+//
+// Mapping notes:
+//   - DB tables are singular snake_case (users, accounts, transactions, ...),
+//     but in TypeScript we use PascalCase singular models (`User`, `Account`, ...)
+//     with `@@map("...")` to preserve the physical table names.
+//   - DB columns are snake_case. We expose camelCase in the Prisma Client with
+//     `@map("snake_case")` on each field that needs the conversion.
+//   - RLS is enabled on all feature tables in Supabase. The Nest backend connects
+//     via the pooler using the `postgres` role (bypasses RLS), and every query is
+//     scoped by `userId` at the service layer — same IDOR hardening the Go backend
+//     already had.
+//   - `User` currently maps to `public.users` (legacy table from the Go backend).
+//     Step 12 of the migration will move authentication to Supabase (`auth.users`)
+//     and replace this model with a `Profile` model pointing at `public.profiles`.
+//     Keep this note in mind when updating the schema.
+//
+// Regenerate after editing:
+//   npx prisma generate
+//
+// Re-sync with the Supabase schema (after running DDL in the DB):
+//   npx prisma db pull && npx prisma generate
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = []
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// -----------------------------------------------------------------------------
+// User (legacy — kept for backward compatibility with existing FK references)
+// -----------------------------------------------------------------------------
+/// Row Level Security is enabled on this table in Supabase.
+model User {
+  id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email        String    @unique @db.VarChar
+  passwordHash String    @map("password_hash")
+  name         String?
+  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt    DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
+
+  accounts      Account[]
+  categories    Category[]
+  goals         Goal[]
+  subscriptions Subscription[]
+  transactions  Transaction[]
+
+  @@map("users")
+}
+
+// -----------------------------------------------------------------------------
+// Profile (Supabase Auth — profiles.id = auth.users.id)
+// -----------------------------------------------------------------------------
+/// Stores app-specific user data. The `id` is always set to the corresponding
+/// `auth.users.id` from Supabase Auth (not auto-generated).
+model Profile {
+  id        String    @id @db.Uuid
+  name      String?
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
+
+  @@map("profiles")
+}
+
+// -----------------------------------------------------------------------------
+// Account
+// -----------------------------------------------------------------------------
+/// Row Level Security is enabled on this table in Supabase.
+model Account {
+  id        String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  name      String    @db.VarChar
+  type      String    @db.VarChar
+  balance   Decimal?  @default(0) @db.Decimal
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_accounts_user")
+  subscriptions Subscription[]
+  transactions  Transaction[]
+
+  @@map("accounts")
+}
+
+// -----------------------------------------------------------------------------
+// Category
+// -----------------------------------------------------------------------------
+/// Row Level Security is enabled on this table in Supabase.
+model Category {
+  id        String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  name      String    @db.VarChar
+  type      String    @db.VarChar // "income" | "expense"
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_categories_user")
+  subscriptions Subscription[]
+  transactions  Transaction[]
+
+  @@map("categories")
+}
+
+// -----------------------------------------------------------------------------
+// Goal
+// -----------------------------------------------------------------------------
+/// Row Level Security is enabled on this table in Supabase.
+model Goal {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  name          String    @db.VarChar
+  targetAmount  Decimal   @map("target_amount") @db.Decimal
+  currentAmount Decimal?  @default(0) @map("current_amount") @db.Decimal
+  dueDate       DateTime? @map("due_date") @db.Date
+  createdAt     DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_goals_user")
+
+  @@map("goals")
+}
+
+// -----------------------------------------------------------------------------
+// Subscription
+// -----------------------------------------------------------------------------
+/// Row Level Security is enabled on this table in Supabase.
+model Subscription {
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  accountId       String?   @map("account_id") @db.Uuid
+  categoryId      String?   @map("category_id") @db.Uuid
+  name            String    @db.VarChar
+  amount          Decimal   @db.Decimal
+  billingCycle    String    @map("billing_cycle") @db.VarChar // "monthly" | "yearly"
+  nextBillingDate DateTime? @map("next_billing_date") @db.Date
+  active          Boolean?  @default(true)
+  createdAt       DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_subscriptions_user")
+  account  Account?  @relation(fields: [accountId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_subscriptions_account")
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_subscriptions_category")
+
+  @@map("subscriptions")
+}
+
+// -----------------------------------------------------------------------------
+// Transaction
+// -----------------------------------------------------------------------------
+/// Row Level Security is enabled on this table in Supabase.
+model Transaction {
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  accountId   String    @map("account_id") @db.Uuid
+  categoryId  String?   @map("category_id") @db.Uuid
+  amount      Decimal   @db.Decimal
+  type        String    @db.VarChar // "income" | "expense"
+  description String?   @db.VarChar
+  occurredAt  DateTime  @default(now()) @map("occurred_at") @db.Timestamp(6)
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_transactions_user")
+  account  Account   @relation(fields: [accountId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_transactions_account")
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_transactions_category")
+
+  @@map("transactions")
+}
