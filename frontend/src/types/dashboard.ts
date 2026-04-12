@@ -3,6 +3,7 @@ export type DashboardDTO = {
   goal: GoalSummary;
   last_month_transactions: TransactionSummary[];
   categories: CategorySummary;
+  financial_health: FinancialHealth;
 };
 
 export type AccountSummary = {
@@ -38,4 +39,18 @@ export type CategoryDistribution = {
   name: string;
   amount: string;
   percentage: string;
+};
+
+export type HealthLevel = 'bom' | 'atenção' | 'crítico' | 'moderado' | 'alto' | 'baixo' | 'ruim' | 'sem dados';
+
+export type FinancialHealthIndicator = {
+  label: string;
+  level: HealthLevel;
+  value: string;
+};
+
+export type FinancialHealth = {
+  gastos: FinancialHealthIndicator;
+  dividas: FinancialHealthIndicator;
+  investimentos: FinancialHealthIndicator;
 };

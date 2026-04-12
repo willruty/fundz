@@ -1,156 +1,223 @@
-# FUNDZ
+<p align="center">
+  <h1 align="center">FUNDZ</h1>
+  <p align="center">Plataforma de gestao financeira pessoal para quem quer parar de ser emocional com dinheiro.</p>
+</p>
 
-## Descrição
-
-Fundz é uma plataforma de gestão financeira pessoal focada em jovens que querem parar de ser emocional com dinheiro e começar a enxergar números de forma clara.
-
-A proposta é simples: transformar dados financeiros em decisões melhores através de visualização, controle e análise.
-
-O sistema permite:
-
-- Gerenciar contas
-- Registrar e categorizar transações
-- Visualizar métricas financeiras
-- Controlar assinaturas e metas
-- (em breve) analisar comportamento financeiro com IA
+<p align="center">
+  <img src="https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white" />
+  <img src="https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma&logoColor=white" />
+  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?logo=supabase&logoColor=white" />
+  <img src="https://img.shields.io/badge/Tailwind-4.1-06B6D4?logo=tailwindcss&logoColor=white" />
+  <img src="https://img.shields.io/badge/Deploy-Vercel-000?logo=vercel&logoColor=white" />
+</p>
 
 ---
 
-## Status do Projeto
+## Sobre
 
-MVP em fase final (menos de 1 semana para deploy).
+Fundz transforma dados financeiros em decisoes melhores atraves de visualizacao, controle e analise. Focado em jovens que querem enxergar seus numeros de forma clara.
 
-Situação atual:
+**Funcionalidades:**
 
-- Backend com CRUDs principais funcionando (users, accounts, transactions, categories, goals, subscriptions)
-- Frontend funcional com páginas principais
-- Integração com banco (Supabase) ativa
-- Parte do dashboard já estruturada
-
-Foco atual:
-
-- Ajustes finais de produto
-- Persistência de dados faltantes
-- Melhorias visuais
-- Preparação para deploy
-- Estrutura para monetização futura
+- Gerenciar contas e saldos
+- Registrar e categorizar transacoes (receitas e despesas)
+- Acompanhar metas financeiras
+- Controlar assinaturas recorrentes e parcelamentos
+- Dashboard com metricas: media diaria, distribuicao por categoria, previsao mensal
+- Exportar dados para Excel
 
 ---
 
 ## Stack
 
-### Frontend
-
-- React
-- TypeScript
-- TailwindCSS
-- Recharts
-
-### Backend
-
-- Node e Nest
-- API REST
-- Arquitetura em módulos (controller, service, module)
-
-### Database
-
-- Supabase (PostgreSQL)
-- Gorm
+| Camada | Tecnologias |
+|---|---|
+| **Frontend** | React 19, TypeScript, Vite, Tailwind CSS 4, Recharts, Motion, Lucide Icons |
+| **Backend** | NestJS 11, TypeScript, Prisma 6, Passport JWT |
+| **Banco** | Supabase (PostgreSQL) com RLS |
+| **Auth** | Supabase Auth (JWT ES256/HS256) |
+| **Deploy** | Vercel (monorepo) |
 
 ---
 
-## TODO (PRIORIDADE MVP)
+## Pre-requisitos
 
-### Core / Dados
-
-- [ ] Ao criar uma account:
-  - [ ] Definir saldo inicial
-  - [ ] Adicionar campos de controle financeiro relevantes (ex: saldo atual, etc)
-
-- [ ] Impedir repetição de cores nos cards de account
-
-- [ ] Persistir o card de gasto impulsivo no banco de dados
+- [Node.js](https://nodejs.org/) >= 20
+- [npm](https://www.npmjs.com/)
+- Conta no [Supabase](https://supabase.com/) com projeto criado
 
 ---
 
-### Investimentos
+## Instalacao
 
-- [ ] Criar CRUD completo de investimentos
-- [ ] Associar investimentos a uma account
+### 1. Clone o repositorio
 
----
+```bash
+git clone https://github.com/seu-usuario/fundz.git
+cd fundz
+```
 
-### Frontend / UX
+### 2. Configure o backend
 
-- [ ] Melhorar layout da primeira linha da página de assinaturas
+```bash
+cd backend
+cp .env.example .env
+npm install
+npx prisma generate
+```
 
-- [ ] Criar página de Profile / Configurações:
-  - [ ] Upload de foto
-  - [ ] Alterar nome
-  - [ ] Alterar senha
-  - [ ] Deletar conta
+Preencha o `.env` com suas credenciais do Supabase:
 
-- [ ] Melhorar landing page:
-  - [ ] Layout mais profissional
-  - [ ] Componentes mais chamativos
-  - [ ] Imagens da plataforma
-  - [ ] Animações
-  - [ ] Transições mais fluidas
+```env
+DATABASE_URL="postgresql://..."
+DIRECT_URL="postgresql://..."
+SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_ANON_KEY=sua-anon-key
+SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key
+SUPABASE_JWT_SECRET=seu-jwt-secret
+```
 
----
+### 3. Configure o frontend
 
-### Controle de Acesso / Monetização
+```bash
+cd ../frontend
+cp .env.example .env
+npm install
+```
 
-- [ ] Restringir acesso a páginas específicas (ex: investimentos)
-  - [ ] Liberar apenas via chave de acesso
+Preencha o `.env` do frontend:
 
-- [ ] Implementar gateway de pagamento
-  - [ ] Liberar funcionalidades baseado em pagamento
+```env
+VITE_SUPABASE_URL=https://xxx.supabase.co
+VITE_SUPABASE_ANON_KEY=sua-anon-key
+VITE_API_URL=http://localhost:8000/fundz
+```
 
----
+### 4. Rode o projeto
 
-### Inteligência / Diferencial
+Em terminais separados:
 
-- [ ] Implementar IA para análise de dados financeiros
-  - (insights, padrões de gasto, comportamento)
+```bash
+# Terminal 1 - Backend
+cd backend
+npm run start:dev
+# -> http://localhost:8000
 
----
-
-### Integrações
-
-- [ ] Pesquisar integração com OpenFinance
-  - [ ] Puxar extratos automaticamente
-  - OU
-  - [ ] Permitir upload de extratos bancários
-
----
-
-## Próximos Passos (Estratégico)
-
-1. Finalizar consistência de dados (accounts, saldo, impulsivo)
-2. Garantir persistência completa no banco
-3. Ajustar UX mínima (profile + assinaturas)
-4. Implementar restrição por chave de acesso
-5. Deploy do MVP
-6. Evoluções pós-MVP:
-   - Pagamento
-   - IA
-   - OpenFinance
+# Terminal 2 - Frontend
+cd frontend
+npm run dev
+# -> http://localhost:5173
+```
 
 ---
 
-## Objetivo do MVP
+## Estrutura do Projeto
 
-- Rodar de forma estável
-- Resolver um problema real
-- Ser utilizável
-- Criar base para monetização
+```
+fundz/
+├── backend/                 # API REST (NestJS)
+│   ├── prisma/              # Schema e migrations
+│   └── src/
+│       ├── accounts/        # CRUD contas
+│       ├── auth/            # Guard + estrategia JWT
+│       ├── categories/      # CRUD categorias
+│       ├── dashboard/       # Dados agregados
+│       ├── goals/           # CRUD metas
+│       ├── health/          # Health check
+│       ├── installments/    # CRUD parcelamentos
+│       ├── subscriptions/   # CRUD assinaturas
+│       ├── transactions/    # CRUD transacoes
+│       ├── users/           # Auth (register/login)
+│       ├── prisma/          # Modulo DB
+│       ├── supabase/        # Cliente Supabase
+│       └── common/          # Decorators, filters, DTOs
+│
+├── frontend/                # SPA (React + Vite)
+│   └── src/
+│       ├── pages/           # Paginas por rota
+│       ├── components/      # Componentes UI + features
+│       ├── service/         # API client + services
+│       ├── types/           # Tipos TypeScript
+│       └── utils/           # Supabase client
+│
+├── vercel.json              # Config deploy monorepo
+└── package.json             # Scripts raiz
+```
 
 ---
 
-## Diretrizes de Desenvolvimento
+## API
 
-- Priorizar velocidade com qualidade suficiente
-- Evitar overengineering
-- Pensar como produto, não apenas como código
-- Toda feature deve ter impacto real
+Todas as rotas sao prefixadas com `/fundz`. Rotas protegidas exigem `Authorization: Bearer <token>`.
+
+| Metodo | Rota | Descricao |
+|---|---|---|
+| `GET` | `/health` | Health check |
+| `POST` | `/user/auth/register` | Criar conta |
+| `POST` | `/user/auth/login` | Login |
+| `GET` | `/user/auth/validate` | Validar token |
+| `CRUD` | `/account` | Contas |
+| `GET` | `/account/balance/:id` | Saldo da conta |
+| `CRUD` | `/category` | Categorias |
+| `CRUD` | `/transaction` | Transacoes |
+| `GET` | `/transaction/last-month` | Transacoes ultimos 30 dias |
+| `CRUD` | `/goal` | Metas |
+| `CRUD` | `/subscription` | Assinaturas |
+| `CRUD` | `/installment` | Parcelamentos |
+| `GET` | `/dashboard/overview` | Dashboard agregado |
+
+---
+
+## Scripts
+
+```bash
+# Backend
+cd backend
+npm run start:dev      # Dev com hot reload
+npm run build          # Build producao
+npm run start:prod     # Rodar build
+npm run lint           # Lint
+npx prisma studio      # Visualizar banco
+
+# Frontend
+cd frontend
+npm run dev            # Dev server
+npm run build          # Build producao
+npm run preview        # Preview do build
+npm run lint           # Lint
+```
+
+---
+
+## Deploy
+
+O projeto esta configurado para deploy na **Vercel** como monorepo:
+
+- Frontend em `/` (Vite)
+- Backend em `/_/backend` (NestJS serverless)
+
+Configure as variaveis de ambiente no dashboard da Vercel para ambos os projetos.
+
+---
+
+## Roadmap
+
+- [x] CRUDs completos (contas, transacoes, categorias, metas, assinaturas, parcelamentos)
+- [x] Dashboard com metricas financeiras
+- [x] Autenticacao Supabase
+- [x] Deploy Vercel
+- [X] Card de Saúde Financeira na home (investimentos 'bom', gastos 'atenção', dividas 'baixo')
+- [ ] Pagina de perfil/configuracoes (deixar 100% funcional pelo menos a parte de perfil)
+- [ ] CRUD de investimentos
+- [ ] Landing page profissional
+- [ ] Página de politica de privacidade 
+- [ ] Gateway de pagamento
+- [ ] Analise financeira com IA
+- [ ] Integracao OpenFinance (Pluggy)
+
+---
+
+## Licenca
+
+Projeto privado. Todos os direitos reservados.

@@ -270,11 +270,38 @@ export function HomeSkeleton() {
         </div>
         <div className="w-full"><MonthlyBalanceSkeleton /></div>
 
-        {/* Linha 3: Categorias */}
+        {/* Linha 3: Saúde Financeira */}
+        <div className="lg:col-span-2">
+          <div className="bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] p-6 shadow-[var(--neo-shadow)]">
+            <div className="flex justify-between items-center mb-5">
+              <Skeleton className="h-3 w-36" />
+              <Skeleton className="h-6 w-16 rounded-full" />
+            </div>
+            <div className="flex flex-col gap-4">
+              {[0, 1, 2].map((i) => (
+                <div key={i}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="w-9 h-9 rounded-lg" />
+                      <div className="flex flex-col gap-1">
+                        <Skeleton className="h-3 w-24" />
+                        <Skeleton className="h-2.5 w-12" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                  </div>
+                  {i < 2 && <div className="border-t-2 border-black/10 border-dashed mt-4" />}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Linha 4: Categorias */}
         <div className="w-full"><CategoryAnalysisSkeleton /></div>
         <div className="w-full"><CategoryDistributionSkeleton /></div>
 
-        {/* Linha 4: Transações */}
+        {/* Linha 5: Transações */}
         <div className="w-full lg:col-span-2">
           <RecentTransactionsSkeleton />
         </div>

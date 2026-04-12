@@ -1,24 +1,120 @@
 import { useState, useEffect } from "react";
-import { User, Lock, Bell, Settings2, Camera, Moon, Sun } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  User,
+  Lock,
+  Bell,
+  Settings2,
+  Camera,
+  Moon,
+  Sun,
+  AlertTriangle,
+} from "lucide-react";
+import toast from "react-hot-toast";
 import { ConfigsSkeleton } from "../components/skeletons/ConfigsSkeleton";
+import {
+  getProfile,
+  updateProfile,
+  changePassword,
+  deleteAccount,
+} from "../service/profile.service";
+import type { Profile } from "../service/profile.service";
 
 type Tab = "profile" | "account" | "notifications" | "preferences";
 
 export function Configs() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("profile");
 
+  // Profile state
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [name, setName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  // Password state
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+
+  // Notification state
+  const [pushEnabled, setPushEnabled] = useState(true);
+  const [emailEnabled, setEmailEnabled] = useState(false);
+
+  // Preferences state
+  const [isPrivate, setIsPrivate] = useState(false);
+
+  // Delete account state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 0);
-    return () => clearTimeout(timer);
+    getProfile()
+      .then((p) => {
+        setProfile(p);
+        setName(p.name ?? "");
+        setAvatarUrl(p.avatar_url ?? "");
+      })
+      .catch((err) => {
+        console.error("Erro ao buscar perfil:", err);
+        toast.error("Erro ao carregar perfil");
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <ConfigsSkeleton />;
 
-  // Estados mockados
-  const [pushEnabled, setPushEnabled] = useState(true);
-  const [emailEnabled, setEmailEnabled] = useState(false);
-  const [isPrivate, setIsPrivate] = useState(false);
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    try {
+      const updated = await updateProfile({ name, avatar_url: avatarUrl || undefined });
+      setProfile(updated);
+      localStorage.setItem("user_name", updated.name ?? "");
+      toast.success("Perfil atualizado!");
+    } catch {
+      toast.error("Erro ao salvar perfil");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (newPassword.length < 6) {
+      toast.error("A senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("As senhas não coincidem");
+      return;
+    }
+    setChangingPassword(true);
+    try {
+      await changePassword(newPassword);
+      toast.success("Senha alterada com sucesso!");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch {
+      toast.error("Erro ao alterar senha");
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== "EXCLUIR") return;
+    setDeleting(true);
+    try {
+      await deleteAccount();
+      localStorage.clear();
+      toast.success("Conta excluída");
+      navigate("/auth");
+    } catch {
+      toast.error("Erro ao excluir conta");
+      setDeleting(false);
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto w-full p-4 md:p-8">
@@ -75,11 +171,19 @@ export function Configs() {
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8">
                 <div className="relative group cursor-pointer">
                   <div className="w-24 h-24 rounded-full bg-[var(--main-bg)] border-2 border-[var(--black)] shadow-[var(--neo-shadow-hover)] overflow-hidden flex items-center justify-center transition-transform group-hover:scale-105">
-                    <User
-                      size={40}
-                      className="text-[var(--black-muted)]"
-                      strokeWidth={2}
-                    />
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt="Avatar"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User
+                        size={40}
+                        className="text-[var(--black-muted)]"
+                        strokeWidth={2}
+                      />
+                    )}
                   </div>
                   <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border-2 border-transparent group-hover:border-[var(--black)]">
                     <Camera
@@ -96,9 +200,15 @@ export function Configs() {
                   <p className="text-[10px] font-bold text-[var(--black-muted)] mt-1 mb-3 uppercase tracking-wider">
                     JPG, GIF ou PNG. Máx: 5MB.
                   </p>
-                  <button className="text-[10px] font-black uppercase tracking-wider text-[var(--primary)] bg-[var(--secondary)] border-2 border-[var(--black)] px-4 py-2 rounded-md shadow-[var(--neo-shadow-hover)] hover:bg-[var(--secondary-hover)] transition-colors">
-                    Alterar foto
-                  </button>
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="text"
+                      value={avatarUrl}
+                      onChange={(e) => setAvatarUrl(e.target.value)}
+                      placeholder="URL da imagem de perfil"
+                      className="w-full bg-white border-2 border-[var(--black)] rounded-md px-4 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all shadow-[var(--neo-shadow-hover)]"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -106,23 +216,21 @@ export function Configs() {
                 <InputGroup
                   label="Nome Completo"
                   placeholder="Ex: João Silva"
+                  value={name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
                 />
                 <InputGroup
-                  label="Apelido / Username"
-                  placeholder="Ex: joaosilva99"
-                  helperText="Como a galera vai te ver no app."
+                  label="E-mail"
+                  value={profile?.email ?? ""}
+                  disabled
+                  helperText="O e-mail não pode ser alterado."
                 />
-                <div className="md:col-span-2">
-                  <InputGroup
-                    label="Bio"
-                    placeholder="Escreva um pouco sobre você..."
-                    isTextarea
-                  />
-                </div>
               </div>
 
               <div className="mt-8 pt-6 border-t-2 border-[var(--black)] border-dashed flex justify-end">
-                <Button>Salvar Alterações</Button>
+                <Button onClick={handleSaveProfile} disabled={saving}>
+                  {saving ? "Salvando..." : "Salvar Alterações"}
+                </Button>
               </div>
             </div>
           )}
@@ -134,17 +242,26 @@ export function Configs() {
                 Conta e Segurança
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 pb-8 border-b-2 border-[var(--black)] border-dashed">
-                <InputGroup
-                  label="E-mail"
-                  type="email"
-                  placeholder="joao@exemplo.com"
-                />
-                <InputGroup
-                  label="Telefone"
-                  type="tel"
-                  placeholder="(00) 00000-0000"
-                />
+              <div className="mb-8 pb-8 border-b-2 border-[var(--black)] border-dashed">
+                <h3 className="font-black text-[var(--primary)] mb-4 uppercase tracking-tight">
+                  Informações da Conta
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <InputGroup
+                    label="E-mail"
+                    value={profile?.email ?? ""}
+                    disabled
+                  />
+                  <InputGroup
+                    label="Membro desde"
+                    value={
+                      profile?.created_at
+                        ? new Date(profile.created_at).toLocaleDateString("pt-BR")
+                        : ""
+                    }
+                    disabled
+                  />
+                </div>
               </div>
 
               <h3 className="font-black text-[var(--primary)] mb-4 uppercase tracking-tight">
@@ -152,24 +269,25 @@ export function Configs() {
               </h3>
               <div className="grid grid-cols-1 gap-5 max-w-md">
                 <InputGroup
-                  label="Senha Atual"
-                  type="password"
-                  placeholder="••••••••"
-                />
-                <InputGroup
                   label="Nova Senha"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Mínimo 6 caracteres"
+                  value={newPassword}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
                 />
                 <InputGroup
                   label="Confirmar Nova Senha"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Repita a nova senha"
+                  value={confirmPassword}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
                 />
               </div>
 
               <div className="mt-8 pt-6 border-t-2 border-[var(--black)] border-dashed flex justify-end">
-                <Button>Atualizar Segurança</Button>
+                <Button onClick={handleChangePassword} disabled={changingPassword}>
+                  {changingPassword ? "Alterando..." : "Atualizar Senha"}
+                </Button>
               </div>
             </div>
           )}
@@ -204,7 +322,9 @@ export function Configs() {
               </div>
 
               <div className="mt-8 pt-6 border-t-2 border-[var(--black)] border-dashed flex justify-end">
-                <Button>Salvar Preferências</Button>
+                <Button onClick={() => toast.success("Preferências salvas!")}>
+                  Salvar Preferências
+                </Button>
               </div>
             </div>
           )}
@@ -221,14 +341,12 @@ export function Configs() {
                   Aparência
                 </h3>
                 <div className="flex gap-4">
-                  {/* Botão Modo Claro (Ativo) */}
                   <button className="flex-1 flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-[var(--black)] bg-[var(--secondary)] text-[var(--primary)] shadow-[var(--neo-shadow-hover)] transition-transform hover:-translate-y-0.5">
                     <Sun size={24} strokeWidth={2.5} />
                     <span className="text-xs font-black uppercase tracking-wider">
                       Modo Claro
                     </span>
                   </button>
-                  {/* Botão Modo Escuro (Inativo) */}
                   <button className="flex-1 flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-[var(--black)] bg-white text-[var(--black-muted)] hover:bg-black/5 transition-colors">
                     <Moon size={24} strokeWidth={2.5} />
                     <span className="text-xs font-black uppercase tracking-wider">
@@ -250,18 +368,58 @@ export function Configs() {
                 />
               </div>
 
-              {/* Zona de Perigo Brutalista */}
+              {/* Zona de Perigo */}
               <div className="mt-8 pt-8 border-t-4 border-red-500">
-                <h3 className="font-black text-xl text-red-600 mb-2 uppercase tracking-tighter">
-                  Zona de Perigo
-                </h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle size={20} className="text-red-600" strokeWidth={2.5} />
+                  <h3 className="font-black text-xl text-red-600 uppercase tracking-tighter">
+                    Zona de Perigo
+                  </h3>
+                </div>
                 <p className="text-xs font-bold text-[var(--black-muted)] mb-5">
                   Ao excluir sua conta, todos os seus dados serão apagados
                   permanentemente. Esta ação não tem volta.
                 </p>
-                <button className="px-5 py-3 bg-red-500 text-white font-black uppercase tracking-wider rounded-md border-2 border-[var(--black)] shadow-[var(--neo-shadow)] hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px] hover:bg-red-600 transition-all">
-                  Excluir minha conta
-                </button>
+
+                {!showDeleteConfirm ? (
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="px-5 py-3 bg-red-500 text-white font-black uppercase tracking-wider rounded-md border-2 border-[var(--black)] shadow-[var(--neo-shadow)] hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px] hover:bg-red-600 transition-all"
+                  >
+                    Excluir minha conta
+                  </button>
+                ) : (
+                  <div className="bg-red-50 border-2 border-red-500 rounded-xl p-5 space-y-4">
+                    <p className="text-sm font-black text-red-700">
+                      Digite <span className="bg-red-200 px-2 py-0.5 rounded">EXCLUIR</span> para confirmar:
+                    </p>
+                    <input
+                      type="text"
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      placeholder="EXCLUIR"
+                      className="w-full max-w-xs bg-white border-2 border-red-500 rounded-md px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-red-500 transition-all"
+                    />
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleDeleteAccount}
+                        disabled={deleteConfirmText !== "EXCLUIR" || deleting}
+                        className="px-5 py-3 bg-red-600 text-white font-black uppercase tracking-wider rounded-md border-2 border-[var(--black)] shadow-[var(--neo-shadow)] hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {deleting ? "Excluindo..." : "Confirmar Exclusão"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowDeleteConfirm(false);
+                          setDeleteConfirmText("");
+                        }}
+                        className="px-5 py-3 bg-white text-[var(--primary)] font-black uppercase tracking-wider rounded-md border-2 border-[var(--black)] shadow-[var(--neo-shadow-hover)] hover:bg-black/5 transition-all"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -305,25 +463,33 @@ function InputGroup({
   placeholder,
   type = "text",
   helperText,
-  isTextarea = false,
-}: any) {
+  value,
+  onChange,
+  disabled = false,
+}: {
+  label: string;
+  placeholder?: string;
+  type?: string;
+  helperText?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+}) {
   return (
     <div className="flex flex-col gap-2">
       <label className="text-[10px] font-black text-[var(--black-muted)] uppercase tracking-widest">
         {label}
       </label>
-      {isTextarea ? (
-        <textarea
-          placeholder={placeholder}
-          className="w-full bg-white border-2 border-[var(--black)] rounded-md p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all min-h-[100px] resize-none shadow-[var(--neo-shadow-hover)]"
-        />
-      ) : (
-        <input
-          type={type}
-          placeholder={placeholder}
-          className="w-full bg-white border-2 border-[var(--black)] rounded-md px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all shadow-[var(--neo-shadow-hover)]"
-        />
-      )}
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        className={`w-full bg-white border-2 border-[var(--black)] rounded-md px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all shadow-[var(--neo-shadow-hover)] ${
+          disabled ? "opacity-60 cursor-not-allowed bg-gray-50" : ""
+        }`}
+      />
       {helperText && (
         <span className="text-[10px] font-bold text-[var(--black-light)] mt-1">
           {helperText}
@@ -339,7 +505,13 @@ function ToggleRow({
   checked,
   onChange,
   disabled = false,
-}: any) {
+}: {
+  title: string;
+  description: string;
+  checked: boolean;
+  onChange: () => void;
+  disabled?: boolean;
+}) {
   return (
     <div
       className={`flex items-center justify-between gap-4 p-4 rounded-xl border-2 border-[var(--black)] bg-white shadow-[var(--neo-shadow-hover)] transition-colors ${
@@ -355,7 +527,6 @@ function ToggleRow({
         </p>
       </div>
 
-      {/* Toggle com estilo Neo-Brutalista */}
       <button
         type="button"
         disabled={disabled}
@@ -374,9 +545,21 @@ function ToggleRow({
   );
 }
 
-function Button({ children }: { children: React.ReactNode }) {
+function Button({
+  children,
+  onClick,
+  disabled = false,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+}) {
   return (
-    <button className="bg-[var(--primary)] text-[var(--secondary)] px-6 py-3 rounded-md border-2 border-[var(--black)] text-xs font-black uppercase tracking-widest shadow-[var(--neo-shadow)] hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all">
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="bg-[var(--primary)] text-[var(--secondary)] px-6 py-3 rounded-md border-2 border-[var(--black)] text-xs font-black uppercase tracking-widest shadow-[var(--neo-shadow)] hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+    >
       {children}
     </button>
   );

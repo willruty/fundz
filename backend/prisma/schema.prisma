@@ -38,6 +38,7 @@ model Profile {
   id        String    @id @db.Uuid
   email     String?   @unique @db.VarChar
   name      String?
+  avatarUrl String?   @map("avatar_url") @db.VarChar
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
 

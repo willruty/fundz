@@ -6,6 +6,7 @@ import { MonthlyBalanceCard } from "../components/MonthlyBalance";
 import { CategoryAnalysisCard } from "../components/CategoryAnalysis";
 import { CategoryDistributionCard } from "../components/CategoryDistribution";
 import { RecentTransactions } from "../components/RecentTransactions";
+import { FinancialHealthCard } from "../components/FinancialHealthCard";
 import { HomeSkeleton } from "../components/HomeSkeleton";
 import { getDashboardOverview } from "../service/dashboard.service";
 import type { DashboardDTO } from "../types/dashboard";
@@ -51,7 +52,12 @@ export function Home() {
           />
         </div>
 
-        {/* Linha 3: Categorias */}
+        {/* Linha 3: Saúde Financeira */}
+        <div className="lg:col-span-2">
+          <FinancialHealthCard health={dashboard.financial_health} />
+        </div>
+
+        {/* Linha 4: Categorias */}
         <div className="w-full">
           <CategoryAnalysisCard most_used={dashboard.categories.most_used} />
         </div>

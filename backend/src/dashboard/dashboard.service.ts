@@ -38,16 +38,31 @@ export interface CategorySummary {
   distribution: CategoryDistribution[];
 }
 
+export type HealthLevel = 'bom' | 'atenção' | 'crítico' | 'moderado' | 'alto' | 'baixo' | 'ruim' | 'sem dados';
+
+export interface FinancialHealthIndicator {
+  label: string;
+  level: HealthLevel;
+  value: string;
+}
+
+export interface FinancialHealth {
+  gastos: FinancialHealthIndicator;
+  dividas: FinancialHealthIndicator;
+  investimentos: FinancialHealthIndicator;
+}
+
 @Injectable()
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getOverview(userId: string) {
-    const [accounts, goal, lastMonthTransactions, categories] = await Promise.all([
+    const [accounts, goal, lastMonthTransactions, categories, financialHealth] = await Promise.all([
       this.getAccountsSummary(userId),
       this.getNextGoal(userId),
       this.getLastMonthTransactions(userId),
       this.getCategorySummary(userId),
+      this.getFinancialHealth(userId),
     ]);
 
     return {
@@ -56,6 +71,7 @@ export class DashboardService {
         goal,
         last_month_transactions: lastMonthTransactions,
         categories,
+        financial_health: financialHealth,
       },
     };
   }
@@ -192,5 +208,97 @@ export class DashboardService {
         });
 
     return { most_used: mostUsed, distribution };
+  }
+
+  private async getFinancialHealth(userId: string): Promise<FinancialHealth> {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const [transactionTotals, subscriptionTotal, installmentTotal] = await Promise.all([
+      // Income and expense totals from last 30 days
+      this.prisma.$queryRaw<Array<{ type: string; total: Prisma.Decimal }>>(
+        Prisma.sql`
+          SELECT type, SUM(ABS(amount)) AS total
+          FROM transactions
+          WHERE user_id = ${userId}::uuid
+            AND occurred_at >= ${thirtyDaysAgo}
+          GROUP BY type
+        `,
+      ),
+      // Monthly cost of active subscriptions
+      this.prisma.$queryRaw<Array<{ total: Prisma.Decimal }>>(
+        Prisma.sql`
+          SELECT COALESCE(SUM(
+            CASE WHEN billing_cycle = 'yearly' THEN amount / 12
+                 ELSE amount
+            END
+          ), 0) AS total
+          FROM subscriptions
+          WHERE user_id = ${userId}::uuid AND active = true
+        `,
+      ),
+      // Monthly cost of active installments
+      this.prisma.$queryRaw<Array<{ total: Prisma.Decimal }>>(
+        Prisma.sql`
+          SELECT COALESCE(SUM(installment_amount), 0) AS total
+          FROM installments
+          WHERE user_id = ${userId}::uuid
+            AND active = true
+            AND paid_installments < total_installments
+        `,
+      ),
+    ]);
+
+    let income = new Decimal(0);
+    let expense = new Decimal(0);
+    for (const row of transactionTotals) {
+      if (row.type === 'income') income = new Decimal(row.total.toString());
+      if (row.type === 'expense') expense = new Decimal(row.total.toString());
+    }
+
+    const monthlyDebts = new Decimal(subscriptionTotal[0]?.total?.toString() ?? '0')
+      .add(new Decimal(installmentTotal[0]?.total?.toString() ?? '0'));
+
+    // --- Gastos: expense/income ratio ---
+    let gastos: FinancialHealthIndicator;
+    if (income.isZero()) {
+      gastos = { label: 'Gastos', level: 'sem dados', value: '0%' };
+    } else {
+      const ratio = expense.div(income).mul(100).toDecimalPlaces(0);
+      const ratioNum = ratio.toNumber();
+      let level: HealthLevel = 'bom';
+      if (ratioNum > 85) level = 'crítico';
+      else if (ratioNum > 60) level = 'atenção';
+      gastos = { label: 'Gastos', level, value: `${ratioNum}%` };
+    }
+
+    // --- Dívidas: monthly debts / income ---
+    let dividas: FinancialHealthIndicator;
+    if (income.isZero() && monthlyDebts.isZero()) {
+      dividas = { label: 'Dívidas', level: 'sem dados', value: 'R$ 0' };
+    } else if (income.isZero()) {
+      dividas = { label: 'Dívidas', level: 'alto', value: `R$ ${monthlyDebts.toFixed(0)}` };
+    } else {
+      const debtRatio = monthlyDebts.div(income).mul(100).toDecimalPlaces(0).toNumber();
+      let level: HealthLevel = 'baixo';
+      if (debtRatio > 50) level = 'alto';
+      else if (debtRatio > 25) level = 'moderado';
+      dividas = { label: 'Dívidas', level, value: `${debtRatio}%` };
+    }
+
+    // --- Investimentos: savings rate ---
+    let investimentos: FinancialHealthIndicator;
+    if (income.isZero()) {
+      investimentos = { label: 'Investimentos', level: 'sem dados', value: '0%' };
+    } else {
+      const savingsRate = income.sub(expense).div(income).mul(100).toDecimalPlaces(0);
+      const savingsNum = savingsRate.toNumber();
+      let level: HealthLevel = 'bom';
+      if (savingsNum < 5) level = 'ruim';
+      else if (savingsNum < 20) level = 'atenção';
+      investimentos = { label: 'Investimentos', level, value: `${savingsNum}%` };
+    }
+
+    return { gastos, dividas, investimentos };
   }
 }

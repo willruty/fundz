@@ -2,7 +2,7 @@
   "name": "fundz",
   "version": "1.0.0",
   "scripts": {
-    "backend": "cd src/backend && air",
-    "frontend": "cd src/frontend && npm run dev"
+    "backend": "cd backend && npm start --watch",
+    "frontend": "cd frontend && npm run dev"
   }
 }

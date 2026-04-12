@@ -8,6 +8,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -146,5 +148,73 @@ export class UsersService {
       message: 'Token válido',
       user_id: userId,
     };
+  }
+
+  /** Get user profile */
+  async getProfile(userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, name: true, avatarUrl: true, createdAt: true },
+    });
+
+    if (!profile) {
+      throw new BadRequestException('perfil não encontrado');
+    }
+
+    return { data: profile };
+  }
+
+  /** Update profile (name, avatar_url) */
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    const data: Record<string, string> = {};
+    if (dto.name !== undefined) data.name = dto.name;
+    if (dto.avatar_url !== undefined) data.avatarUrl = dto.avatar_url;
+
+    if (Object.keys(data).length === 0) {
+      throw new BadRequestException('nenhum campo para atualizar');
+    }
+
+    const profile = await this.prisma.profile.update({
+      where: { id: userId },
+      data,
+    });
+
+    return { data: profile };
+  }
+
+  /** Change password via Supabase Admin API */
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    const { error } = await this.supabase.supabaseAdmin.auth.admin.updateUserById(
+      userId,
+      { password: dto.new_password },
+    );
+
+    if (error) {
+      throw new BadRequestException(error.message);
+    }
+
+    return { data: 'senha atualizada com sucesso' };
+  }
+
+  /** Delete account — removes profile + auth user */
+  async deleteAccount(userId: string) {
+    // Delete all user data (cascade via DB or manual)
+    await this.prisma.$transaction([
+      this.prisma.transaction.deleteMany({ where: { userId } }),
+      this.prisma.installment.deleteMany({ where: { userId } }),
+      this.prisma.subscription.deleteMany({ where: { userId } }),
+      this.prisma.goal.deleteMany({ where: { userId } }),
+      this.prisma.account.deleteMany({ where: { userId } }),
+      this.prisma.category.deleteMany({ where: { userId } }),
+      this.prisma.profile.deleteMany({ where: { id: userId } }),
+    ]);
+
+    // Delete auth user
+    const { error } = await this.supabase.supabaseAdmin.auth.admin.deleteUser(userId);
+    if (error) {
+      throw new InternalServerErrorException('erro ao remover conta de autenticação');
+    }
+
+    return { data: 'conta excluída com sucesso' };
   }
 }
