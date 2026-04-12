@@ -6,6 +6,10 @@ export interface Transaction {
   amount: string;
   type: string;
   occurred_at: string;
+  // Fields returned by the backend (camelCase from Prisma)
+  occurredAt?: string;
+  categoryId?: string;
+  accountId?: string;
 }
 
 export interface TransactionListResponse {
@@ -19,10 +23,18 @@ export interface CreateTransactionInput {
   amount: string;
   type: string;
   occurred_at: string;
+  account_id: string;
+  category_id?: string;
 }
 
-export interface UpdateTransactionInput extends CreateTransactionInput {
+export interface UpdateTransactionInput {
   id: string;
+  description?: string;
+  amount?: string;
+  type?: string;
+  occurred_at?: string;
+  account_id?: string;
+  category_id?: string;
 }
 
 export async function getTransactions(): Promise<Transaction[]> {
@@ -43,12 +55,13 @@ export async function createTransaction(
 export async function updateTransaction(
   input: UpdateTransactionInput,
 ): Promise<Transaction> {
-  const response = await api.put<{ data: Transaction }>("/transaction/", {
-    ...input,
-    occurred_at: input.occurred_at.includes("T")
+  const payload: Record<string, unknown> = { ...input };
+  if (input.occurred_at) {
+    payload.occurred_at = input.occurred_at.includes("T")
       ? input.occurred_at
-      : `${input.occurred_at}T00:00:00Z`,
-  });
+      : `${input.occurred_at}T00:00:00Z`;
+  }
+  const response = await api.put<{ data: Transaction }>("/transaction/", payload);
   return response.data;
 }
 

@@ -1,22 +1,21 @@
 import { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
-// Dados mockados
-const data = [
-  { name: "Supermercado", value: 1200, color: "#FF3B3B" },
-  { name: "Restaurantes", value: 850, color: "#08233e" },
-  { name: "Transporte", value: 500, color: "#ffd100" },
-  { name: "Lazer", value: 600, color: "#000000" },
-  { name: "Outros", value: 300, color: "#9ca3af" }, // Cinza
-];
+interface CategoryEntry {
+  name: string;
+  value: number;
+  color: string;
+}
 
-export function CategoryDistributionCard() {
+interface CategoryDistributionCardProps {
+  data: CategoryEntry[];
+}
+
+export function CategoryDistributionCard({ data }: CategoryDistributionCardProps) {
   const [activeIndex, setActiveIndex] = useState<number>(-1);
 
   const totalSpent = data.reduce((sum, entry) => sum + entry.value, 0);
 
-  // 2. Tipando os handlers do PieChart
-  // O Recharts passa o objeto da fatia como primeiro argumento (_) e o index como segundo
   const onPieEnter = (_: any, index: number) => setActiveIndex(index);
   const onPieLeave = () => setActiveIndex(-1);
 
@@ -28,7 +27,6 @@ export function CategoryDistributionCard() {
     ? ((activeData.value / totalSpent) * 100).toFixed(0) + "%"
     : null;
 
-  // 3. Tipando o argumento 'val' como number
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -36,9 +34,16 @@ export function CategoryDistributionCard() {
       minimumFractionDigits: 0,
     }).format(val);
 
+  if (data.length === 0) {
+    return (
+      <div className="flex flex-col bg-white border-[3px] border-black rounded-2xl shadow-[8px_8px_0px_0px_#000000] h-[420px] p-6 items-center justify-center">
+        <p className="text-sm font-black text-gray-500 uppercase tracking-wider">Sem despesas neste período</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col bg-white border-[3px] border-black rounded-2xl shadow-[8px_8px_0px_0px_#000000] h-[420px] p-6 relative">
-      {/* Cabeçalho "Clean" e Massivo (sem a tarja azul) */}
       <div className="flex justify-between items-start mb-2">
         <div>
           <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">
@@ -53,7 +58,6 @@ export function CategoryDistributionCard() {
         </span>
       </div>
 
-      {/* Área Principal do Gráfico */}
       <div className="flex-1 relative">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -61,8 +65,8 @@ export function CategoryDistributionCard() {
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={90} // Raio interno aumentado
-              outerRadius={125} // Raio externo aumentado (gráfico gigante)
+              innerRadius={90}
+              outerRadius={125}
               paddingAngle={1}
               dataKey="value"
               stroke="#000000"
@@ -85,7 +89,6 @@ export function CategoryDistributionCard() {
           </PieChart>
         </ResponsiveContainer>
 
-        {/* Tooltip Dinâmica "Chumbada" no Centro do Gráfico */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
           <span className="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest mb-1">
             {displayTitle}
@@ -93,7 +96,6 @@ export function CategoryDistributionCard() {
           <span className="text-3xl font-black text-black tracking-tighter leading-none">
             {formatCurrency(displayValue)}
           </span>
-          {/* Mostra a tag de % apenas se estiver com o mouse em cima de uma fatia */}
           {displayPercentage && (
             <span className="text-[10px] font-black text-white bg-black px-2 py-0.5 mt-2 border-[2px] border-black rounded uppercase shadow-[2px_2px_0px_0px_#000000]">
               {displayPercentage} DO TOTAL
@@ -102,18 +104,16 @@ export function CategoryDistributionCard() {
         </div>
       </div>
 
-      {/* Legenda Horizontal na Base (Dotted Line separando) */}
       <div className="flex flex-wrap justify-center gap-2 mt-2 pt-4 border-t-[3px] border-black border-dotted">
         {data.map((entry) => (
           <div
             key={entry.name}
             className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 border-2 border-black rounded-md shadow-[2px_2px_0px_0px_#000000]"
           >
-            {/* Bolinha com a cor da categoria */}
             <div
               className="w-2.5 h-2.5 rounded-full border border-black"
               style={{ backgroundColor: entry.color }}
-            ></div>
+            />
             <span className="text-[9px] font-black text-black uppercase tracking-wider">
               {entry.name}
             </span>

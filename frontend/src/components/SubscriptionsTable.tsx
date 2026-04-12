@@ -17,30 +17,28 @@ export interface SubscriptionItem {
   status: CommitmentStatus;
 }
 
-const mockData: SubscriptionItem[] = [
-  { id: "1", name: "Netflix",        type: "subscription",  value: 39.9,  recurrence: "Mensal",  nextBilling: "18 Mar", totalPaid: 480,    status: "active"   },
-  { id: "2", name: "Notebook Dell",  type: "installment",   value: 320,   installmentCurrent: 3,  installmentTotal: 12,  nextBilling: "18 Mar", totalPaid: 960,    status: "active"   },
-  { id: "3", name: "Total Pass",     type: "subscription",  value: 119.9, recurrence: "Mensal",  nextBilling: "22 Mar", totalPaid: 1438.8, status: "active"   },
-  { id: "4", name: "Amazon Prime",   type: "subscription",  value: 119.0, recurrence: "Anual",   nextBilling: "05 Nov", totalPaid: 238,    status: "active"   },
-  { id: "5", name: "iPhone 13",      type: "installment",   value: 450,   installmentCurrent: 12, installmentTotal: 12,  nextBilling: "-",  totalPaid: 5400,   status: "finished" },
-];
+interface SubscriptionTableProps {
+  items: SubscriptionItem[];
+  onNew: () => void;
+  onEdit: (item: SubscriptionItem) => void;
+  onDelete: (item: SubscriptionItem) => void;
+}
 
 type FilterType = "all" | CommitmentType;
 
-export default function SubscriptionTable() {
+export default function SubscriptionTable({ items, onNew, onEdit, onDelete }: SubscriptionTableProps) {
   const [filter, setFilter] = useState<FilterType>("all");
 
   const fmt = (v: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
-  const filteredData = mockData.filter((item) =>
+  const filteredData = items.filter((item) =>
     filter === "all" ? true : item.type === filter
   );
 
   return (
     <div className="w-full bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] overflow-hidden flex flex-col transition-all duration-200 hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]">
 
-      {/* HEADER — primary, igual ao RecentTransactions */}
       <div className="p-5 sm:p-6 border-b-2 border-[var(--black)] bg-[var(--primary)] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-[var(--secondary)] uppercase tracking-tighter italic">
@@ -52,7 +50,6 @@ export default function SubscriptionTable() {
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Filtros */}
           <div className="flex items-center gap-2 bg-[var(--main-bg)] p-1.5 rounded-lg border-2 border-[var(--black)]">
             {([
               { key: "all",          label: "Todos"          },
@@ -75,13 +72,15 @@ export default function SubscriptionTable() {
             ))}
           </div>
 
-          <button className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] transition-all shadow-[var(--neo-shadow-hover)] cursor-pointer">
+          <button
+            onClick={onNew}
+            className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] transition-all shadow-[var(--neo-shadow-hover)] cursor-pointer"
+          >
             <Plus size={14} strokeWidth={3} /> Novo
           </button>
         </div>
       </div>
 
-      {/* TABELA */}
       <div className="overflow-x-auto w-full min-h-[300px]">
         <table className="w-full text-left border-collapse whitespace-nowrap">
           <thead>
@@ -114,10 +113,9 @@ export default function SubscriptionTable() {
             ) : (
               filteredData.map((item) => (
                 <tr
-                  key={item.id}
+                  key={`${item.type}-${item.id}`}
                   className="border-b-2 border-[var(--black)] transition-all group hover:bg-[var(--secondary)] hover:bg-opacity-10"
                 >
-                  {/* Faixa colorida no hover — via grupo */}
                   <td className="p-4 sm:p-5 relative">
                     <div className="absolute left-0 top-0 h-full w-1 bg-[var(--secondary)] opacity-0 group-hover:opacity-100 transition-opacity" />
                     <span className="text-sm font-black text-[var(--primary)] uppercase tracking-tight">
@@ -175,10 +173,16 @@ export default function SubscriptionTable() {
 
                   <td className="p-4 sm:p-5">
                     <div className="flex justify-center gap-2">
-                      <button className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-[var(--primary)] cursor-pointer">
+                      <button
+                        onClick={() => onEdit(item)}
+                        className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-[var(--primary)] cursor-pointer"
+                      >
                         <Pencil size={16} strokeWidth={2.5} />
                       </button>
-                      <button className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-red-500 cursor-pointer">
+                      <button
+                        onClick={() => onDelete(item)}
+                        className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-red-500 cursor-pointer"
+                      >
                         <Trash2 size={16} strokeWidth={2.5} />
                       </button>
                     </div>

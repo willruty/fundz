@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
-import { Calendar } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Calendar, Plus, Pencil, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
 import { GoalsSkeleton } from "../components/skeletons/GoalsSkeleton";
+import GoalModal, { type GoalFormData } from "../components/GoalModal";
 import {
   BarChart,
   Bar,
@@ -12,29 +14,17 @@ import {
   ReferenceLine,
   Cell,
 } from "recharts";
+import {
+  getGoals,
+  createGoal,
+  updateGoal,
+  deleteGoal,
+  type Goal,
+} from "../service/goals.service";
 
-// ── DADOS ──────────────────────────────────────────────────────────────────────
+// ── CORES POR ÍNDICE ───────────────────────────────────────────────────────────
 
-const mockGoals = [
-  { id: 1, name: "Viagem Europa",        category: "viagem",     target: 9000,  current: 4200, deadline: "2025-12", monthlyContribution: 620,  requiredMonthly: 1000 },
-  { id: 2, name: "Reserva de Emergência",category: "emergencia", target: 10000, current: 6000, deadline: "2025-06", monthlyContribution: 1050, requiredMonthly: 1250 },
-  { id: 3, name: "Setup Home Office",    category: "equipamento",target: 4500,  current: 1800, deadline: "2025-03", monthlyContribution: 210,  requiredMonthly: 540  },
-  { id: 4, name: "Entrada do Carro",     category: "veiculo",    target: 15000, current: 2200, deadline: "2026-08", monthlyContribution: 800,  requiredMonthly: 800  },
-];
-
-const CAT_COLOR: Record<string, string> = {
-  viagem:     "#1A6BFF",
-  emergencia: "#22c55e",
-  equipamento:"#a855f7",
-  veiculo:    "#f97316",
-};
-
-const CAT_LABEL: Record<string, string> = {
-  viagem:     "Viagem",
-  emergencia: "Emergência",
-  equipamento:"Equipamento",
-  veiculo:    "Veículo",
-};
+const GOAL_COLORS = ["#1A6BFF", "#22c55e", "#a855f7", "#f97316", "#ef4444", "#06b6d4", "#8b5cf6"];
 
 // ── UTILITÁRIOS ────────────────────────────────────────────────────────────────
 
@@ -42,12 +32,60 @@ const fmt = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
 const pct = (current: number, target: number) =>
-  Math.min(100, Math.round((current / target) * 100));
+  target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
 
-const fmtDeadline = (str: string) => {
-  const [y, m] = str.split("-");
-  return new Date(+y, +m - 1).toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
-};
+function fmtDeadline(str: string | null): string {
+  if (!str) return "Sem prazo";
+  const d = new Date(str);
+  return d.toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
+}
+
+function monthsLeft(dueDate: string | null): number {
+  if (!dueDate) return 0;
+  const now = new Date();
+  const due = new Date(dueDate);
+  return Math.max(0, (due.getFullYear() - now.getFullYear()) * 12 + (due.getMonth() - now.getMonth()));
+}
+
+// ── GOAL SHAPE INTERNO ─────────────────────────────────────────────────────────
+
+interface MappedGoal {
+  id: string;
+  name: string;
+  target: number;
+  current: number;
+  dueDate: string | null;
+  color: string;
+  requiredMonthly: number;
+}
+
+function mapGoals(raw: Goal[]): MappedGoal[] {
+  return raw.map((g, i) => {
+    const target = parseFloat(g.targetAmount) || 0;
+    const current = parseFloat(g.currentAmount) || 0;
+    const ml = monthsLeft(g.dueDate);
+    const remaining = Math.max(0, target - current);
+    return {
+      id: g.id,
+      name: g.name,
+      target,
+      current,
+      dueDate: g.dueDate,
+      color: GOAL_COLORS[i % GOAL_COLORS.length],
+      requiredMonthly: ml > 0 ? Math.ceil(remaining / ml) : remaining,
+    };
+  });
+}
+
+function goalToFormData(goal: Goal): GoalFormData {
+  return {
+    id: goal.id,
+    name: goal.name,
+    targetAmount: String(parseFloat(goal.targetAmount) || 0),
+    currentAmount: String(parseFloat(goal.currentAmount) || 0),
+    dueDate: goal.dueDate ? goal.dueDate.slice(0, 10) : "",
+  };
+}
 
 // ── RADIAL RING ────────────────────────────────────────────────────────────────
 
@@ -68,108 +106,192 @@ function RadialRing({ percentage }: { percentage: number }) {
   );
 }
 
-// ── TOOLTIPS ───────────────────────────────────────────────────────────────────
-
-function ProgressTooltip({ active, payload }: any) {
-  if (!active || !payload?.length) return null;
-  const entry = payload[0]?.payload;
-  const goal = mockGoals.find((g) => g.name === entry?.fullName);
-  return (
-    <div className="bg-[var(--main-bg)] border-2 border-[var(--black)] rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-3 min-w-[160px]">
-      <p className="text-[10px] font-black uppercase text-[var(--black-muted)] mb-2 border-b-2 border-[var(--black)] border-dashed pb-1">
-        {entry?.fullName}
-      </p>
-      <div className="flex justify-between items-center gap-4">
-        <span className="text-[10px] font-bold uppercase text-[var(--black-muted)]">Progresso:</span>
-        <span className="text-xs font-black text-[var(--primary)]">{payload[0]?.value}%</span>
-      </div>
-      {goal && (
-        <div className="mt-2 pt-2 border-t-2 border-[var(--black)] flex justify-between items-center bg-[var(--secondary)] -mx-3 -mb-3 px-3 py-2 rounded-b-md">
-          <span className="text-[10px] font-black uppercase text-[var(--primary)]">Acumulado:</span>
-          <span className="text-sm font-black text-[var(--primary)]">{fmt(goal.current)}</span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function RitmoTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
-  const atual = payload.find((p: any) => p.dataKey === "atual")?.value ?? 0;
-  const necessario = payload.find((p: any) => p.dataKey === "necessario")?.value ?? 0;
-  return (
-    <div className="bg-[var(--main-bg)] border-2 border-[var(--black)] rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-3 min-w-[180px]">
-      <p className="text-[10px] font-black uppercase text-[var(--black-muted)] mb-2 border-b-2 border-[var(--black)] border-dashed pb-1">
-        {label}
-      </p>
-      <div className="space-y-1">
-        {payload.map((entry: any, i: number) => (
-          <div key={i} className="flex justify-between items-center gap-4">
-            <span className="text-[10px] font-bold uppercase text-[var(--black-muted)]">
-              {entry.dataKey === "atual" ? "Atual" : "Necessário"}:
-            </span>
-            <span className="text-xs font-black text-[var(--primary)]">{fmt(entry.value)}</span>
-          </div>
-        ))}
-      </div>
-      <div className="mt-2 pt-2 border-t-2 border-[var(--black)] flex justify-between items-center bg-[var(--secondary)] -mx-3 -mb-3 px-3 py-2 rounded-b-md">
-        <span className="text-[10px] font-black uppercase text-[var(--primary)]">Diferença:</span>
-        <span className="text-sm font-black text-[var(--primary)]">
-          {fmt(Math.abs(atual - necessario))}
-        </span>
-      </div>
-    </div>
-  );
-}
-
 // ── PAGE ───────────────────────────────────────────────────────────────────────
 
 export function Goals() {
   const [loading, setLoading] = useState(true);
-  const [ritmoFilter, setRitmoFilter] = useState<"all" | "atual" | "necessario">("all");
+  const [rawGoals, setRawGoals] = useState<Goal[]>([]);
+  const [goals, setGoals] = useState<MappedGoal[]>([]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 0);
-    return () => clearTimeout(timer);
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalInitial, setModalInitial] = useState<GoalFormData | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  // Delete confirm state
+  const [deleteTarget, setDeleteTarget] = useState<MappedGoal | null>(null);
+
+  const fetchData = useCallback(() => {
+    return getGoals()
+      .then((raw) => {
+        setRawGoals(raw);
+        setGoals(mapGoals(raw));
+      })
+      .catch(console.error);
   }, []);
 
-  const totalTarget  = mockGoals.reduce((s, g) => s + g.target, 0);
-  const totalCurrent = mockGoals.reduce((s, g) => s + g.current, 0);
-  const overallPct   = Math.round((totalCurrent / totalTarget) * 100);
+  useEffect(() => {
+    fetchData().finally(() => setLoading(false));
+  }, [fetchData]);
 
-  // Meta com maior progresso → destaque no topo
-  const featured = [...mockGoals].sort(
+  // ── CRUD handlers ──────────────────────────────────────────────────────────
+
+  const handleNew = () => {
+    setModalInitial(null);
+    setModalOpen(true);
+  };
+
+  const handleEdit = (goal: MappedGoal) => {
+    const raw = rawGoals.find((g) => g.id === goal.id);
+    if (raw) {
+      setModalInitial(goalToFormData(raw));
+      setModalOpen(true);
+    }
+  };
+
+  const handleSave = async (data: GoalFormData) => {
+    setSaving(true);
+    try {
+      const payload = {
+        name: data.name,
+        target_amount: parseFloat(data.targetAmount) || 0,
+        current_amount: parseFloat(data.currentAmount) || 0,
+        due_date: data.dueDate || undefined,
+      };
+      if (data.id) {
+        await updateGoal({ id: data.id, ...payload });
+        toast.success("Meta atualizada!");
+      } else {
+        await createGoal(payload);
+        toast.success("Meta criada!");
+      }
+      setModalOpen(false);
+      await fetchData();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro ao salvar";
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteRequest = (goal: MappedGoal) => {
+    setDeleteTarget(goal);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteGoal(deleteTarget.id);
+      toast.success("Meta removida!");
+      setDeleteTarget(null);
+      await fetchData();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro ao deletar";
+      toast.error(msg);
+    }
+  };
+
+  // ── TOOLTIP (closure sobre goals) ───────────────────────────────────────────
+
+  function ProgressTooltip({ active, payload }: any) {
+    if (!active || !payload?.length) return null;
+    const entry = payload[0]?.payload;
+    const goal = goals.find((g) => g.name === entry?.fullName);
+    return (
+      <div className="bg-[var(--main-bg)] border-2 border-[var(--black)] rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-3 min-w-[160px]">
+        <p className="text-[10px] font-black uppercase text-[var(--black-muted)] mb-2 border-b-2 border-[var(--black)] border-dashed pb-1">
+          {entry?.fullName}
+        </p>
+        <div className="flex justify-between items-center gap-4">
+          <span className="text-[10px] font-bold uppercase text-[var(--black-muted)]">Progresso:</span>
+          <span className="text-xs font-black text-[var(--primary)]">{payload[0]?.value}%</span>
+        </div>
+        {goal && (
+          <div className="mt-2 pt-2 border-t-2 border-[var(--black)] flex justify-between items-center bg-[var(--secondary)] -mx-3 -mb-3 px-3 py-2 rounded-b-md">
+            <span className="text-[10px] font-black uppercase text-[var(--primary)]">Acumulado:</span>
+            <span className="text-sm font-black text-[var(--primary)]">{fmt(goal.current)}</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function RitmoTooltip({ active, payload, label }: any) {
+    if (!active || !payload?.length) return null;
+    const necessario = payload.find((p: any) => p.dataKey === "necessario")?.value ?? 0;
+    return (
+      <div className="bg-[var(--main-bg)] border-2 border-[var(--black)] rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-3 min-w-[180px]">
+        <p className="text-[10px] font-black uppercase text-[var(--black-muted)] mb-2 border-b-2 border-[var(--black)] border-dashed pb-1">
+          {label}
+        </p>
+        <div className="flex justify-between items-center gap-4">
+          <span className="text-[10px] font-bold uppercase text-[var(--black-muted)]">Necessário/mês:</span>
+          <span className="text-xs font-black text-[var(--primary)]">{fmt(necessario)}</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) return <GoalsSkeleton />;
+
+  if (goals.length === 0) {
+    return (
+      <main className="min-h-screen mx-auto flex items-center justify-center">
+        <div className="text-center p-12 bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)]">
+          <p className="text-2xl font-black text-[var(--primary)] uppercase tracking-tight mb-4">Nenhuma meta cadastrada</p>
+          <p className="text-sm text-[var(--black-muted)] font-bold uppercase tracking-wide mb-6">Crie sua primeira meta financeira.</p>
+          <button
+            onClick={handleNew}
+            className="bg-[var(--secondary)] text-[var(--primary)] px-6 py-3 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 mx-auto hover:bg-[var(--secondary-hover)] transition-all shadow-[var(--neo-shadow-hover)] cursor-pointer"
+          >
+            <Plus size={14} strokeWidth={3} /> Nova meta
+          </button>
+        </div>
+
+        <GoalModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSave={handleSave}
+          initial={modalInitial}
+          saving={saving}
+        />
+      </main>
+    );
+  }
+
+  const totalTarget  = goals.reduce((s, g) => s + g.target, 0);
+  const totalCurrent = goals.reduce((s, g) => s + g.current, 0);
+  const overallPct   = totalTarget > 0 ? Math.round((totalCurrent / totalTarget) * 100) : 0;
+
+  const featured = [...goals].sort(
     (a, b) => pct(b.current, b.target) - pct(a.current, a.target)
   )[0];
 
-  // Meta mais próxima de 50% (ainda abaixo)
-  const milestone = mockGoals
+  const milestone = goals
     .filter((g) => pct(g.current, g.target) < 50)
     .sort((a, b) => (a.target * 0.5 - a.current) - (b.target * 0.5 - b.current))[0];
   const milestoneGap = milestone ? milestone.target * 0.5 - milestone.current : 0;
 
-  const progressData = mockGoals.map((g) => ({
+  const progressData = goals.map((g) => ({
     name:     g.name.split(" ").slice(0, 2).join(" "),
     fullName: g.name,
     progress: pct(g.current, g.target),
-    category: g.category,
+    color:    g.color,
   }));
 
-  const ritmoData = mockGoals.map((g) => ({
+  const ritmoData = goals.map((g) => ({
     name:      g.name.split(" ").slice(0, 2).join(" "),
-    atual:     g.monthlyContribution,
-    necessario:g.requiredMonthly,
+    necessario: g.requiredMonthly,
   }));
-
-  if (loading) return <GoalsSkeleton />;
 
   return (
     <main className="min-h-screen mx-auto space-y-8">
 
-      {/* ── SEÇÃO 1 · CARDS TOPO (padrão Subscriptions: 4 cols, auto-rows-fr) ── */}
+      {/* ── SEÇÃO 1 · CARDS TOPO ── */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-fr">
 
-        {/* Meta em Destaque — col-span-2, CommitmentCard style (amarelo) */}
+        {/* Meta em Destaque */}
         <div className="lg:col-span-2 bg-[var(--secondary)] border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] transition-all duration-200 hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]">
           <div className="flex flex-col h-full px-6 py-6">
 
@@ -178,15 +300,13 @@ export function Goals() {
                 Meta em destaque
               </h2>
               <span
-                className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded border-2 border-[var(--black)] shadow-[var(--neo-shadow-hover)]"
-                style={{ background: CAT_COLOR[featured.category], color: "#fff" }}
+                className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded border-2 border-[var(--black)] shadow-[var(--neo-shadow-hover)] bg-[var(--primary)] text-white"
               >
-                {CAT_LABEL[featured.category]}
+                {pct(featured.current, featured.target)}% concluída
               </span>
             </div>
 
             <div className="flex-grow flex items-center gap-6 mb-8">
-              {/* Ring SVG */}
               <div className="relative shrink-0 flex items-center justify-center">
                 <RadialRing percentage={pct(featured.current, featured.target)} />
                 <div className="absolute flex flex-col items-center">
@@ -209,13 +329,12 @@ export function Goals() {
                 <div className="flex items-center gap-1.5">
                   <Calendar size={11} strokeWidth={2.5} className="text-[var(--primary)]" />
                   <span className="text-[10px] font-black text-[var(--primary)] uppercase tracking-wider">
-                    Prazo: {fmtDeadline(featured.deadline)}
+                    Prazo: {fmtDeadline(featured.dueDate)}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Sub-cards brancos (CommitmentCard breakdown) */}
             <div className="grid grid-cols-2 gap-4 mt-auto">
               <div className="flex flex-col p-4 bg-white border-2 border-[var(--black)] rounded-[var(--radius-main)] shadow-[var(--neo-shadow-hover)] hover:bg-black/5 transition-colors">
                 <span className="text-[10px] font-black text-[var(--black-muted)] uppercase tracking-wider mb-1">
@@ -237,7 +356,7 @@ export function Goals() {
           </div>
         </div>
 
-        {/* Total em Metas — col-span-1, NextBillingCard style (primary) */}
+        {/* Total em Metas */}
         <div className="lg:col-span-1 flex flex-col w-full h-full p-6 bg-[var(--primary)] border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] transition-all duration-200 hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]">
           <h2 className="text-xs font-black text-[var(--main-bg)] opacity-80 uppercase tracking-widest mb-4">
             Total em metas
@@ -270,7 +389,7 @@ export function Goals() {
           </div>
         </div>
 
-        {/* Progresso Geral — col-span-1, ActiveSubscriptionsCard style (branco) */}
+        {/* Progresso Geral */}
         <div className="lg:col-span-1 flex flex-col w-full h-full p-6 bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] transition-all duration-200 hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]">
           <h2 className="text-xs font-black text-[var(--black-muted)] uppercase tracking-widest mb-4">
             Progresso geral
@@ -296,7 +415,7 @@ export function Goals() {
 
       </section>
 
-      {/* ── SEÇÃO 2 · GRÁFICOS (padrão expense-chart-card: cabeçalho azul escuro) ── */}
+      {/* ── SEÇÃO 2 · GRÁFICOS ── */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Gráfico de Progresso por Meta */}
@@ -343,7 +462,7 @@ export function Goals() {
                 />
                 <Bar dataKey="progress" radius={[3, 3, 0, 0]} maxBarSize={52} stroke="var(--black)" strokeWidth={2}>
                   {progressData.map((entry, i) => (
-                    <Cell key={i} fill={CAT_COLOR[entry.category]} />
+                    <Cell key={i} fill={entry.color} />
                   ))}
                 </Bar>
               </BarChart>
@@ -351,44 +470,35 @@ export function Goals() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-5 mx-5 pb-4 pt-3 border-t-2 border-[var(--black)] border-dashed">
-            {mockGoals.map((g) => (
+            {goals.map((g) => (
               <div key={g.id} className="flex items-center gap-2">
                 <div
                   className="w-3.5 h-3.5 border-2 border-[var(--black)] shadow-[var(--neo-shadow-hover)]"
-                  style={{ backgroundColor: CAT_COLOR[g.category] }}
+                  style={{ backgroundColor: g.color }}
                 />
                 <span className="text-[10px] font-black text-[var(--primary)] uppercase tracking-wider">
-                  {CAT_LABEL[g.category]}
+                  {g.name.split(" ").slice(0, 2).join(" ")}
                 </span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Ritmo vs Necessário — AnnualSubscriptionChart style com filtros */}
+        {/* Aporte Necessário por Meta */}
         <div className="bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] flex flex-col overflow-hidden transition-all duration-200 hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]">
-          <div className="bg-[var(--primary)] border-b-2 border-[var(--black)] px-6 py-4 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+          <div className="bg-[var(--primary)] border-b-2 border-[var(--black)] px-6 py-4 flex justify-between items-center">
             <div>
               <h3 className="text-[10px] font-extrabold tracking-widest text-[var(--secondary)] uppercase mb-1">
                 Aportes Mensais
               </h3>
-              <h2 className="text-xl font-black text-white">Ritmo vs Necessário</h2>
+              <h2 className="text-xl font-black text-white">Necessário por Meta</h2>
             </div>
-            <div className="flex items-center gap-2 bg-[var(--main-bg)] p-1.5 rounded-lg border-2 border-[var(--black)]">
-              {(["all", "atual", "necessario"] as const).map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setRitmoFilter(f)}
-                  className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-md transition-all border-2 cursor-pointer ${
-                    ritmoFilter === f
-                      ? "bg-[var(--primary)] text-[var(--secondary)] border-[var(--black)] shadow-[var(--neo-shadow-hover)]"
-                      : "bg-transparent text-[var(--black-muted)] border-transparent hover:text-[var(--primary)] hover:bg-black/5"
-                  }`}
-                >
-                  {f === "all" ? "Todos" : f === "atual" ? "Atual" : "Necessário"}
-                </button>
-              ))}
-            </div>
+            <button
+              onClick={handleNew}
+              className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] transition-all shadow-[var(--neo-shadow-hover)] cursor-pointer"
+            >
+              <Plus size={14} strokeWidth={3} /> Nova meta
+            </button>
           </div>
 
           <div className="h-[280px] p-5 pt-7">
@@ -413,69 +523,60 @@ export function Goals() {
                   content={<RitmoTooltip />}
                   cursor={{ fill: "rgba(0,0,0,0.04)", stroke: "var(--black)", strokeWidth: 1.5 }}
                 />
-                {(ritmoFilter === "all" || ritmoFilter === "atual") && (
-                  <Bar
-                    dataKey="atual" name="atual"
-                    radius={[3, 3, 0, 0]} fill="var(--primary)" maxBarSize={32}
-                    stroke="var(--black)" strokeWidth={2}
-                  />
-                )}
-                {(ritmoFilter === "all" || ritmoFilter === "necessario") && (
-                  <Bar
-                    dataKey="necessario" name="necessario"
-                    radius={[3, 3, 0, 0]} fill="var(--secondary)" maxBarSize={32}
-                    stroke="var(--black)" strokeWidth={2}
-                  />
-                )}
+                <Bar
+                  dataKey="necessario"
+                  radius={[3, 3, 0, 0]} fill="var(--secondary)" maxBarSize={52}
+                  stroke="var(--black)" strokeWidth={2}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           <div className="flex flex-wrap justify-center gap-6 mx-5 pb-4 pt-3 border-t-2 border-[var(--black)] border-dashed">
             <div className="flex items-center gap-2">
-              <div className="w-3.5 h-3.5 border-2 border-[var(--black)] shadow-[var(--neo-shadow-hover)] bg-[var(--primary)]" />
-              <span className="text-[10px] font-black text-[var(--primary)] uppercase tracking-wider">Aporte Atual</span>
-            </div>
-            <div className="flex items-center gap-2">
               <div className="w-3.5 h-3.5 border-2 border-[var(--black)] shadow-[var(--neo-shadow-hover)] bg-[var(--secondary)]" />
-              <span className="text-[10px] font-black text-[var(--primary)] uppercase tracking-wider">Necessário</span>
+              <span className="text-[10px] font-black text-[var(--primary)] uppercase tracking-wider">Aporte Necessário/mês</span>
             </div>
           </div>
         </div>
 
       </section>
 
-      {/* ── SEÇÃO 3 · CARDS DE METAS (padrão expense cards: cabeçalho azul por card) ── */}
+      {/* ── SEÇÃO 3 · CARDS DE METAS ── */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {mockGoals.map((goal) => {
-          const progress   = pct(goal.current, goal.target);
-          const isOnTrack  = goal.monthlyContribution >= goal.requiredMonthly;
-          const now        = new Date();
-          const [dy, dm]   = goal.deadline.split("-").map(Number);
-          const monthsLeft = (dy - now.getFullYear()) * 12 + (dm - now.getMonth());
+        {goals.map((goal) => {
+          const progress  = pct(goal.current, goal.target);
+          const ml        = monthsLeft(goal.dueDate);
 
           return (
             <div
               key={goal.id}
-              className="flex flex-col bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] overflow-hidden transition-all duration-200 hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]"
+              className="flex flex-col bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] overflow-hidden transition-all duration-200 hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px] group"
             >
-              {/* Cabeçalho azul escuro — expense-chart-card style */}
               <div className="bg-[var(--primary)] border-b-2 border-[var(--black)] px-5 py-3 flex justify-between items-center">
                 <span
-                  className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border-2 border-[var(--black)]"
-                  style={{ background: CAT_COLOR[goal.category], color: "#fff" }}
+                  className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border-2 border-[var(--black)] text-white"
+                  style={{ background: goal.color }}
                 >
-                  {CAT_LABEL[goal.category]}
+                  Meta
                 </span>
-                <span
-                  className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 border-2 border-[var(--black)] rounded ${
-                    isOnTrack
-                      ? "bg-[#22c55e] text-white"
-                      : "bg-[#FF3B3B] text-white"
-                  }`}
-                >
-                  {isOnTrack ? "No ritmo" : "Abaixo"}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 border-2 border-[var(--black)] rounded bg-[var(--secondary)] text-[var(--primary)]">
+                    {progress}%
+                  </span>
+                  <button
+                    onClick={() => handleEdit(goal)}
+                    className="p-1 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white/20 transition-all text-white/70 hover:text-white cursor-pointer opacity-0 group-hover:opacity-100"
+                  >
+                    <Pencil size={13} strokeWidth={2.5} />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteRequest(goal)}
+                    className="p-1 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white/20 transition-all text-white/70 hover:text-red-300 cursor-pointer opacity-0 group-hover:opacity-100"
+                  >
+                    <Trash2 size={13} strokeWidth={2.5} />
+                  </button>
+                </div>
               </div>
 
               <div className="flex flex-col flex-1 p-5 gap-4">
@@ -486,12 +587,11 @@ export function Goals() {
                   <div className="flex items-center gap-1.5 mt-1.5">
                     <Calendar size={11} strokeWidth={2.5} className="text-[var(--black-muted)]" />
                     <span className="text-[10px] font-black text-[var(--black-muted)] uppercase tracking-wider">
-                      {fmtDeadline(goal.deadline)}
+                      {fmtDeadline(goal.dueDate)}
                     </span>
                   </div>
                 </div>
 
-                {/* Valores acumulado / alvo */}
                 <div className="flex items-end justify-between">
                   <div>
                     <p className="text-[9px] font-black text-[var(--black-muted)] uppercase tracking-wider mb-0.5">
@@ -511,24 +611,21 @@ export function Goals() {
                   </div>
                 </div>
 
-                {/* Barra de progresso — next-goal-card style */}
                 <div className="w-full h-4 bg-[var(--main-bg)] rounded-full overflow-hidden border-2 border-[var(--black)]">
                   <div
                     className="h-full border-r-2 border-[var(--black)] transition-all duration-1000 ease-out"
-                    style={{
-                      width: `${progress}%`,
-                      background: CAT_COLOR[goal.category],
-                    }}
+                    style={{ width: `${progress}%`, background: goal.color }}
                   />
                 </div>
 
-                {/* Rodapé: % + tempo restante */}
                 <div className="flex items-center justify-between pt-2 border-t-2 border-[var(--black)] border-dashed">
                   <span className="text-[9px] font-black text-[var(--primary)] bg-[var(--secondary)] px-2 py-0.5 rounded border-2 border-[var(--black)] uppercase tracking-wider">
-                    {progress}%
+                    {fmt(goal.requiredMonthly)}/mês
                   </span>
                   <span className="text-[9px] font-black text-[var(--black-muted)] uppercase tracking-wider">
-                    {monthsLeft > 0 ? `${monthsLeft}m restantes` : "Prazo expirado"}
+                    {goal.dueDate
+                      ? ml > 0 ? `${ml}m restantes` : "Prazo expirado"
+                      : "Sem prazo"}
                   </span>
                 </div>
               </div>
@@ -536,6 +633,44 @@ export function Goals() {
           );
         })}
       </section>
+
+      {/* Modal de criação/edição */}
+      <GoalModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSave}
+        initial={modalInitial}
+        saving={saving}
+      />
+
+      {/* Confirm delete modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDeleteTarget(null)} />
+          <div className="relative bg-white w-full max-w-sm rounded-2xl border-3 border-[var(--black)] shadow-[8px_8px_0px_0px_#000] p-6 space-y-4">
+            <h3 className="text-lg font-black text-[var(--primary)] uppercase tracking-tight">
+              Confirmar exclusão
+            </h3>
+            <p className="text-sm font-bold text-[var(--black-muted)]">
+              Tem certeza que deseja remover a meta <span className="text-[var(--primary)]">{deleteTarget.name}</span>?
+            </p>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-lg border-2 border-[var(--black)] bg-white text-[var(--primary)] hover:bg-black/5 transition-all cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-lg border-2 border-[var(--black)] bg-red-500 text-white shadow-[var(--neo-shadow-hover)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all cursor-pointer"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </main>
   );

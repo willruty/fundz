@@ -9,6 +9,7 @@ import { HealthModule } from './health/health.module';
 import { AccountsModule } from './accounts/accounts.module';
 import { CategoriesModule } from './categories/categories.module';
 import { GoalsModule } from './goals/goals.module';
+import { InstallmentsModule } from './installments/installments.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { DashboardModule } from './dashboard/dashboard.module';
@@ -29,6 +30,7 @@ import { HttpExceptionResponseFilter } from './common/filters/http-exception.fil
     AccountsModule,
     CategoriesModule,
     GoalsModule,
+    InstallmentsModule,
     SubscriptionsModule,
     TransactionsModule,
     DashboardModule,

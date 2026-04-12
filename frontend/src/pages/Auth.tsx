@@ -17,6 +17,27 @@ export function Auth() {
     password: "",
   });
   const [loading, setLoading] = useState(false);
+  const [loadingGuest, setLoadingGuest] = useState(false);
+
+  const handleGuestLogin = async () => {
+    setLoadingGuest(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: "visitante@fundz.app",
+        password: "Visitante@123",
+      });
+
+      if (error) throw error;
+
+      localStorage.setItem("user_name", "Visitante");
+      toast.success("Entrando como visitante...");
+      navigate("/home");
+    } catch (_) {
+      toast.error("Não foi possível entrar como visitante.");
+    } finally {
+      setLoadingGuest(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,25 +60,32 @@ export function Auth() {
         localStorage.setItem("user_name", userName);
         toast.success("Login realizado com sucesso!");
       } else {
-        const { data, error } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            data: { name: formData.name },
-          },
+        // Registra via backend (admin API — sem verificação de email)
+        const baseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000/fundz";
+        const res = await fetch(`${baseUrl}/user/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            name: formData.name,
+          }),
         });
 
-        if (error) throw error;
-
-        if (!data.session) {
-          toast.success(
-            "Cadastro realizado! Verifique seu e-mail para confirmar a conta.",
-          );
-          return;
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: "Erro ao cadastrar" }));
+          throw new Error(err.error || err.message || "Erro ao cadastrar");
         }
 
-        const userName = formData.name || data.user?.email?.split("@")[0] || "";
-        localStorage.setItem("user_name", userName);
+        // Seta sessão no Supabase client para que as chamadas autenticadas funcionem
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        if (signInError) throw signInError;
+
+        localStorage.setItem("user_name", formData.name || formData.email.split("@")[0]);
         toast.success("Cadastro realizado com sucesso!");
       }
 
@@ -272,6 +300,23 @@ export function Auth() {
                 {!loading && <ChevronRight size={18} strokeWidth={3} />}
               </button>
             </form>
+
+            <div className="relative flex items-center gap-4">
+              <div className="flex-1 h-px bg-[var(--black)] opacity-20" />
+              <span className="text-[10px] font-black text-[var(--black-muted)] uppercase tracking-widest">
+                ou
+              </span>
+              <div className="flex-1 h-px bg-[var(--black)] opacity-20" />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleGuestLogin}
+              disabled={loadingGuest || loading}
+              className="w-full bg-white text-[var(--primary)] font-black py-4 rounded-xl border-2 border-[var(--black)] shadow-[var(--neo-shadow)] hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px] disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[var(--neo-shadow)] transition-all uppercase tracking-widest flex items-center justify-center gap-3 text-sm"
+            >
+              {loadingGuest ? "Entrando..." : "Entrar como visitante"}
+            </button>
           </div>
         </div>
       </div>

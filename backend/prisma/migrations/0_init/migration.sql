@@ -1,0 +1,4 @@
+-- Baseline migration.
+-- Este arquivo representa o estado inicial do banco (criado fora do Prisma).
+-- Ele é marcado como "já aplicado" via: prisma migrate resolve --applied "0_init"
+-- O SQL aqui NÃO é executado — serve apenas como registro histórico.

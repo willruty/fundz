@@ -2,25 +2,35 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { passportJwtSecret } from 'jwks-rsa';
 import { EnvironmentVariables } from '../../config/env.validation';
 import { JwtPayload } from '../types/jwt-payload.type';
 
 /**
- * Validates Supabase-issued JWTs (HS256) on protected routes.
+ * Validates Supabase-issued JWTs on protected routes.
  *
- * Replicates backend-go/internal/service/jwt.go — ValidateJWT:
- *   1. Verify signature with SUPABASE_JWT_SECRET + HS256.
- *   2. Extract userId from `sub` (Supabase standard).
- *   3. Fallback to `user_id` (legacy Go tokens).
- *   4. Reject if neither is present.
+ * Supabase now signs tokens with ES256 (asymmetric ECDSA key).
+ * We verify using the JWKS endpoint from Supabase Auth so we never
+ * need to store the private key — only the public key is used.
+ *
+ * JWKS endpoint: https://<project>.supabase.co/auth/v1/.well-known/jwks.json
  */
 @Injectable()
 export class SupabaseStrategy extends PassportStrategy(Strategy, 'supabase') {
   constructor(config: ConfigService<EnvironmentVariables, true>) {
+    const supabaseUrl = config.get('SUPABASE_URL', { infer: true });
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: config.get('SUPABASE_JWT_SECRET', { infer: true }),
-      algorithms: ['HS256'],
+      // secretOrKeyProvider fetches the public key from Supabase's JWKS endpoint.
+      // Falls back to HS256 secret for legacy tokens (Go backend).
+      secretOrKeyProvider: passportJwtSecret({
+        cache: true,
+        rateLimit: true,
+        jwksRequestsPerMinute: 10,
+        jwksUri: `${supabaseUrl}/auth/v1/.well-known/jwks.json`,
+      }),
+      algorithms: ['ES256', 'HS256'],
       ignoreExpiration: false,
     });
   }

@@ -50,11 +50,12 @@ export class EnvironmentVariables {
   SUPABASE_SERVICE_ROLE_KEY?: string;
 
   /**
-   * Legacy HS256 JWT secret from Supabase (Settings → API → JWT Settings).
-   * Used by Passport to validate access tokens server-side.
+   * Legacy HS256 JWT secret (kept for backward compat). Auth now uses ES256
+   * via the Supabase JWKS endpoint — this field is no longer required.
    */
+  @IsOptional()
   @IsString()
-  SUPABASE_JWT_SECRET!: string;
+  SUPABASE_JWT_SECRET?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

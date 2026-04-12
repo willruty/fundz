@@ -9,33 +9,26 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// Dados mockados para um mês completo (30 dias)
-const allData = [
-  { day: "01", amount: 120 }, { day: "02", amount: 300 }, { day: "03", amount: 150 },
-  { day: "04", amount: 450 }, { day: "05", amount: 200 }, { day: "06", amount: 580 },
-  { day: "07", amount: 320 }, { day: "08", amount: 110 }, { day: "09", amount: 250 },
-  { day: "10", amount: 280 }, { day: "11", amount: 400 }, { day: "12", amount: 150 },
-  { day: "13", amount: 90 },  { day: "14", amount: 350 }, { day: "15", amount: 420 },
-  { day: "16", amount: 100 }, { day: "17", amount: 200 }, { day: "18", amount: 500 },
-  { day: "19", amount: 300 }, { day: "20", amount: 150 }, { day: "21", amount: 600 },
-  { day: "22", amount: 250 }, { day: "23", amount: 180 }, { day: "24", amount: 400 },
-  { day: "25", amount: 320 }, { day: "26", amount: 210 }, { day: "27", amount: 550 },
-  { day: "28", amount: 150 }, { day: "29", amount: 300 }, { day: "30", amount: 450 },
-];
+interface DayAmount {
+  day: string;
+  amount: number;
+}
 
-export function DailySpendingChart() {
+interface DailySpendingChartProps {
+  data: DayAmount[];
+}
+
+export function DailySpendingChart({ data }: DailySpendingChartProps) {
   const [period, setPeriod] = useState("7d");
 
-  // Filtra os dados de trás para frente baseado no período
-  const chartData = 
-    period === "7d" ? allData.slice(-7) : 
-    period === "15d" ? allData.slice(-15) : 
-    allData;
+  const chartData =
+    period === "7d"  ? data.slice(-7)  :
+    period === "15d" ? data.slice(-15) :
+    data;
 
   return (
     <div className="flex flex-col bg-white border-[3px] border-black rounded-2xl shadow-[8px_8px_0px_0px_#000000] h-[420px] overflow-hidden">
-      
-      {/* Cabeçalho Azul Alinhado com o restante do projeto */}
+
       <div className="bg-[#08233e] border-b-[3px] border-black px-6 py-4 flex justify-between items-center">
         <div>
           <h3 className="text-[10px] font-extrabold tracking-widest text-[#FF3B3B] uppercase mb-1">
@@ -44,7 +37,6 @@ export function DailySpendingChart() {
           <h2 className="text-xl font-black text-white m-0">Gasto Diário</h2>
         </div>
 
-        {/* Filtros Interativos */}
         <div className="flex gap-2">
           {["7d", "15d", "30d"].map((p) => (
             <button
@@ -62,7 +54,6 @@ export function DailySpendingChart() {
         </div>
       </div>
 
-      {/* Container do Gráfico */}
       <div className="flex-1 w-full p-6 pt-8">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
@@ -97,21 +88,18 @@ export function DailySpendingChart() {
               formatter={(value) => [`R$ ${value}`, "Gasto"]}
               labelFormatter={(label) => `Dia ${label}`}
             />
-            
-            {/* Linha Brutalista com Pontos Marcados */}
             <Line
               type="linear"
               dataKey="amount"
               stroke="#FF3B3B"
               strokeWidth={4}
-              dot={{ r: 4, stroke: '#000', strokeWidth: 2, fill: '#fff' }}
-              activeDot={{ r: 7, stroke: '#000', strokeWidth: 3, fill: '#FF3B3B' }}
+              dot={{ r: 4, stroke: "#000", strokeWidth: 2, fill: "#fff" }}
+              activeDot={{ r: 7, stroke: "#000", strokeWidth: 3, fill: "#FF3B3B" }}
               animationDuration={500}
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
-      
     </div>
   );
 }

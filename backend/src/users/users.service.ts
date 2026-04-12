@@ -50,10 +50,10 @@ export class UsersService {
 
     const userId = createData.user.id;
 
-    // 2. Insert profile row.
+    // 2. Insert profile row (id = auth.users.id).
     try {
       await this.prisma.profile.create({
-        data: { id: userId, name },
+        data: { id: userId, email, name },
       });
     } catch {
       // Roll back: delete the auth user if profile insertion fails.

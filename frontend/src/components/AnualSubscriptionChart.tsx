@@ -9,26 +9,15 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-interface MonthlyCommitment {
+export interface MonthlyCommitment {
   month: string;
   subscriptions: number;
   installments: number;
 }
 
-const mockData: MonthlyCommitment[] = [
-  { month: "Mar", subscriptions: 280, installments: 500 },
-  { month: "Abr", subscriptions: 280, installments: 500 },
-  { month: "Mai", subscriptions: 280, installments: 500 },
-  { month: "Jun", subscriptions: 280, installments: 370 },
-  { month: "Jul", subscriptions: 310, installments: 370 },
-  { month: "Ago", subscriptions: 310, installments: 150 },
-  { month: "Set", subscriptions: 310, installments: 150 },
-  { month: "Out", subscriptions: 380, installments: 150 },
-  { month: "Nov", subscriptions: 380, installments: 0   },
-  { month: "Dez", subscriptions: 380, installments: 0   },
-  { month: "Jan", subscriptions: 280, installments: 0   },
-  { month: "Fev", subscriptions: 280, installments: 0   },
-];
+interface AnnualSubscriptionChartProps {
+  data: MonthlyCommitment[];
+}
 
 type FilterType = "all" | "subscriptions" | "installments";
 
@@ -37,18 +26,21 @@ const COLORS = {
   installments:  "var(--secondary)",
 };
 
-export default function AnnualSubscriptionChart() {
+export default function AnnualSubscriptionChart({ data }: AnnualSubscriptionChartProps) {
   const [filter, setFilter] = useState<FilterType>("all");
 
   const fmt = (v: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
-  // Métricas do cabeçalho
-  const avgMonthly = Math.round(
-    mockData.reduce((s, d) => s + d.subscriptions + d.installments, 0) / mockData.length
-  );
-  const peakMonth = mockData.reduce<MonthlyCommitment & { total: number }>(
-    (max, d) => (d.subscriptions + d.installments > max.total ? { ...d, total: d.subscriptions + d.installments } : max),
+  const avgMonthly = data.length > 0
+    ? Math.round(data.reduce((s, d) => s + d.subscriptions + d.installments, 0) / data.length)
+    : 0;
+
+  const peakMonth = data.reduce<MonthlyCommitment & { total: number }>(
+    (max, d) =>
+      d.subscriptions + d.installments > max.total
+        ? { ...d, total: d.subscriptions + d.installments }
+        : max,
     { month: "", total: 0, subscriptions: 0, installments: 0 }
   );
 
@@ -81,7 +73,6 @@ export default function AnnualSubscriptionChart() {
   return (
     <div className="bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] flex flex-col overflow-hidden transition-all duration-200 hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]">
 
-      {/* HEADER — primary, com métricas rápidas */}
       <div className="bg-[var(--primary)] border-b-2 border-[var(--black)] px-5 sm:px-6 py-4 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
           <h3 className="text-[10px] font-extrabold tracking-widest text-[var(--secondary)] uppercase mb-1">
@@ -95,20 +86,18 @@ export default function AnnualSubscriptionChart() {
           </p>
         </div>
 
-        {/* Métricas rápidas + filtros */}
         <div className="flex flex-wrap items-center gap-3">
-          {/* Média mensal */}
           <div className="flex flex-col items-end px-3 py-2 bg-white/10 border-2 border-white/20 rounded-md">
             <span className="text-[9px] font-black text-[var(--main-bg)] opacity-60 uppercase tracking-wider">Média/mês</span>
             <span className="text-sm font-black text-[var(--secondary)]">{fmt(avgMonthly)}</span>
           </div>
-          {/* Mês pico */}
-          <div className="flex flex-col items-end px-3 py-2 bg-white/10 border-2 border-white/20 rounded-md">
-            <span className="text-[9px] font-black text-[var(--main-bg)] opacity-60 uppercase tracking-wider">Pico</span>
-            <span className="text-sm font-black text-[var(--secondary)]">{peakMonth.month} · {fmt(peakMonth.total)}</span>
-          </div>
+          {peakMonth.month && (
+            <div className="flex flex-col items-end px-3 py-2 bg-white/10 border-2 border-white/20 rounded-md">
+              <span className="text-[9px] font-black text-[var(--main-bg)] opacity-60 uppercase tracking-wider">Pico</span>
+              <span className="text-sm font-black text-[var(--secondary)]">{peakMonth.month} · {fmt(peakMonth.total)}</span>
+            </div>
+          )}
 
-          {/* Filtros */}
           <div className="flex items-center gap-2 bg-[var(--main-bg)] p-1.5 rounded-lg border-2 border-[var(--black)]">
             {(["all", "subscriptions", "installments"] as const).map((type) => (
               <button
@@ -127,11 +116,10 @@ export default function AnnualSubscriptionChart() {
         </div>
       </div>
 
-      {/* GRÁFICO */}
       <div className="p-5 sm:p-6">
         <div className="w-full h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={mockData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="4 4" stroke="var(--black)" strokeOpacity={0.15} vertical={false} />
               <XAxis
                 dataKey="month"
@@ -168,7 +156,6 @@ export default function AnnualSubscriptionChart() {
           </ResponsiveContainer>
         </div>
 
-        {/* LEGENDA */}
         <div className="flex flex-wrap justify-center gap-6 mt-6 pt-4 border-t-2 border-[var(--black)] border-dashed">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 border-2 border-[var(--black)] shadow-[var(--neo-shadow-hover)]"

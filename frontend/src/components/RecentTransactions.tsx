@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import * as XLSX from "xlsx";
 import {
   Filter,
   ChevronLeft,
@@ -25,6 +26,8 @@ import {
   deleteTransaction,
 } from "../service/transaction.service";
 import type { Transaction } from "../service/transaction.service";
+import { getCategories, type Category } from "../service/categories.service";
+import { getAccounts, type ApiAccount } from "../service/accounts.service";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -78,57 +81,76 @@ function CsvImportModal({ onClose, onImport }: CsvModalProps) {
   const [importing, setImporting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const normalizeRow = (row: Record<string, unknown>): Partial<Transaction> | null => {
+    const getVal = (keys: string[]): string => {
+      for (const k of keys) {
+        const hit = Object.keys(row).find((rk) => rk.toLowerCase().trim() === k);
+        if (hit) return String(row[hit] ?? "").trim();
+      }
+      return "";
+    };
+    const description = getVal(["description", "descricao", "descrição", "desc"]);
+    if (!description) return null;
+
+    const amountRaw = getVal(["amount", "valor"]);
+    const amount = amountRaw.replace(/[^\d.,-]/g, "").replace(",", ".") || "0";
+
+    let dateStr = getVal(["date", "data", "occurred_at"]);
+    if (dateStr && /^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      const [d, m, y] = dateStr.split("/");
+      dateStr = `${y}-${m}-${d}`;
+    } else if (!dateStr) {
+      dateStr = new Date().toISOString().split("T")[0];
+    }
+
+    const rawType = (getVal(["type", "tipo"]) || "expense").toLowerCase();
+    const type = rawType === "entrada" || rawType === "income" ? "income" : "expense";
+
+    return { description, amount, type, occurred_at: dateStr };
+  };
+
   const parseCSV = (text: string): Partial<Transaction>[] => {
-    const lines = text.trim().split("\n").filter(Boolean);
+    const lines = text.trim().split(/\r?\n/).filter(Boolean);
     if (lines.length < 2) return [];
-
-    const headers = lines[0]
-      .toLowerCase()
-      .split(",")
-      .map((h) => h.trim().replace(/"/g, ""));
-
-    return lines
-      .slice(1)
+    const headers = lines[0].split(",").map((h) => h.trim().replace(/"/g, "").toLowerCase());
+    return lines.slice(1)
       .map((line) => {
         const values = line.split(",").map((v) => v.trim().replace(/"/g, ""));
         const row: Record<string, string> = {};
-        headers.forEach((h, i) => {
-          row[h] = values[i] ?? "";
-        });
-
-        const date =
-          row.date ||
-          row.data ||
-          row.occurred_at ||
-          new Date().toISOString().split("T")[0];
-        const rawType = (row.type || row.tipo || "expense").toLowerCase();
-
-        return {
-          description: row.description || row.descricao || row.desc || "",
-          amount: row.amount || row.valor || "0",
-          type:
-            rawType === "entrada" || rawType === "income" ? "income" : "expense",
-          occurred_at: date,
-        };
+        headers.forEach((h, i) => { row[h] = values[i] ?? ""; });
+        return normalizeRow(row);
       })
-      .filter((r) => r.description);
+      .filter((r): r is Partial<Transaction> => r !== null);
   };
 
-  const handleFile = (f: File) => {
+  const parseExcel = async (f: File): Promise<Partial<Transaction>[]> => {
+    const buf = await f.arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array" });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { raw: false });
+    return json.map(normalizeRow).filter((r): r is Partial<Transaction> => r !== null);
+  };
+
+  const handleFile = async (f: File) => {
     setFile(f);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      setPreview(parseCSV(text));
-    };
-    reader.readAsText(f, "UTF-8");
+    try {
+      const ext = f.name.toLowerCase().split(".").pop();
+      if (ext === "csv") {
+        const text = await f.text();
+        setPreview(parseCSV(text));
+      } else if (ext === "xlsx" || ext === "xls") {
+        setPreview(await parseExcel(f));
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const dropped = e.dataTransfer.files[0];
-    if (dropped?.name.endsWith(".csv")) handleFile(dropped);
+    if (dropped) handleFile(dropped);
   };
 
   const handleImport = async () => {
@@ -156,7 +178,7 @@ function CsvImportModal({ onClose, onImport }: CsvModalProps) {
       >
         <div className="flex items-center justify-between p-5 border-b-2 border-[var(--black)] bg-[var(--primary)]">
           <h3 className="text-[var(--secondary)] font-black text-lg uppercase tracking-tight flex items-center gap-2">
-            <Upload size={18} strokeWidth={3} /> Importar CSV
+            <Upload size={18} strokeWidth={3} /> Importar Transações
           </h3>
           <button
             onClick={onClose}
@@ -189,15 +211,15 @@ function CsvImportModal({ onClose, onImport }: CsvModalProps) {
             <p className="font-black text-sm text-[var(--primary)] uppercase">
               {file
                 ? file.name
-                : "Arraste o CSV aqui ou clique para selecionar"}
+                : "Arraste um arquivo aqui ou clique para selecionar"}
             </p>
             <p className="text-[10px] text-[var(--black-muted)] font-bold mt-1 uppercase tracking-wider">
-              Formato: date, description, amount, type
+              Formatos: CSV, XLSX, XLS
             </p>
             <input
               ref={inputRef}
               type="file"
-              accept=".csv"
+              accept=".csv,.xlsx,.xls"
               className="hidden"
               onChange={(e) =>
                 e.target.files?.[0] && handleFile(e.target.files[0])
@@ -306,13 +328,15 @@ function CsvImportModal({ onClose, onImport }: CsvModalProps) {
 
 export function RecentTransactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [accounts, setAccounts] = useState<ApiAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<Partial<Transaction>>({});
+  const [editForm, setEditForm] = useState<Partial<Transaction> & { account_id?: string; category_id?: string }>({});
 
   const [filterSearch, setFilterSearch] = useState("");
   const [filterDateFrom, setFilterDateFrom] = useState("");
@@ -334,8 +358,14 @@ export function RecentTransactions() {
   const fetchTransactions = async () => {
     setLoading(true);
     try {
-      const data = await getTransactions();
-      setTransactions(data);
+      const [txs, cats, accs] = await Promise.all([
+        getTransactions(),
+        getCategories(),
+        getAccounts(),
+      ]);
+      setTransactions(txs);
+      setCategories(cats);
+      setAccounts(accs);
     } catch {
       showToast("Erro ao carregar transações", "error");
     } finally {
@@ -407,6 +437,11 @@ export function RecentTransactions() {
 
   const handleSave = async () => {
     const isNew = editingId === "new";
+    const accountId = editForm.account_id ?? accounts[0]?.id;
+    if (!accountId) {
+      showToast("Nenhuma conta disponível", "error");
+      return;
+    }
     try {
       if (isNew) {
         await createTransaction({
@@ -414,6 +449,8 @@ export function RecentTransactions() {
           amount: String(editForm.amount ?? "0"),
           type: editForm.type ?? "expense",
           occurred_at: editForm.occurred_at ?? new Date().toISOString().split("T")[0],
+          account_id: accountId,
+          category_id: editForm.category_id || undefined,
         });
         showToast("Criado com sucesso!", "success");
       } else {
@@ -423,6 +460,8 @@ export function RecentTransactions() {
           amount: String(editForm.amount ?? "0"),
           type: editForm.type ?? "expense",
           occurred_at: editForm.occurred_at ?? new Date().toISOString().split("T")[0],
+          account_id: accountId,
+          category_id: editForm.category_id || undefined,
         });
         showToast("Atualizado!", "success");
       }
@@ -445,6 +484,11 @@ export function RecentTransactions() {
   };
 
   const handleCsvImport = async (rows: Partial<Transaction>[]) => {
+    const defaultAccount = accounts[0]?.id;
+    if (!defaultAccount) {
+      showToast("Crie uma conta antes de importar", "error");
+      return;
+    }
     let success = 0;
     let fail = 0;
     for (const row of rows) {
@@ -454,6 +498,7 @@ export function RecentTransactions() {
           amount: String(row.amount ?? "0"),
           type: row.type ?? "expense",
           occurred_at: row.occurred_at ?? new Date().toISOString().split("T")[0],
+          account_id: defaultAccount,
         });
         success++;
       } catch {
@@ -666,6 +711,10 @@ export function RecentTransactions() {
               {/* New */}
               <button
                 onClick={() => {
+                  if (accounts.length === 0) {
+                    showToast("Crie uma conta antes", "error");
+                    return;
+                  }
                   setIsCreating(true);
                   setEditingId("new");
                   setEditForm({
@@ -673,6 +722,8 @@ export function RecentTransactions() {
                     amount: "",
                     type: "expense",
                     occurred_at: new Date().toISOString().split("T")[0],
+                    account_id: accounts[0]?.id,
+                    category_id: "",
                   });
                 }}
                 className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] transition-all shadow-[var(--neo-shadow-hover)]"
@@ -680,12 +731,12 @@ export function RecentTransactions() {
                 <Plus size={16} strokeWidth={3} /> Novo
               </button>
 
-              {/* CSV */}
+              {/* Import */}
               <button
                 onClick={() => setIsCsvModalOpen(true)}
                 className="bg-white text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary)] transition-colors shadow-[var(--neo-shadow-hover)]"
               >
-                <Upload size={14} strokeWidth={2.5} /> CSV
+                <Upload size={14} strokeWidth={2.5} /> Importar
               </button>
             </div>
           </div>
@@ -876,7 +927,11 @@ export function RecentTransactions() {
                             <button
                               onClick={() => {
                                 setEditingId(t.id);
-                                setEditForm(t);
+                                setEditForm({
+                                  ...t,
+                                  account_id: (t as any).accountId ?? accounts[0]?.id,
+                                  category_id: (t as any).categoryId ?? "",
+                                });
                               }}
                               className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-[var(--primary)]"
                             >
