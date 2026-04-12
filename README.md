@@ -1,62 +1,156 @@
-# Fundz
+# FUNDZ
 
-## Overview
-Fundz is a personal project aimed at building a **modern and centralized financial organization platform**, focused on simplicity, clarity, and a serious approach to personal finance management.
+## Descrição
 
-The project is currently in an **early development stage** and is being redesigned to better reflect backend best practices and scalable architecture.
+Fundz é uma plataforma de gestão financeira pessoal focada em jovens que querem parar de ser emocional com dinheiro e começar a enxergar números de forma clara.
 
-## Problem
-Managing personal finances often involves multiple tools with poor usability, fragmented data, or overly complex interfaces.  
-Fundz aims to centralize financial information into a **clean, intuitive, and structured interface**, making financial organization more accessible without sacrificing control or seriousness.
+A proposta é simples: transformar dados financeiros em decisões melhores através de visualização, controle e análise.
 
-## Solution
-The platform is designed as a web application with a modern frontend and a backend responsible for authentication, data persistence, and business rules.
+O sistema permite:
 
-The current implementation includes the initial authentication flow, and the project is planned to evolve into a full backend-driven system with well-defined APIs and domain logic.
+- Gerenciar contas
+- Registrar e categorizar transações
+- Visualizar métricas financeiras
+- Controlar assinaturas e metas
+- (em breve) analisar comportamento financeiro com IA
 
-## Main Features
-(Current and planned)
+---
 
-- User authentication (initial implementation)
-- Centralized financial data visualization
-- Categorization of expenses and income
-- Backend-driven business rules
-- Secure data persistence
+## Status do Projeto
 
-## Tech Stack
-- **Frontend:** React, Tailwind CSS  
-- **Backend:** Go (current) → Java (planned migration)  
-- **Database:** PostgreSQL  
-- **Authentication:** JWT  
-- **Infrastructure:** Local development environment
+MVP em fase final (menos de 1 semana para deploy).
 
-## Architecture
-The project follows a classic client-server architecture:
-- A React frontend responsible for user interaction
-- A backend API handling authentication, business rules, and data persistence
-- A relational database storing user and financial data
+Situação atual:
 
-The backend is currently being rethought to migrate from Go to **Java**, with the goal of improving maintainability, structure, and long-term scalability.
+- Backend com CRUDs principais funcionando (users, accounts, transactions, categories, goals, subscriptions)
+- Frontend funcional com páginas principais
+- Integração com banco (Supabase) ativa
+- Parte do dashboard já estruturada
 
-## How to Run
-> ⚠️ The project is currently incomplete and not production-ready.
+Foco atual:
 
-Basic setup instructions will be added as the backend refactor progresses.
+- Ajustes finais de produto
+- Persistência de dados faltantes
+- Melhorias visuais
+- Preparação para deploy
+- Estrutura para monetização futura
 
-## Key Technical Decisions
-- Initial backend written in Go for rapid prototyping
-- Planned migration to Java to better structure domain logic and long-term growth
-- Focus on backend-first design rather than UI-driven development
-- Prioritization of clean architecture over rapid feature delivery
+---
 
-## Status
-🚧 **Early-stage / paused**
+## Stack
 
-The project was started as an experimental personal initiative and paused in its initial phase.  
-It is planned to be **resumed and refactored**, with the backend being rewritten in Java and the project scope better defined.
+### Frontend
 
-## Next Steps
-- Redesign backend architecture in Java
-- Define core financial domain entities
-- Implement secure authentication and authorization
-- Expand backend APIs and business rules
+- React
+- TypeScript
+- TailwindCSS
+- Recharts
+
+### Backend
+
+- Node e Nest
+- API REST
+- Arquitetura em módulos (controller, service, module)
+
+### Database
+
+- Supabase (PostgreSQL)
+- Gorm
+
+---
+
+## TODO (PRIORIDADE MVP)
+
+### Core / Dados
+
+- [ ] Ao criar uma account:
+  - [ ] Definir saldo inicial
+  - [ ] Adicionar campos de controle financeiro relevantes (ex: saldo atual, etc)
+
+- [ ] Impedir repetição de cores nos cards de account
+
+- [ ] Persistir o card de gasto impulsivo no banco de dados
+
+---
+
+### Investimentos
+
+- [ ] Criar CRUD completo de investimentos
+- [ ] Associar investimentos a uma account
+
+---
+
+### Frontend / UX
+
+- [ ] Melhorar layout da primeira linha da página de assinaturas
+
+- [ ] Criar página de Profile / Configurações:
+  - [ ] Upload de foto
+  - [ ] Alterar nome
+  - [ ] Alterar senha
+  - [ ] Deletar conta
+
+- [ ] Melhorar landing page:
+  - [ ] Layout mais profissional
+  - [ ] Componentes mais chamativos
+  - [ ] Imagens da plataforma
+  - [ ] Animações
+  - [ ] Transições mais fluidas
+
+---
+
+### Controle de Acesso / Monetização
+
+- [ ] Restringir acesso a páginas específicas (ex: investimentos)
+  - [ ] Liberar apenas via chave de acesso
+
+- [ ] Implementar gateway de pagamento
+  - [ ] Liberar funcionalidades baseado em pagamento
+
+---
+
+### Inteligência / Diferencial
+
+- [ ] Implementar IA para análise de dados financeiros
+  - (insights, padrões de gasto, comportamento)
+
+---
+
+### Integrações
+
+- [ ] Pesquisar integração com OpenFinance
+  - [ ] Puxar extratos automaticamente
+  - OU
+  - [ ] Permitir upload de extratos bancários
+
+---
+
+## Próximos Passos (Estratégico)
+
+1. Finalizar consistência de dados (accounts, saldo, impulsivo)
+2. Garantir persistência completa no banco
+3. Ajustar UX mínima (profile + assinaturas)
+4. Implementar restrição por chave de acesso
+5. Deploy do MVP
+6. Evoluções pós-MVP:
+   - Pagamento
+   - IA
+   - OpenFinance
+
+---
+
+## Objetivo do MVP
+
+- Rodar de forma estável
+- Resolver um problema real
+- Ser utilizável
+- Criar base para monetização
+
+---
+
+## Diretrizes de Desenvolvimento
+
+- Priorizar velocidade com qualidade suficiente
+- Evitar overengineering
+- Pensar como produto, não apenas como código
+- Toda feature deve ter impacto real
