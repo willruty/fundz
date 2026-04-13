@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   Plus,
@@ -12,6 +13,7 @@ import {
   ShieldCheck,
   Pencil,
   Trash2,
+  X,
 } from "lucide-react";
 import { AccountsSkeleton } from "../components/skeletons/AccountsSkeleton";
 import AccountModal, { type AccountFormData } from "../components/AccountModal";
@@ -67,12 +69,13 @@ function mapAccount(a: ApiAccount, idx: number, txs: ApiTransaction[]): Account 
   const expenses = acctTxs
     .filter((t) => t.type === "expense")
     .reduce((s, t) => s + Math.abs(parseFloat(t.amount)), 0);
+  const initialBalance = a.balance ? parseFloat(a.balance) : 0;
   return {
     id: a.id,
     name: a.name,
     initials: a.name.slice(0, 2).toUpperCase(),
     type: a.type,
-    balance: income - expenses,
+    balance: initialBalance + income - expenses,
     income,
     expenses,
     color: ACCT_COLORS[idx % ACCT_COLORS.length],
@@ -190,6 +193,7 @@ function BankCard({ account, hidden, onEdit, onDelete }: BankCardProps) {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export function Accounts() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [hidden, setHidden] = useState(false);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -202,6 +206,7 @@ export function Accounts() {
   const [editingAccount, setEditingAccount] = useState<AccountFormData | null>(null);
   const [savingAccount, setSavingAccount] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Account | null>(null);
+  const [showInvestNudge, setShowInvestNudge] = useState(false);
 
   const fetchData = useCallback(() => {
     return Promise.all([getAccounts(), getTransactions(), getCategories()])
@@ -231,7 +236,15 @@ export function Accounts() {
   };
 
   const handleEdit = (acc: Account) => {
-    setEditingAccount({ id: acc.id, name: acc.name, type: acc.type });
+    const raw = rawAccounts.find((r) => r.id === acc.id);
+    setEditingAccount({
+      id: acc.id,
+      name: acc.name,
+      type: acc.type,
+      balance: raw?.balance ? parseFloat(raw.balance) : 0,
+      currentIncome: acc.income,
+      currentExpenses: acc.expenses,
+    });
     setModalOpen(true);
   };
 
@@ -239,14 +252,17 @@ export function Accounts() {
     setSavingAccount(true);
     try {
       if (data.id) {
-        await updateAccount({ id: data.id, name: data.name, type: data.type });
+        await updateAccount({ id: data.id, name: data.name, type: data.type, balance: data.balance });
         toast.success("Conta atualizada!");
+        setModalOpen(false);
+        setEditingAccount(null);
       } else {
-        await createAccount({ name: data.name, type: data.type });
+        await createAccount({ name: data.name, type: data.type, balance: data.balance });
         toast.success("Conta criada!");
+        setModalOpen(false);
+        setEditingAccount(null);
+        setShowInvestNudge(true);
       }
-      setModalOpen(false);
-      setEditingAccount(null);
       await fetchData();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao salvar conta");
@@ -299,6 +315,49 @@ export function Accounts() {
         initial={editingAccount}
         saving={savingAccount}
       />
+
+      {/* Investment nudge modal */}
+      {showInvestNudge && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowInvestNudge(false)} />
+          <div className="relative bg-white w-full max-w-sm rounded-2xl border-3 border-[var(--black)] shadow-[8px_8px_0px_0px_#000] overflow-hidden">
+            <div className="bg-[var(--primary)] border-b-2 border-[var(--black)] px-5 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp size={18} strokeWidth={2.5} className="text-[var(--secondary)]" />
+                <span className="text-sm font-black text-[var(--secondary)] uppercase tracking-tight">
+                  Você investe?
+                </span>
+              </div>
+              <button
+                onClick={() => setShowInvestNudge(false)}
+                className="p-1 rounded-md border-2 border-white/30 text-white hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                <X size={16} strokeWidth={3} />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <p className="text-sm font-bold text-[var(--black-muted)] leading-relaxed">
+                Conta criada com sucesso! Você possui investimentos? Acompanhe rendimentos, taxas e projeções na área de investimentos.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowInvestNudge(false)}
+                  className="flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-lg border-2 border-[var(--black)] bg-white text-[var(--primary)] hover:bg-black/5 transition-all cursor-pointer"
+                >
+                  Dispensar
+                </button>
+                <button
+                  onClick={() => { setShowInvestNudge(false); navigate("/investments"); }}
+                  className="flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-lg border-2 border-[var(--black)] bg-[var(--primary)] text-[var(--secondary)] shadow-[var(--neo-shadow-hover)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  Ver investimentos
+                  <TrendingUp size={13} strokeWidth={3} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete confirm modal */}
       {deleteTarget && (

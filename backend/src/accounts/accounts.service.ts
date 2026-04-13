@@ -13,6 +13,7 @@ export class AccountsService {
         userId,
         name: dto.name,
         type: dto.type,
+        ...(dto.balance !== undefined && { balance: dto.balance }),
       },
     });
   }
@@ -60,6 +61,7 @@ export class AccountsService {
     const data: Record<string, unknown> = {};
     if (dto.name !== undefined) data.name = dto.name;
     if (dto.type !== undefined) data.type = dto.type;
+    if (dto.balance !== undefined) data.balance = dto.balance;
 
     const result = await this.prisma.account.updateMany({
       where: { id: dto.id, userId },

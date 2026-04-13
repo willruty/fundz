@@ -19,12 +19,14 @@ interface AccountListResponse {
 export interface CreateAccountInput {
   name: string;
   type: string;
+  balance?: number;
 }
 
 export interface UpdateAccountInput {
   id: string;
   name?: string;
   type?: string;
+  balance?: number;
 }
 
 export async function getAccounts(): Promise<ApiAccount[]> {

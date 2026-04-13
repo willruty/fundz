@@ -56,6 +56,15 @@ export class EnvironmentVariables {
   @IsOptional()
   @IsString()
   SUPABASE_JWT_SECRET?: string;
+
+  /**
+   * UUID of the guest/visitor account (visitante@fundz.app).
+   * When set, all mutating requests (POST/PUT/PATCH/DELETE) from this user
+   * are blocked with 403 — the account is read-only for demo purposes.
+   */
+  @IsOptional()
+  @IsString()
+  GUEST_USER_ID?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

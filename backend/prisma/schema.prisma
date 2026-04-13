@@ -46,6 +46,7 @@ model Profile {
   categories    Category[]
   goals         Goal[]
   installments  Installment[]
+  investments   Investment[]
   subscriptions Subscription[]
   transactions  Transaction[]
 
@@ -157,6 +158,27 @@ model Installment {
   category Category? @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_installments_category")
 
   @@map("installments")
+}
+
+// -----------------------------------------------------------------------------
+// Investment
+// -----------------------------------------------------------------------------
+/// User investment record. Tracks invested amount, annual yield rate, and category.
+model Investment {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  name       String    @db.VarChar
+  category   String    @db.VarChar
+  amount     Decimal   @db.Decimal
+  annualRate Decimal   @map("annual_rate") @db.Decimal
+  startDate  DateTime  @default(now()) @map("start_date") @db.Date
+  notes      String?   @db.VarChar
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt  DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
+
+  profile Profile @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_investments_user")
+
+  @@map("investments")
 }
 
 // -----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   User,
@@ -15,15 +15,18 @@ import { ConfigsSkeleton } from "../components/skeletons/ConfigsSkeleton";
 import {
   getProfile,
   updateProfile,
+  uploadAvatar,
   changePassword,
   deleteAccount,
 } from "../service/profile.service";
 import type { Profile } from "../service/profile.service";
+import { useIsGuest } from "../hooks/useIsGuest";
 
 type Tab = "profile" | "account" | "notifications" | "preferences";
 
 export function Configs() {
   const navigate = useNavigate();
+  const isGuest = useIsGuest();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("profile");
 
@@ -32,6 +35,8 @@ export function Configs() {
   const [name, setName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Password state
   const [newPassword, setNewPassword] = useState("");
@@ -69,7 +74,7 @@ export function Configs() {
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
-      const updated = await updateProfile({ name, avatar_url: avatarUrl || undefined });
+      const updated = await updateProfile({ name });
       setProfile(updated);
       localStorage.setItem("user_name", updated.name ?? "");
       toast.success("Perfil atualizado!");
@@ -77,6 +82,35 @@ export function Configs() {
       toast.error("Erro ao salvar perfil");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !profile) return;
+
+    const allowed = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      toast.error("Formato inválido. Use JPG, PNG, GIF ou WEBP.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Imagem muito grande. Máx: 5MB.");
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const publicUrl = await uploadAvatar(profile.id, file);
+      const updated = await updateProfile({ avatar_url: publicUrl });
+      setProfile(updated);
+      setAvatarUrl(publicUrl);
+      toast.success("Foto atualizada!");
+    } catch {
+      toast.error("Erro ao enviar imagem");
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -128,6 +162,13 @@ export function Configs() {
         </p>
       </div>
 
+      {isGuest && (
+        <div className="mb-6 flex items-center gap-3 px-4 py-3 bg-amber-50 border-2 border-amber-400 rounded-xl text-amber-800 font-bold text-sm">
+          <AlertTriangle size={18} strokeWidth={2.5} className="shrink-0" />
+          Conta visitante — edições estão desabilitadas nesta demonstração.
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row gap-8">
         {/* MENU LATERAL */}
         <aside className="w-full md:w-64 shrink-0">
@@ -169,7 +210,19 @@ export function Configs() {
               </h2>
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8">
-                <div className="relative group cursor-pointer">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingAvatar || isGuest}
+                  className="relative group cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                >
                   <div className="w-24 h-24 rounded-full bg-[var(--main-bg)] border-2 border-[var(--black)] shadow-[var(--neo-shadow-hover)] overflow-hidden flex items-center justify-center transition-transform group-hover:scale-105">
                     {avatarUrl ? (
                       <img
@@ -192,23 +245,22 @@ export function Configs() {
                       strokeWidth={2.5}
                     />
                   </div>
-                </div>
+                </button>
                 <div>
                   <h3 className="font-black text-[var(--primary)] uppercase tracking-tight">
                     Foto de perfil
                   </h3>
                   <p className="text-[10px] font-bold text-[var(--black-muted)] mt-1 mb-3 uppercase tracking-wider">
-                    JPG, GIF ou PNG. Máx: 5MB.
+                    JPG, PNG, GIF ou WEBP. Máx: 5MB.
                   </p>
-                  <div className="flex flex-col gap-2">
-                    <input
-                      type="text"
-                      value={avatarUrl}
-                      onChange={(e) => setAvatarUrl(e.target.value)}
-                      placeholder="URL da imagem de perfil"
-                      className="w-full bg-white border-2 border-[var(--black)] rounded-md px-4 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all shadow-[var(--neo-shadow-hover)]"
-                    />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingAvatar || isGuest}
+                    className="px-4 py-2 bg-white border-2 border-[var(--black)] rounded-md text-xs font-black uppercase tracking-wider shadow-[var(--neo-shadow-hover)] hover:bg-black/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {uploadingAvatar ? "Enviando..." : "Escolher foto"}
+                  </button>
                 </div>
               </div>
 
@@ -218,6 +270,7 @@ export function Configs() {
                   placeholder="Ex: João Silva"
                   value={name}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+                  disabled={isGuest}
                 />
                 <InputGroup
                   label="E-mail"
@@ -228,7 +281,7 @@ export function Configs() {
               </div>
 
               <div className="mt-8 pt-6 border-t-2 border-[var(--black)] border-dashed flex justify-end">
-                <Button onClick={handleSaveProfile} disabled={saving}>
+                <Button onClick={handleSaveProfile} disabled={saving || isGuest}>
                   {saving ? "Salvando..." : "Salvar Alterações"}
                 </Button>
               </div>
@@ -274,6 +327,7 @@ export function Configs() {
                   placeholder="Mínimo 6 caracteres"
                   value={newPassword}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
+                  disabled={isGuest}
                 />
                 <InputGroup
                   label="Confirmar Nova Senha"
@@ -281,11 +335,12 @@ export function Configs() {
                   placeholder="Repita a nova senha"
                   value={confirmPassword}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+                  disabled={isGuest}
                 />
               </div>
 
               <div className="mt-8 pt-6 border-t-2 border-[var(--black)] border-dashed flex justify-end">
-                <Button onClick={handleChangePassword} disabled={changingPassword}>
+                <Button onClick={handleChangePassword} disabled={changingPassword || isGuest}>
                   {changingPassword ? "Alterando..." : "Atualizar Senha"}
                 </Button>
               </div>
@@ -305,12 +360,14 @@ export function Configs() {
                   description="Receba alertas no seu celular ou navegador sobre novidades."
                   checked={pushEnabled}
                   onChange={() => setPushEnabled(!pushEnabled)}
+                  disabled={isGuest}
                 />
                 <ToggleRow
                   title="E-mails de Resumo"
                   description="Receba um resumo semanal das suas atividades e finanças."
                   checked={emailEnabled}
                   onChange={() => setEmailEnabled(!emailEnabled)}
+                  disabled={isGuest}
                 />
                 <ToggleRow
                   title="Avisos de Segurança"
@@ -322,7 +379,7 @@ export function Configs() {
               </div>
 
               <div className="mt-8 pt-6 border-t-2 border-[var(--black)] border-dashed flex justify-end">
-                <Button onClick={() => toast.success("Preferências salvas!")}>
+                <Button onClick={() => toast.success("Preferências salvas!")} disabled={isGuest}>
                   Salvar Preferências
                 </Button>
               </div>
@@ -365,11 +422,12 @@ export function Configs() {
                   description="Apenas seus amigos poderão ver seu apelido e conquistas."
                   checked={isPrivate}
                   onChange={() => setIsPrivate(!isPrivate)}
+                  disabled={isGuest}
                 />
               </div>
 
               {/* Zona de Perigo */}
-              <div className="mt-8 pt-8 border-t-4 border-red-500">
+              {!isGuest && <div className="mt-8 pt-8 border-t-4 border-red-500">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertTriangle size={20} className="text-red-600" strokeWidth={2.5} />
                   <h3 className="font-black text-xl text-red-600 uppercase tracking-tighter">
@@ -420,7 +478,7 @@ export function Configs() {
                     </div>
                   </div>
                 )}
-              </div>
+              </div>}
             </div>
           )}
         </main>

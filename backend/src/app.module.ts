@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { ReadOnlyGuard } from './common/guards/read-only.guard';
 import { validateEnv } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
 import { SupabaseModule } from './supabase/supabase.module';
@@ -13,6 +14,7 @@ import { InstallmentsModule } from './installments/installments.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { InvestmentsModule } from './investments/investments.module';
 import { UsersModule } from './users/users.module';
 import { HttpExceptionResponseFilter } from './common/filters/http-exception.filter';
 
@@ -34,6 +36,7 @@ import { HttpExceptionResponseFilter } from './common/filters/http-exception.fil
     SubscriptionsModule,
     TransactionsModule,
     DashboardModule,
+    InvestmentsModule,
     UsersModule,
   ],
   controllers: [],
@@ -41,6 +44,10 @@ import { HttpExceptionResponseFilter } from './common/filters/http-exception.fil
     {
       provide: APP_FILTER,
       useClass: HttpExceptionResponseFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ReadOnlyGuard,
     },
   ],
 })

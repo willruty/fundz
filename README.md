@@ -208,7 +208,7 @@ Configure as variaveis de ambiente no dashboard da Vercel para ambos os projetos
 - [x] Autenticacao Supabase
 - [x] Deploy Vercel
 - [X] Card de Saúde Financeira na home (investimentos 'bom', gastos 'atenção', dividas 'baixo')
-- [ ] Pagina de perfil/configuracoes (deixar 100% funcional pelo menos a parte de perfil)
+- [X] Pagina de perfil/configuracoes (deixar 100% funcional pelo menos a parte de perfil)
 - [ ] CRUD de investimentos
 - [ ] Landing page profissional
 - [ ] Página de politica de privacidade 

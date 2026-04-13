@@ -161,7 +161,15 @@ export class UsersService {
       throw new BadRequestException('perfil não encontrado');
     }
 
-    return { data: profile };
+    return {
+      data: {
+        id: profile.id,
+        email: profile.email,
+        name: profile.name,
+        avatar_url: profile.avatarUrl,
+        created_at: profile.createdAt,
+      },
+    };
   }
 
   /** Update profile (name, avatar_url) */
@@ -179,7 +187,15 @@ export class UsersService {
       data,
     });
 
-    return { data: profile };
+    return {
+      data: {
+        id: profile.id,
+        email: profile.email,
+        name: profile.name,
+        avatar_url: profile.avatarUrl,
+        created_at: profile.createdAt,
+      },
+    };
   }
 
   /** Change password via Supabase Admin API */

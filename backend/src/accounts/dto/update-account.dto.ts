@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class UpdateAccountDto {
   /** ID is sent in the body (Go parity: PUT /account/ with id in payload). */
@@ -13,4 +14,10 @@ export class UpdateAccountDto {
   @IsOptional()
   @IsString()
   type?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  balance?: number;
 }

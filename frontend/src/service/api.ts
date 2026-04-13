@@ -1,12 +1,14 @@
+import toast from "react-hot-toast";
 import { supabase } from "../lib/supabase";
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/fundz";
+const GUEST_EMAIL = "visitante@fundz.app";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
-async function getToken(): Promise<string | null> {
+async function getSession() {
   const { data } = await supabase.auth.getSession();
-  return data.session?.access_token ?? null;
+  return data.session;
 }
 
 async function request<T>(
@@ -14,7 +16,13 @@ async function request<T>(
   method: HttpMethod = "GET",
   body?: unknown,
 ): Promise<T> {
-  const token = await getToken();
+  const session = await getSession();
+  const token = session?.access_token ?? null;
+
+  if (method !== "GET" && session?.user?.email === GUEST_EMAIL) {
+    toast.error("Conta visitante — apenas visualização permitida");
+    throw new Error("guest_read_only");
+  }
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",
