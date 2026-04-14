@@ -22,7 +22,7 @@ export function Auth() {
   const handleGuestLogin = async () => {
     setLoadingGuest(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: "visitante@fundz.app",
         password: "Visitante@123",
       });

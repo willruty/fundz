@@ -328,7 +328,7 @@ function CsvImportModal({ onClose, onImport }: CsvModalProps) {
 
 export function RecentTransactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [, setCategories] = useState<Category[]>([]);
   const [accounts, setAccounts] = useState<ApiAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
