@@ -7,6 +7,7 @@ import { DailySpendingChart } from "../components/ExpenseChartCard";
 import { CategoryDistributionCard } from "../components/ExpenseCategoryDistribuitionCard";
 import { TransactionTableCard, type ExpenseTransaction } from "../components/ExpensesTableCard";
 import { ExpensesSkeleton } from "../components/skeletons/ExpensesSkeleton";
+import { AnimatedSection } from "../components/ui/AnimatedSection";
 import { getTransactions, type Transaction } from "../service/transaction.service";
 import { getCategories, type Category } from "../service/categories.service";
 import { getAccounts, type ApiAccount } from "../service/accounts.service";
@@ -136,48 +137,48 @@ export function Expenses() {
     <div className="min-h-screen">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-10 gap-4 lg:gap-6">
         {/* LINHA 1 */}
-        <div className="lg:col-span-2">
+        <AnimatedSection index={0} className="lg:col-span-2">
           <DailyAverageCard average={dailyAverage} last7Days={last7Days} />
-        </div>
+        </AnimatedSection>
 
-        <div className="lg:col-span-2">
+        <AnimatedSection index={1} className="lg:col-span-2">
           <MonthlyForecastCard
             dailyAverage={dailyAverage}
             daysInMonth={daysInMonth}
           />
-        </div>
+        </AnimatedSection>
 
-        <div className="lg:col-span-2">
+        <AnimatedSection index={2} className="lg:col-span-2">
           <HighestExpenseCard
             amount={highest ? Math.abs(parseFloat(highest.amount)) : 0}
             date={highest ? new Date(txDate(highest)).toLocaleDateString("pt-BR") : "—"}
             category={highestCatName}
             description={highest?.description || "Nenhuma despesa encontrada"}
           />
-        </div>
+        </AnimatedSection>
 
-        <div className="sm:col-span-2 lg:col-span-4">
+        <AnimatedSection index={3} className="sm:col-span-2 lg:col-span-4">
           <ImpulsiveSpendingCard />
-        </div>
+        </AnimatedSection>
 
         {/* LINHA 2 */}
-        <div className="sm:col-span-2 lg:col-span-5 mt-0 sm:mt-2 lg:mt-4">
+        <AnimatedSection index={4} className="sm:col-span-2 lg:col-span-5 mt-0 sm:mt-2 lg:mt-4">
           <DailySpendingChart data={dailyData} />
-        </div>
+        </AnimatedSection>
 
-        <div className="sm:col-span-2 lg:col-span-5 mt-0 sm:mt-2 lg:mt-4">
+        <AnimatedSection index={5} className="sm:col-span-2 lg:col-span-5 mt-0 sm:mt-2 lg:mt-4">
           <CategoryDistributionCard data={categoryData} />
-        </div>
+        </AnimatedSection>
 
         {/* LINHA 3 */}
-        <div className="sm:col-span-2 lg:col-span-10 mt-0 sm:mt-2 lg:mt-4">
+        <AnimatedSection index={6} className="sm:col-span-2 lg:col-span-10 mt-0 sm:mt-2 lg:mt-4">
           <TransactionTableCard
             transactions={tableData}
             categories={categories}
             accounts={accounts}
             onMutate={fetchData}
           />
-        </div>
+        </AnimatedSection>
       </div>
     </div>
   );

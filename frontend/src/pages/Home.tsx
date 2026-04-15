@@ -8,6 +8,7 @@ import { CategoryDistributionCard } from "../components/CategoryDistribution";
 import { RecentTransactions } from "../components/RecentTransactions";
 import { FinancialHealthCard } from "../components/FinancialHealthCard";
 import { HomeSkeleton } from "../components/HomeSkeleton";
+import { AnimatedSection } from "../components/ui/AnimatedSection";
 import { getDashboardOverview } from "../service/dashboard.service";
 import type { DashboardDTO } from "../types/dashboard";
 
@@ -31,43 +32,43 @@ export function Home() {
       <div className="grid grid-cols-12 gap-5 items-stretch">
 
         {/* Linha 1: Badges das Contas */}
-        <div className="col-span-12">
+        <AnimatedSection index={0} className="col-span-12">
           <AccountList accounts={dashboard.accounts} />
-        </div>
+        </AnimatedSection>
 
         {/* Linha 2: Saldo · Objetivo · Saúde — mesma altura */}
-        <div className="col-span-12 lg:col-span-5">
+        <AnimatedSection index={1} className="col-span-12 lg:col-span-5">
           <BalanceCard
             accounts={dashboard.accounts}
             transactions={dashboard.last_month_transactions}
           />
-        </div>
-        <div className="col-span-12 lg:col-span-4">
+        </AnimatedSection>
+        <AnimatedSection index={2} className="col-span-12 lg:col-span-4">
           <NextGoalCard goal={dashboard.goal} />
-        </div>
-        <div className="col-span-12 lg:col-span-3">
+        </AnimatedSection>
+        <AnimatedSection index={3} className="col-span-12 lg:col-span-3">
           <FinancialHealthCard health={dashboard.financial_health} />
-        </div>
+        </AnimatedSection>
 
         {/* Linha 3: Fluxo de Caixa · Distribuição */}
-        <div className="col-span-12 lg:col-span-7">
+        <AnimatedSection index={4} className="col-span-12 lg:col-span-7">
           <MonthlyBalanceCard
             last_month_transactions={dashboard.last_month_transactions}
           />
-        </div>
-        <div className="col-span-12 lg:col-span-5">
+        </AnimatedSection>
+        <AnimatedSection index={5} className="col-span-12 lg:col-span-5">
           <CategoryDistributionCard
             distribution={dashboard.categories.distribution}
           />
-        </div>
+        </AnimatedSection>
 
         {/* Linha 4: Análise de Categorias · Transações Recentes */}
-        <div className="col-span-12 lg:col-span-5">
+        <AnimatedSection index={6} className="col-span-12 lg:col-span-5">
           <CategoryAnalysisCard most_used={dashboard.categories.most_used} />
-        </div>
-        <div className="col-span-12 lg:col-span-7">
+        </AnimatedSection>
+        <AnimatedSection index={7} className="col-span-12 lg:col-span-7">
           <RecentTransactions />
-        </div>
+        </AnimatedSection>
 
       </div>
     </main>

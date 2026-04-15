@@ -13,6 +13,7 @@ import { Expenses } from "./pages/Expenses";
 import { Subscriptions } from "./pages/Subscriptions";
 import { Configs } from "./pages/Configs";
 import { Advisors } from "./pages/Advisors";
+import { AdvisorsChat } from "./pages/AdvisorsChat";
 import { Toaster } from "react-hot-toast";
 import Platform from "./components/ui/PlataformInterface";
 
@@ -35,6 +36,7 @@ function App() {
           <Route path="/subscriptions" element={<Subscriptions />} />
           <Route path="/configs" element={<Configs />} />
           <Route path="/advisors" element={<Advisors />} />
+          <Route path="/advisors/chat/:personaId" element={<AdvisorsChat />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -31,13 +31,13 @@ Fundz transforma dados financeiros em decisoes melhores atraves de visualizacao,
 
 ## Stack
 
-| Camada | Tecnologias |
-|---|---|
+| Camada       | Tecnologias                                                                |
+| ------------ | -------------------------------------------------------------------------- |
 | **Frontend** | React 19, TypeScript, Vite, Tailwind CSS 4, Recharts, Motion, Lucide Icons |
-| **Backend** | NestJS 11, TypeScript, Prisma 6, Passport JWT |
-| **Banco** | Supabase (PostgreSQL) com RLS |
-| **Auth** | Supabase Auth (JWT ES256/HS256) |
-| **Deploy** | Vercel (monorepo) |
+| **Backend**  | NestJS 11, TypeScript, Prisma 6, Passport JWT                              |
+| **Banco**    | Supabase (PostgreSQL) com RLS                                              |
+| **Auth**     | Supabase Auth (JWT ES256/HS256)                                            |
+| **Deploy**   | Vercel (monorepo)                                                          |
 
 ---
 
@@ -151,21 +151,21 @@ fundz/
 
 Todas as rotas sao prefixadas com `/fundz`. Rotas protegidas exigem `Authorization: Bearer <token>`.
 
-| Metodo | Rota | Descricao |
-|---|---|---|
-| `GET` | `/health` | Health check |
-| `POST` | `/user/auth/register` | Criar conta |
-| `POST` | `/user/auth/login` | Login |
-| `GET` | `/user/auth/validate` | Validar token |
-| `CRUD` | `/account` | Contas |
-| `GET` | `/account/balance/:id` | Saldo da conta |
-| `CRUD` | `/category` | Categorias |
-| `CRUD` | `/transaction` | Transacoes |
-| `GET` | `/transaction/last-month` | Transacoes ultimos 30 dias |
-| `CRUD` | `/goal` | Metas |
-| `CRUD` | `/subscription` | Assinaturas |
-| `CRUD` | `/installment` | Parcelamentos |
-| `GET` | `/dashboard/overview` | Dashboard agregado |
+| Metodo | Rota                      | Descricao                  |
+| ------ | ------------------------- | -------------------------- |
+| `GET`  | `/health`                 | Health check               |
+| `POST` | `/user/auth/register`     | Criar conta                |
+| `POST` | `/user/auth/login`        | Login                      |
+| `GET`  | `/user/auth/validate`     | Validar token              |
+| `CRUD` | `/account`                | Contas                     |
+| `GET`  | `/account/balance/:id`    | Saldo da conta             |
+| `CRUD` | `/category`               | Categorias                 |
+| `CRUD` | `/transaction`            | Transacoes                 |
+| `GET`  | `/transaction/last-month` | Transacoes ultimos 30 dias |
+| `CRUD` | `/goal`                   | Metas                      |
+| `CRUD` | `/subscription`           | Assinaturas                |
+| `CRUD` | `/installment`            | Parcelamentos              |
+| `GET`  | `/dashboard/overview`     | Dashboard agregado         |
 
 ---
 
@@ -207,23 +207,24 @@ Configure as variaveis de ambiente no dashboard da Vercel para ambos os projetos
 - [x] Dashboard com metricas financeiras
 - [x] Autenticacao Supabase
 - [x] Deploy Vercel
-- [X] Card de Saúde Financeira na home (investimentos 'bom', gastos 'atenção', dividas 'baixo')
-- [X] Pagina de perfil/configuracoes (deixar 100% funcional pelo menos a parte de perfil)
-- [X] CRUD de investimentos
-- [ ] Separar em páginas diferentes os advisors (seleção e criação de advisor, chat com advisor)
-- [ ] Criar as tabelas que vão comportar o sistema de advisor
+- [x] Card de Saúde Financeira na home (investimentos 'bom', gastos 'atenção', dividas 'baixo')
+- [x] Pagina de perfil/configuracoes (deixar 100% funcional pelo menos a parte de perfil)
+- [x] CRUD de investimentos
+- [x] Separar em páginas diferentes os advisors (seleção e criação de advisor, chat com advisor)
+- [x] Criar as tabelas que vão comportar o sistema de advisor
+- [ ] Tirar os skeletons
+- [ ] Melhorar a sidebar
 - [ ] Colocar seleção de icone para advisor personalizado
-- [ ] Deixar a seleção de advisor na barra do chat
 - [ ] Em cada analise mostrar a opinião entre advisors, mostrar “conflito” entre agentes na mesma situação
-      + tipo:
-        - Vibe: “vai, experiência vale mais que dinheiro” | Vibe aprova ✅
-        - Core: “não faz sentido dentro da tua realidade atual” | Core desaprova ❌
-        - Flow: “vai, mas corta X e Y essa semana” | Flow sugere ajuste ⚖️
-- [ ] Fazer o histórico de chats cair de cima como um dropdown
-- [ ] Melhorar a página de seleção de advisor
-- [ ] Colocar efeitos em todos os componentes tirando o skeleton
+  - tipo:
+    - Vibe: “vai, experiência vale mais que dinheiro” | Vibe aprova ✅
+    - Core: “não faz sentido dentro da tua realidade atual” | Core desaprova ❌
+    - Flow: “vai, mas corta X e Y essa semana” | Flow sugere ajuste ⚖️
+- [x] Fazer o histórico de chats cair de cima como um dropdown
+- [x] Melhorar a página de seleção de advisor
+- [x] Colocar efeitos em todos os componentes tirando o skeleton
 - [ ] Landing page profissional
-- [ ] Página de politica de privacidade 
+- [ ] Página de politica de privacidade
 - [ ] Gateway de pagamento
 - [ ] Integracao OpenFinance (Pluggy)
 

@@ -18,6 +18,7 @@ import {
 import { AccountsSkeleton } from "../components/skeletons/AccountsSkeleton";
 import AccountModal, { type AccountFormData } from "../components/AccountModal";
 import { TransactionTableCard, type ExpenseTransaction } from "../components/ExpensesTableCard";
+import { AnimatedSection } from "../components/ui/AnimatedSection";
 import {
   getAccounts,
   createAccount,
@@ -413,7 +414,7 @@ export function Accounts() {
       )}
 
       {/* ── SECTION 1: Bank Cards ────────────────────────────────────────────── */}
-      <div className="flex flex-col bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] overflow-hidden">
+      <AnimatedSection index={0} className="flex flex-col bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] overflow-hidden">
         <div className="bg-[var(--primary)] border-b-2 border-[var(--black)] px-6 py-4 flex justify-between items-center flex-wrap gap-4">
           <div>
             <h3 className="text-[10px] font-extrabold tracking-widest text-[var(--secondary)] uppercase mb-1">
@@ -468,11 +469,11 @@ export function Accounts() {
             ))
           )}
         </div>
-      </div>
+      </AnimatedSection>
 
       {/* ── SECTION 2: Global Stats ──────────────────────────────────────────── */}
       {accounts.length > 0 && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <AnimatedSection index={1} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             {
               label: "Saldo Total",
@@ -522,12 +523,12 @@ export function Accounts() {
               </div>
             </div>
           ))}
-        </div>
+        </AnimatedSection>
       )}
 
       {/* ── SECTION 3: Distribution + Top Categories ─────────────────────────── */}
       {accounts.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <AnimatedSection index={2} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
           {/* Distribuição de saldo por conta */}
           <div className="bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] overflow-hidden">
@@ -609,19 +610,21 @@ export function Accounts() {
             </div>
           </div>
 
-        </div>
+        </AnimatedSection>
       )}
 
       {/* ── SECTION 4: Transactions Table ────────────────────────────────────── */}
-      <TransactionTableCard
-        transactions={tableData}
-        categories={categories}
-        accounts={rawAccounts}
-        onMutate={fetchData}
-        mode="all"
-        title="Todas as Transações"
-        subtitle="Movimentações"
-      />
+      <AnimatedSection index={3}>
+        <TransactionTableCard
+          transactions={tableData}
+          categories={categories}
+          accounts={rawAccounts}
+          onMutate={fetchData}
+          mode="all"
+          title="Todas as Transações"
+          subtitle="Movimentações"
+        />
+      </AnimatedSection>
     </main>
   );
 }

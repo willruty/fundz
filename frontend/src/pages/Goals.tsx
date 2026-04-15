@@ -3,6 +3,7 @@ import { Calendar, Plus, Pencil, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { GoalsSkeleton } from "../components/skeletons/GoalsSkeleton";
 import GoalModal, { type GoalFormData } from "../components/GoalModal";
+import { AnimatedSection } from "../components/ui/AnimatedSection";
 import {
   BarChart,
   Bar,
@@ -289,7 +290,7 @@ export function Goals() {
     <main className="min-h-screen mx-auto space-y-8">
 
       {/* ── SEÇÃO 1 · CARDS TOPO ── */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-fr">
+      <AnimatedSection index={0} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-fr">
 
         {/* Meta em Destaque */}
         <div className="lg:col-span-2 bg-[var(--secondary)] border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] transition-all duration-200 hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]">
@@ -413,10 +414,10 @@ export function Goals() {
           </div>
         </div>
 
-      </section>
+      </AnimatedSection>
 
       {/* ── SEÇÃO 2 · GRÁFICOS ── */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <AnimatedSection index={1} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Gráfico de Progresso por Meta */}
         <div className="bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] p-5 sm:p-0 shadow-[var(--neo-shadow)] flex flex-col overflow-hidden transition-all duration-200 hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]">
@@ -540,10 +541,10 @@ export function Goals() {
           </div>
         </div>
 
-      </section>
+      </AnimatedSection>
 
       {/* ── SEÇÃO 3 · CARDS DE METAS ── */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <AnimatedSection index={2} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {goals.map((goal) => {
           const progress  = pct(goal.current, goal.target);
           const ml        = monthsLeft(goal.dueDate);
@@ -632,7 +633,7 @@ export function Goals() {
             </div>
           );
         })}
-      </section>
+      </AnimatedSection>
 
       {/* Modal de criação/edição */}
       <GoalModal

@@ -28,7 +28,10 @@ export function MobileNav() {
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--primary)] border-t-2 border-[var(--black)] shadow-[0_-4px_0px_0px_#000000]">
       <div className="flex items-center justify-around px-2 py-2 safe-area-pb">
         {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive =
+            item.path === "/advisors"
+              ? location.pathname.startsWith("/advisors")
+              : location.pathname === item.path;
           return (
             <button
               key={item.path}

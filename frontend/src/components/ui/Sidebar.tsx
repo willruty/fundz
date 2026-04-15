@@ -82,7 +82,7 @@ export function Sidebar() {
 
         {/* Navegação */}
         <div className="flex flex-col gap-1 px-2 mt-2">
-          {menuItems.map((item) => {
+          {menuItems.filter((item) => item.path !== "/advisors").map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <button
@@ -90,11 +90,10 @@ export function Sidebar() {
                 onClick={() => navigate(item.path)}
                 className={`w-full flex items-center p-3 rounded-xl transition-all duration-200 group relative cursor-pointer ${
                   isActive
-                    ? "bg-white/10 text-[var(--secondary)]" // Fundo sutil ao invés de bordas
+                    ? "bg-white/10 text-[var(--secondary)]"
                     : "text-[var(--main-bg)] hover:bg-white/5 hover:text-[var(--secondary)]"
                 } ${!isExpanded ? "justify-center" : "justify-start px-4"}`}
               >
-                {/* Borda Lateral Animada (Mais quadrada para combinar com o tema) */}
                 {isActive && (
                   <motion.div
                     layoutId="activeBorder"
@@ -103,7 +102,6 @@ export function Sidebar() {
                   />
                 )}
 
-                {/* Ícone */}
                 <div className="flex items-center justify-center min-w-[22px]">
                   <item.icon
                     size={20}
@@ -125,7 +123,6 @@ export function Sidebar() {
                   )}
                 </AnimatePresence>
 
-                {/* Tooltip Brutalista (Aparece apenas quando fechado) */}
                 {!isExpanded && (
                   <div className="absolute left-16 bg-[var(--secondary)] text-[var(--primary)] px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 border-2 border-[var(--black)] shadow-[var(--neo-shadow)] z-[100] translate-x-2 group-hover:translate-x-4">
                     {item.name}
@@ -134,6 +131,54 @@ export function Sidebar() {
               </button>
             );
           })}
+
+          {/* Divisória antes do Advisors */}
+          <div className="mx-2 my-2 border-t border-white/10" />
+
+          {/* Advisors — destaque especial */}
+          {(() => {
+            const isActive = location.pathname.startsWith("/advisors");
+            return (
+              <button
+                onClick={() => navigate("/advisors")}
+                className={`w-full text-[var(--primary)] flex items-center p-3 rounded-xl transition-all duration-200 group relative cursor-pointer border-4 border-white bg-[var(--secondary)] ${
+                  isActive
+                    ? "shadow-none translate-x-[4px] translate-y-[4px]"
+                    : "shadow-[4px_4px_0px_0px_rgba(255,255,255,0.4)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px]"
+                } ${!isExpanded ? "justify-center" : "justify-start px-4"}`}
+              >
+                <div className="flex items-center justify-center min-w-[22px]">
+                  <Bot size={20} strokeWidth={2.5} className="text-[var(--primary)]" />
+                </div>
+
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.span
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: "auto" }}
+                      exit={{ opacity: 0, width: 0 }}
+                      className="font-black text-[10px] uppercase tracking-widest overflow-hidden whitespace-nowrap ml-4 mt-0.5 text-[var(--primary)]"
+                    >
+                      Advisors
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+
+                {/* Badge AI */}
+                {isExpanded && (
+                  <span className="ml-auto text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border border-[var(--primary)]/30 text-[var(--primary)]/70">
+                    AI
+                  </span>
+                )}
+
+                {!isExpanded && (
+                  <div className="absolute left-16 bg-[var(--secondary)] text-[var(--primary)] px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 border-2 border-[var(--black)] shadow-[var(--neo-shadow)] z-[100] translate-x-2 group-hover:translate-x-4">
+                    Advisors
+                  </div>
+                )}
+              </button>
+            );
+          })()}
         </div>
 
         {/* Footer de Perfil / Configurações */}
