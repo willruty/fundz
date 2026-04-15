@@ -260,7 +260,7 @@ function InvestmentModal({ open, onClose, onSave, initial, saving }: InvestmentM
                       </div>
                     </button>
                     {isOpen && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 bg-white border-t-2 border-[var(--black)]">
+                      <div className="grid grid-cols-2 gap-2 p-3 bg-white border-t-2 border-[var(--black)]">
                         {group.items.map((item) => {
                           const isActive = form.category === item.id;
                           return (
@@ -268,17 +268,17 @@ function InvestmentModal({ open, onClose, onSave, initial, saving }: InvestmentM
                               type="button"
                               key={item.id}
                               onClick={() => handleCategorySelect(item.id)}
-                              className={`flex flex-col items-start p-2.5 rounded-lg border-2 border-[var(--black)] text-left transition-all cursor-pointer ${
+                              className={`flex flex-col items-start p-3 rounded-lg border-2 border-[var(--black)] text-left transition-all cursor-pointer min-h-[56px] ${
                                 isActive
                                   ? "translate-x-[2px] translate-y-[2px]"
                                   : "bg-white shadow-[var(--neo-shadow-hover)] hover:translate-x-[2px] hover:translate-y-[2px]"
                               }`}
                               style={{ background: isActive ? group.color : "#fff" }}
                             >
-                              <span className="text-[10px] font-black uppercase tracking-wide" style={{ color: isActive ? "#fff" : "var(--primary)" }}>
+                              <span className="text-xs font-black uppercase tracking-wide leading-tight" style={{ color: isActive ? "#fff" : "var(--primary)" }}>
                                 {item.label}
                               </span>
-                              <span className="text-[9px] font-bold mt-0.5" style={{ color: isActive ? "rgba(255,255,255,0.7)" : "var(--black-muted)" }}>
+                              <span className="text-[10px] font-bold mt-1" style={{ color: isActive ? "rgba(255,255,255,0.75)" : "var(--black-muted)" }}>
                                 {item.desc || "—"}
                               </span>
                             </button>
@@ -406,81 +406,78 @@ function InvestmentCard({
 
   return (
     <div className="group relative flex flex-col bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all overflow-hidden">
-      {/* colored top strip */}
-      <div className="h-1.5 w-full" style={{ background: meta.groupColor }} />
-
-      {/* Action buttons */}
-      <div className="absolute top-4 right-3 z-10 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={onEdit} className="p-1.5 rounded-md border-2 border-[var(--black)] bg-white text-[var(--primary)] hover:bg-[var(--secondary)] shadow-[var(--neo-shadow-hover)] cursor-pointer" title="Editar">
-          <Pencil size={12} strokeWidth={2.5} />
-        </button>
-        <button onClick={onDelete} className="p-1.5 rounded-md border-2 border-[var(--black)] bg-red-500 text-white hover:bg-red-600 shadow-[var(--neo-shadow-hover)] cursor-pointer" title="Excluir">
-          <Trash2 size={12} strokeWidth={2.5} />
-        </button>
+      {/* colored header band */}
+      <div className="flex items-center justify-between px-4 py-3" style={{ background: meta.groupColor }}>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-black uppercase tracking-widest text-white/70">{meta.group}</span>
+          <span className="text-[10px] font-black text-white/40">·</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-white">{meta.label}</span>
+        </div>
+        {/* Action buttons — always visible on header */}
+        <div className="flex gap-1.5">
+          <button onClick={onEdit} className="p-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/25 transition-colors cursor-pointer" title="Editar">
+            <Pencil size={11} strokeWidth={2.5} />
+          </button>
+          <button onClick={onDelete} className="p-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-red-500/80 transition-colors cursor-pointer" title="Excluir">
+            <Trash2 size={11} strokeWidth={2.5} />
+          </button>
+        </div>
       </div>
 
-      <div className="p-5 flex flex-col gap-4">
-        {/* Header */}
+      <div className="p-4 flex flex-col gap-3">
+        {/* Name + notes */}
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 border-2 border-[var(--black)] rounded" style={{ background: meta.groupColor, color: "#fff" }}>
-              {meta.label}
-            </span>
-            <span className="text-[9px] font-bold text-[var(--black-muted)] uppercase">{meta.group}</span>
-          </div>
-          <p className="font-black text-[var(--primary)] tracking-tight leading-snug">{inv.name}</p>
-          {inv.notes && <p className="text-[10px] text-[var(--black-muted)] mt-0.5 truncate">{inv.notes}</p>}
+          <p className="text-sm font-black text-[var(--primary)] tracking-tight leading-snug">{inv.name}</p>
+          {inv.notes && <p className="text-xs text-[var(--black-muted)] mt-0.5 truncate">{inv.notes}</p>}
+          <p className="text-[10px] font-semibold text-[var(--black-muted)] mt-1">
+            Desde {new Date(inv.startDate).toLocaleDateString("pt-BR", { timeZone: "UTC" })}
+          </p>
         </div>
 
         {/* Amount + Rate */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           <div className="flex flex-col p-3 bg-[var(--main-bg)] border-2 border-[var(--black)] rounded-xl">
-            <span className="text-[9px] font-black text-[var(--black-muted)] uppercase tracking-wider mb-0.5">Investido</span>
-            <span className="text-base font-black text-[var(--primary)] tracking-tighter">{fmt(amount)}</span>
+            <span className="text-[10px] font-black text-[var(--black-muted)] uppercase tracking-wider mb-1">Investido</span>
+            <span className="text-sm font-black text-[var(--primary)] tracking-tighter">{fmt(amount)}</span>
           </div>
           <div className="flex flex-col p-3 bg-[var(--main-bg)] border-2 border-[var(--black)] rounded-xl">
-            <span className="text-[9px] font-black text-[var(--black-muted)] uppercase tracking-wider mb-0.5">Taxa a.a.</span>
-            <span className="text-base font-black text-[var(--primary)] tracking-tighter">{rate.toFixed(2)}%</span>
+            <span className="text-[10px] font-black text-[var(--black-muted)] uppercase tracking-wider mb-1">Taxa a.a.</span>
+            <span className="text-sm font-black text-[var(--primary)] tracking-tighter">{rate.toFixed(2)}%</span>
+          </div>
+        </div>
+
+        {/* 1y gain badge */}
+        <div className={`flex items-center justify-between px-3 py-2.5 rounded-xl border-2 border-[var(--black)] ${pct1y >= 0 ? "bg-emerald-50" : "bg-red-50"}`}>
+          <span className="text-[10px] font-black text-[var(--black-muted)] uppercase tracking-wider">Ganho em 1 ano</span>
+          <div className="flex items-center gap-1.5">
+            {pct1y >= 0
+              ? <TrendingUp size={13} strokeWidth={2.5} className="text-emerald-600" />
+              : <TrendingDown size={13} strokeWidth={2.5} className="text-red-500" />}
+            <span className={`text-sm font-black ${pct1y >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+              {pct1y >= 0 ? "+" : ""}{fmt(gain1y)}
+            </span>
           </div>
         </div>
 
         {/* Projections */}
         <div>
-          <p className="text-[9px] font-black text-[var(--black-muted)] uppercase tracking-widest mb-2">Projeção (juros compostos)</p>
-          <div className="grid grid-cols-3 gap-2">
+          <p className="text-[10px] font-black text-[var(--black-muted)] uppercase tracking-widest mb-2">Projeção · juros compostos</p>
+          <div className="grid grid-cols-3 gap-1.5">
             {[
               { label: "1 Ano",   val: proj1y  },
               { label: "5 Anos",  val: proj5y  },
               { label: "10 Anos", val: proj10y },
             ].map(({ label, val }) => (
-              <div key={label} className="flex flex-col p-2.5 border-2 border-[var(--black)] rounded-lg bg-white shadow-[var(--neo-shadow-hover)]">
-                <span className="text-[8px] font-black text-[var(--black-muted)] uppercase tracking-wider">{label}</span>
-                <span className="text-xs font-black text-emerald-600 mt-0.5">{fmtK(val)}</span>
-                <span className="text-[8px] font-bold text-[var(--black-muted)]">
+              <div key={label} className="flex flex-col items-center p-2.5 border-2 border-[var(--black)] rounded-xl bg-white shadow-[var(--neo-shadow-hover)]">
+                <span className="text-[9px] font-black text-[var(--black-muted)] uppercase tracking-wide">{label}</span>
+                <span className="text-xs font-black text-emerald-600 mt-1">{fmtK(val)}</span>
+                <span className="text-[9px] font-bold text-[var(--black-muted)] mt-0.5">
                   +{(((val - amount) / amount) * 100).toFixed(0)}%
                 </span>
               </div>
             ))}
           </div>
         </div>
-
-        {/* 1y gain badge */}
-        <div className={`flex items-center justify-between px-3 py-2 rounded-lg border-2 border-[var(--black)] ${pct1y >= 0 ? "bg-emerald-50" : "bg-red-50"}`}>
-          <span className="text-[9px] font-black text-[var(--black-muted)] uppercase tracking-wider">Ganho estimado em 1 ano</span>
-          <div className="flex items-center gap-1">
-            {pct1y >= 0
-              ? <TrendingUp size={12} strokeWidth={2.5} className="text-emerald-600" />
-              : <TrendingDown size={12} strokeWidth={2.5} className="text-red-500" />}
-            <span className={`text-xs font-black ${pct1y >= 0 ? "text-emerald-600" : "text-red-500"}`}>
-              {pct1y >= 0 ? "+" : ""}{fmt(gain1y)}
-            </span>
-          </div>
-        </div>
-
-        {/* Start date */}
-        <p className="text-[9px] font-bold text-[var(--black-muted)] uppercase tracking-wider -mt-1">
-          Desde {new Date(inv.startDate).toLocaleDateString("pt-BR", { timeZone: "UTC" })}
-        </p>
       </div>
     </div>
   );
@@ -787,22 +784,22 @@ export function Investments() {
 
             {/* Tipo (flat list for calculator) */}
             <div>
-              <label className="text-[10px] font-black uppercase text-[var(--black-muted)] tracking-widest mb-3 block">Tipo de Investimento</label>
-              <div className="grid grid-cols-3 gap-2 max-h-[220px] overflow-y-auto pr-1">
-                {ALL_CATEGORIES.filter(c => c.id !== "custom").slice(0, 15).concat([{ id: "custom", label: "Personalizado", group: "Outros", groupColor: "#FF3B3B", defaultRate: null, desc: "Defina" }]).map((cat) => {
+              <label className="text-[10px] font-black uppercase text-[var(--black-muted)] tracking-widest mb-2 block">Tipo de Investimento</label>
+              <div className="grid grid-cols-2 gap-2 max-h-[240px] overflow-y-auto calc-category-scroll rounded-xl border-2 border-[var(--black)] p-3 bg-white">
+                {ALL_CATEGORIES.filter(c => c.id !== "custom").concat([{ id: "custom", label: "Personalizado", group: "Outros", groupColor: "#64748b", defaultRate: null, desc: "Defina" }]).map((cat) => {
                   const isActive = calcCategory === cat.id;
                   return (
                     <button
                       key={cat.id}
                       onClick={() => setCalcCategory(cat.id)}
-                      className={`flex flex-col items-start p-2.5 rounded-[var(--radius-main)] border-2 border-[var(--black)] transition-all cursor-pointer ${isActive ? "shadow-[var(--neo-shadow-hover)] translate-y-[2px] translate-x-[2px]" : "bg-white shadow-[var(--neo-shadow)] hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]"}`}
+                      className={`flex flex-col items-start p-3 rounded-xl border-2 border-[var(--black)] transition-all cursor-pointer min-h-[52px] ${isActive ? "translate-y-[2px] translate-x-[2px]" : "bg-white shadow-[var(--neo-shadow)] hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px]"}`}
                       style={{ background: isActive ? cat.groupColor : "#fff" }}
                     >
-                      <span className="text-[9px] font-black uppercase tracking-wide leading-tight" style={{ color: isActive ? "#fff" : "var(--primary)" }}>
+                      <span className="text-xs font-black uppercase tracking-wide leading-tight" style={{ color: isActive ? "#fff" : "var(--primary)" }}>
                         {cat.label}
                       </span>
-                      <span className="text-[8px] font-bold uppercase tracking-wider mt-0.5" style={{ color: isActive ? "rgba(255,255,255,0.65)" : "var(--black-muted)" }}>
-                        {cat.defaultRate ? `${cat.defaultRate}%` : cat.desc}
+                      <span className="text-[10px] font-bold mt-1" style={{ color: isActive ? "rgba(255,255,255,0.7)" : "var(--black-muted)" }}>
+                        {cat.defaultRate ? `${cat.defaultRate}% a.a.` : cat.desc}
                       </span>
                     </button>
                   );

@@ -7,15 +7,17 @@ import {
   Target,
   CalendarClock,
   TrendingUp,
+  Bot,
 } from "lucide-react";
 
 const menuItems = [
-  { name: "Home", path: "/home", icon: Home },
-  { name: "Contas", path: "/accounts", icon: Wallet },
-  { name: "Despesas", path: "/expenses", icon: ArrowDownCircle },
-  { name: "Metas", path: "/goals", icon: Target },
-  { name: "Investimentos", path: "/investments", icon: TrendingUp },
-  { name: "Assinaturas", path: "/subscriptions", icon: CalendarClock },
+  { name: "Home",     path: "/home",         icon: Home },
+  { name: "Contas",   path: "/accounts",     icon: Wallet },
+  { name: "Despesas", path: "/expenses",     icon: ArrowDownCircle },
+  { name: "Metas",    path: "/goals",        icon: Target },
+  { name: "Invest.",  path: "/investments",  icon: TrendingUp },
+  { name: "Assina.",  path: "/subscriptions",icon: CalendarClock },
+  { name: "AI",       path: "/advisors",     icon: Bot },
 ];
 
 export function MobileNav() {

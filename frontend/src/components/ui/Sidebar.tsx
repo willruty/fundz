@@ -11,15 +11,17 @@ import {
   Menu,
   Settings,
   TrendingUp,
+  Bot,
 } from "lucide-react";
 
 const menuItems = [
-  { name: "Home", path: "/home", icon: Home },
-  { name: "Contas", path: "/accounts", icon: Wallet },
-  { name: "Despesas", path: "/expenses", icon: ArrowDownCircle },
-  { name: "Metas", path: "/goals", icon: Target },
-  { name: "Investimentos", path: "/investments", icon: TrendingUp },
-  { name: "Assinaturas", path: "/subscriptions", icon: CalendarClock },
+  { name: "Home",         path: "/home",         icon: Home },
+  { name: "Contas",       path: "/accounts",     icon: Wallet },
+  { name: "Despesas",     path: "/expenses",     icon: ArrowDownCircle },
+  { name: "Metas",        path: "/goals",        icon: Target },
+  { name: "Investimentos",path: "/investments",  icon: TrendingUp },
+  { name: "Assinaturas",  path: "/subscriptions",icon: CalendarClock },
+  { name: "Advisors",     path: "/advisors",     icon: Bot },
 ];
 
 export function Sidebar() {

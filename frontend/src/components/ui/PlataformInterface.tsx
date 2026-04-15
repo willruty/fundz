@@ -6,6 +6,7 @@ import { MobileNav } from "./MobileNav";
 function Platform() {
   const location = useLocation();
   const isProfilePage = ["/profile", "/configs"].includes(location.pathname);
+  const isAdvisors    = location.pathname === "/advisors";
 
   // Busca o nome do usuário do LocalStorage
   const userName = localStorage.getItem("user_name") || "";
@@ -75,6 +76,9 @@ function Platform() {
             "Controle seus serviços recorrentes, evite cobranças esquecidas e elimine vazamentos silenciosos do seu orçamento.",
         };
 
+      case "/advisors":
+        return { title: "", subtitle: "" };
+
       default:
         return { title: "", subtitle: "" };
     }
@@ -86,10 +90,12 @@ function Platform() {
     <div className="flex h-screen w-full bg-[#F8FAFC] overflow-hidden font-manrope">
       <Sidebar />
 
-      <main className="flex-1 h-full flex flex-col overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-8 pb-24 md:pb-8">
-        {!isProfilePage && <AppHeader title={title} subtitle={subtitle} />}
+      <main className={`flex-1 h-full flex flex-col overflow-hidden ${
+        isAdvisors ? "" : "overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-8 pb-24 md:pb-8"
+      }`}>
+        {!isProfilePage && !isAdvisors && <AppHeader title={title} subtitle={subtitle} />}
 
-        <div className="flex-1">
+        <div className={isAdvisors ? "flex-1 h-full overflow-hidden" : "flex-1"}>
           <Outlet />
         </div>
       </main>

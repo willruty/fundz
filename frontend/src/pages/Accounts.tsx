@@ -304,6 +304,27 @@ export function Accounts() {
     };
   });
 
+  // ─── Derived stats ────────────────────────────────────────────────────────
+
+  const totalBalance  = accounts.reduce((s, a) => s + a.balance, 0);
+  const totalIncome   = accounts.reduce((s, a) => s + a.income, 0);
+  const totalExpenses = accounts.reduce((s, a) => s + a.expenses, 0);
+  const savingsRate   = totalIncome > 0 ? Math.round(((totalIncome - totalExpenses) / totalIncome) * 100) : 0;
+  const totalTxCount  = accounts.reduce((s, a) => s + a.transactionCount, 0);
+
+  // Top categories by expense amount
+  const catExpense = new Map<string, number>();
+  rawTransactions.forEach((tx) => {
+    if (tx.type !== "expense") return;
+    const catId = (tx as any).categoryId ?? tx.categoryId;
+    const name  = catId ? (catMap.get(catId) ?? "Outros") : "Sem categoria";
+    catExpense.set(name, (catExpense.get(name) ?? 0) + Math.abs(parseFloat(tx.amount)));
+  });
+  const topCategories = [...catExpense.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+  const maxCatExpense = topCategories[0]?.[1] ?? 1;
+
   return (
     <main className="flex flex-col gap-6 bg-[var(--main-bg)] min-h-screen">
 
@@ -449,7 +470,149 @@ export function Accounts() {
         </div>
       </div>
 
-      {/* ── SECTION 2: Transactions Table ────────────────────────────────────── */}
+      {/* ── SECTION 2: Global Stats ──────────────────────────────────────────── */}
+      {accounts.length > 0 && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            {
+              label: "Saldo Total",
+              value: hidden ? "R$ ••••••" : fmt(totalBalance),
+              sub: `${accounts.length} conta${accounts.length !== 1 ? "s" : ""}`,
+              bg: "bg-[var(--primary)]",
+              valueCls: "text-[var(--secondary)]",
+              labelCls: "text-white/70",
+              subCls: "text-white/50",
+            },
+            {
+              label: "Total Entradas",
+              value: hidden ? "••••" : fmt(totalIncome),
+              sub: "acumulado",
+              bg: "bg-emerald-500",
+              valueCls: "text-white",
+              labelCls: "text-white/70",
+              subCls: "text-white/50",
+            },
+            {
+              label: "Total Saídas",
+              value: hidden ? "••••" : fmt(totalExpenses),
+              sub: "acumulado",
+              bg: "bg-red-500",
+              valueCls: "text-white",
+              labelCls: "text-white/70",
+              subCls: "text-white/50",
+            },
+            {
+              label: "Taxa de Economia",
+              value: `${savingsRate}%`,
+              sub: `${totalTxCount} transações`,
+              bg: savingsRate >= 20 ? "bg-[var(--secondary)]" : savingsRate >= 0 ? "bg-amber-400" : "bg-red-400",
+              valueCls: savingsRate >= 0 ? "text-[var(--primary)]" : "text-white",
+              labelCls: "text-[var(--primary)]/70",
+              subCls: "text-[var(--primary)]/50",
+            },
+          ].map(({ label, value, sub, bg, valueCls, labelCls, subCls }) => (
+            <div
+              key={label}
+              className={`${bg} border-2 border-[var(--black)] rounded-[var(--radius-card)] p-5 shadow-[var(--neo-shadow)] hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all flex flex-col justify-between min-h-[110px]`}
+            >
+              <span className={`text-[10px] font-black uppercase tracking-widest ${labelCls}`}>{label}</span>
+              <div>
+                <p className={`text-2xl font-black tracking-tighter leading-none ${valueCls}`}>{value}</p>
+                <p className={`text-[10px] font-bold mt-1 ${subCls}`}>{sub}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── SECTION 3: Distribution + Top Categories ─────────────────────────── */}
+      {accounts.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+          {/* Distribuição de saldo por conta */}
+          <div className="bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] overflow-hidden">
+            <div className="bg-[var(--main-bg)] border-b-2 border-[var(--black)] px-5 py-3 flex items-center gap-2">
+              <Wallet size={13} strokeWidth={3} className="text-[var(--primary)]" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-[var(--black-muted)]">
+                Distribuição de Saldo
+              </span>
+            </div>
+            <div className="p-5 flex flex-col gap-4">
+              {accounts.map((acc) => {
+                const pct = totalBalance > 0 ? Math.max(0, (acc.balance / totalBalance) * 100) : 0;
+                return (
+                  <div key={acc.id} className="flex flex-col gap-1.5">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-6 h-6 rounded-md border-2 border-[var(--black)] flex items-center justify-center text-[8px] font-black"
+                          style={{ background: acc.color, color: acc.textColor }}
+                        >
+                          {acc.initials}
+                        </div>
+                        <span className="text-xs font-black text-[var(--primary)] uppercase tracking-tight">{acc.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-[var(--black-muted)]">{pct.toFixed(1)}%</span>
+                        <span className="text-xs font-black text-[var(--primary)]">{hidden ? "••••" : fmt(acc.balance)}</span>
+                      </div>
+                    </div>
+                    <div className="h-3 w-full bg-[var(--main-bg)] border-2 border-[var(--black)] rounded-sm overflow-hidden">
+                      <div
+                        className="h-full border-r-2 border-[var(--black)] transition-all duration-700"
+                        style={{ width: `${pct}%`, background: acc.color }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Top categorias de gasto */}
+          <div className="bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)] overflow-hidden">
+            <div className="bg-[var(--main-bg)] border-b-2 border-[var(--black)] px-5 py-3 flex items-center gap-2">
+              <ArrowDownRight size={13} strokeWidth={3} className="text-red-500" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-[var(--black-muted)]">
+                Top Categorias · Gastos
+              </span>
+            </div>
+            <div className="p-5 flex flex-col gap-4">
+              {topCategories.length === 0 ? (
+                <p className="text-xs font-bold text-[var(--black-muted)] text-center py-6">Sem despesas registradas</p>
+              ) : (
+                topCategories.map(([name, amount], i) => {
+                  const pct = (amount / maxCatExpense) * 100;
+                  const rankColors = ["bg-red-500", "bg-red-400", "bg-amber-400", "bg-amber-300", "bg-[var(--main-bg)]"];
+                  const rankTextColors = ["text-white", "text-white", "text-[var(--primary)]", "text-[var(--primary)]", "text-[var(--primary)]"];
+                  return (
+                    <div key={name} className="flex flex-col gap-1.5">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-5 h-5 rounded border-2 border-[var(--black)] flex items-center justify-center text-[8px] font-black ${rankColors[i]} ${rankTextColors[i]}`}>
+                            {i + 1}
+                          </div>
+                          <span className="text-xs font-black text-[var(--primary)] uppercase tracking-tight">{name}</span>
+                        </div>
+                        <span className="text-xs font-black text-red-500">{hidden ? "••••" : fmt(amount)}</span>
+                      </div>
+                      <div className="h-3 w-full bg-[var(--main-bg)] border-2 border-[var(--black)] rounded-sm overflow-hidden">
+                        <div
+                          className="h-full bg-red-400 border-r-2 border-[var(--black)] transition-all duration-700"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+        </div>
+      )}
+
+      {/* ── SECTION 4: Transactions Table ────────────────────────────────────── */}
       <TransactionTableCard
         transactions={tableData}
         categories={categories}

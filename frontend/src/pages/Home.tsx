@@ -28,49 +28,47 @@ export function Home() {
 
   return (
     <main>
-      <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch gap-5">
+      <div className="grid grid-cols-12 gap-5 items-stretch">
+
         {/* Linha 1: Badges das Contas */}
-        <div className="lg:col-span-2">
+        <div className="col-span-12">
           <AccountList accounts={dashboard.accounts} />
         </div>
 
-        {/* Linha 2: Resumo Geral */}
-        <div className="flex flex-col sm:flex-row gap-5">
-          <div className="flex-1">
-            <BalanceCard
-              accounts={dashboard.accounts}
-              transactions={dashboard.last_month_transactions}
-            />
-          </div>
-          <div className="flex-1">
-            <NextGoalCard goal={dashboard.goal} />
-          </div>
+        {/* Linha 2: Saldo · Objetivo · Saúde — mesma altura */}
+        <div className="col-span-12 lg:col-span-5">
+          <BalanceCard
+            accounts={dashboard.accounts}
+            transactions={dashboard.last_month_transactions}
+          />
         </div>
-        <div className="w-full">
+        <div className="col-span-12 lg:col-span-4">
+          <NextGoalCard goal={dashboard.goal} />
+        </div>
+        <div className="col-span-12 lg:col-span-3">
+          <FinancialHealthCard health={dashboard.financial_health} />
+        </div>
+
+        {/* Linha 3: Fluxo de Caixa · Distribuição */}
+        <div className="col-span-12 lg:col-span-7">
           <MonthlyBalanceCard
             last_month_transactions={dashboard.last_month_transactions}
           />
         </div>
-
-        {/* Linha 3: Saúde Financeira */}
-        <div className="lg:col-span-2">
-          <FinancialHealthCard health={dashboard.financial_health} />
-        </div>
-
-        {/* Linha 4: Categorias */}
-        <div className="w-full">
-          <CategoryAnalysisCard most_used={dashboard.categories.most_used} />
-        </div>
-        <div className="w-full">
+        <div className="col-span-12 lg:col-span-5">
           <CategoryDistributionCard
             distribution={dashboard.categories.distribution}
           />
         </div>
 
-        {/* Linha 4: Transações */}
-        <div className="w-full lg:col-span-2">
+        {/* Linha 4: Análise de Categorias · Transações Recentes */}
+        <div className="col-span-12 lg:col-span-5">
+          <CategoryAnalysisCard most_used={dashboard.categories.most_used} />
+        </div>
+        <div className="col-span-12 lg:col-span-7">
           <RecentTransactions />
         </div>
+
       </div>
     </main>
   );

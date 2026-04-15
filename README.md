@@ -209,11 +209,17 @@ Configure as variaveis de ambiente no dashboard da Vercel para ambos os projetos
 - [x] Deploy Vercel
 - [X] Card de Saúde Financeira na home (investimentos 'bom', gastos 'atenção', dividas 'baixo')
 - [X] Pagina de perfil/configuracoes (deixar 100% funcional pelo menos a parte de perfil)
-- [ ] CRUD de investimentos
+- [X] CRUD de investimentos
+- [ ] Separar em páginas diferentes os advisors (seleção e criação de advisor, chat com advisor)
+- [ ] Criar as tabelas que vão comportar o sistema de advisor
+- [ ] Colocar seleção de icone para advisor personalizado
+- [ ] Deixar a seleção de advisor na barra do chat
+- [ ] Fazer o histórico de chats cair de cima como um dropdown
+- [ ] Melhorar a página de seleção de advisor
+- [ ] Colocar efeitos em todos os componentes tirando o skeleton
 - [ ] Landing page profissional
 - [ ] Página de politica de privacidade 
 - [ ] Gateway de pagamento
-- [ ] Analise financeira com IA
 - [ ] Integracao OpenFinance (Pluggy)
 
 ---
