@@ -214,6 +214,11 @@ Configure as variaveis de ambiente no dashboard da Vercel para ambos os projetos
 - [ ] Criar as tabelas que vão comportar o sistema de advisor
 - [ ] Colocar seleção de icone para advisor personalizado
 - [ ] Deixar a seleção de advisor na barra do chat
+- [ ] Em cada analise mostrar a opinião entre advisors, mostrar “conflito” entre agentes na mesma situação
+      + tipo:
+        - Vibe: “vai, experiência vale mais que dinheiro” | Vibe aprova ✅
+        - Core: “não faz sentido dentro da tua realidade atual” | Core desaprova ❌
+        - Flow: “vai, mas corta X e Y essa semana” | Flow sugere ajuste ⚖️
 - [ ] Fazer o histórico de chats cair de cima como um dropdown
 - [ ] Melhorar a página de seleção de advisor
 - [ ] Colocar efeitos em todos os componentes tirando o skeleton
