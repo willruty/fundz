@@ -59,8 +59,8 @@ async function bootstrap() {
     }),
   );
 
-  const port = config.get('SERVICE_PORT', { infer: true });
-  await app.listen(port);
+  const port = process.env.PORT ? Number(process.env.PORT) : config.get('SERVICE_PORT', { infer: true });
+  await app.listen(port, '0.0.0.0');
 }
 
 void bootstrap();
