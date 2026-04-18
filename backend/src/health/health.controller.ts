@@ -9,11 +9,4 @@ export class HealthController {
   getHealth() {
     return { data: { status: 'ok' } };
   }
-
-  /** GET /fundz/heath — legacy alias (typo in the Go backend). */
-  @Public()
-  @Get('heath')
-  getHeath() {
-    return { data: { status: 'ok' } };
-  }
 }
