@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useIsGuest } from "../hooks/useIsGuest";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -291,6 +292,7 @@ function PersonaCard({
 
 export function Advisors() {
   const navigate = useNavigate();
+  const isGuest = useIsGuest();
   const [customPersonas, setCustomPersonas] =
     useState<Persona[]>(loadCustomPersonas);
   const [sessions, setSessions] = useState<ChatSession[]>(loadSessions);
@@ -406,6 +408,27 @@ export function Advisors() {
               />
             ))}
           </div>
+
+          {/* Group chat coming soon badge */}
+          <div className="flex items-center gap-2 mt-4 px-4 py-2.5 rounded-md border-2 border-dashed border-black/30 bg-white/40 w-fit text-[10px] font-black uppercase tracking-widest text-black/50">
+            <span>🔒 Em breve:</span>
+            <div className="flex gap-1.5">
+              {PRESET_PERSONAS.slice(0, 3).map((p) => (
+                <div
+                  key={p.id}
+                  className="w-5 h-5 rounded border border-black/20 flex items-center justify-center text-[8px]"
+                  style={{
+                    background: p.color,
+                    color: p.textColor,
+                    opacity: 0.6,
+                  }}
+                >
+                  {p.icon}
+                </div>
+              ))}
+            </div>
+            <span>Conselho em Grupo</span>
+          </div>
         </div>
 
         {/* Custom personas */}
@@ -441,37 +464,41 @@ export function Advisors() {
                     </p>
                   </div>
                 </button>
-                <div className="flex gap-1 ml-1">
-                  <button
-                    onClick={() => {
-                      setEditingPersona(p);
-                      setModalOpen(true);
-                    }}
-                    className="p-1.5 rounded-md border-2 border-black bg-[var(--secondary)] hover:bg-[var(--secondary-hover)] cursor-pointer"
-                    title="Editar"
-                  >
-                    <Pencil size={10} strokeWidth={3} className="text-black" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteCustom(p.id)}
-                    className="p-1.5 rounded-md border-2 border-black bg-red-500 hover:bg-red-600 cursor-pointer"
-                    title="Excluir"
-                  >
-                    <Trash2 size={10} strokeWidth={3} className="text-white" />
-                  </button>
-                </div>
+                {!isGuest && (
+                  <div className="flex gap-1 ml-1">
+                    <button
+                      onClick={() => {
+                        setEditingPersona(p);
+                        setModalOpen(true);
+                      }}
+                      className="p-1.5 rounded-md border-2 border-black bg-[var(--secondary)] hover:bg-[var(--secondary-hover)] cursor-pointer"
+                      title="Editar"
+                    >
+                      <Pencil size={10} strokeWidth={3} className="text-black" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCustom(p.id)}
+                      className="p-1.5 rounded-md border-2 border-black bg-red-500 hover:bg-red-600 cursor-pointer"
+                      title="Excluir"
+                    >
+                      <Trash2 size={10} strokeWidth={3} className="text-white" />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
 
-            <button
-              onClick={() => {
-                setEditingPersona(null);
-                setModalOpen(true);
-              }}
-              className="flex items-center gap-2 px-4 py-2 rounded-md border-2 border-dashed border-black/40 bg-transparent text-black/50 hover:text-black hover:border-black hover:bg-white transition-all cursor-pointer text-xs font-black uppercase tracking-widest"
-            >
-              <Plus size={13} strokeWidth={3} /> Novo Advisor
-            </button>
+            {!isGuest && (
+              <button
+                onClick={() => {
+                  setEditingPersona(null);
+                  setModalOpen(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-md border-2 border-dashed border-black/40 bg-transparent text-black/50 hover:text-black hover:border-black hover:bg-white transition-all cursor-pointer text-xs font-black uppercase tracking-widest"
+              >
+                <Plus size={13} strokeWidth={3} /> Novo Advisor
+              </button>
+            )}
           </div>
         </div>
 
@@ -567,16 +594,18 @@ export function Advisors() {
                       </div>
                     </button>
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteSession(s.id);
-                      }}
-                      className="absolute top-3 right-3 p-1 rounded-md border-2 border-black bg-red-500 text-white opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-opacity cursor-pointer"
-                      title="Excluir"
-                    >
-                      <X size={10} strokeWidth={3} />
-                    </button>
+                    {!isGuest && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteSession(s.id);
+                        }}
+                        className="absolute top-3 right-3 p-1 rounded-md border-2 border-black bg-red-500 text-white opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-opacity cursor-pointer"
+                        title="Excluir"
+                      >
+                        <X size={10} strokeWidth={3} />
+                      </button>
+                    )}
                   </div>
                 );
               })}

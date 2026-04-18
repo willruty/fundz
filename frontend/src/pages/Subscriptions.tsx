@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useIsGuest } from "../hooks/useIsGuest";
 import toast from "react-hot-toast";
 import CommitmentCard from "../components/CommitmentCard";
 import ActiveSubscriptionsCard from "../components/ActiveSubscriptionCard";
@@ -163,6 +164,7 @@ function instToFormData(inst: Installment): InstallmentFormData {
 // ── PAGE ───────────────────────────────────────────────────────────────────────
 
 export function Subscriptions() {
+  const isGuest = useIsGuest();
   const [loading, setLoading] = useState(true);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [installments, setInstallments] = useState<Installment[]>([]);
@@ -385,6 +387,7 @@ export function Subscriptions() {
         onNew={handleNew}
         onEdit={handleEdit}
         onDelete={handleDeleteRequest}
+        isGuest={isGuest}
       />
 
       {/* Modal de criação/edição */}

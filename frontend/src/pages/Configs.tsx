@@ -4,10 +4,7 @@ import {
   User,
   Lock,
   Bell,
-  Settings2,
   Camera,
-  Moon,
-  Sun,
   AlertTriangle,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -17,12 +14,11 @@ import {
   updateProfile,
   uploadAvatar,
   changePassword,
-  deleteAccount,
 } from "../service/profile.service";
 import type { Profile } from "../service/profile.service";
 import { useIsGuest } from "../hooks/useIsGuest";
 
-type Tab = "profile" | "account" | "notifications" | "preferences";
+type Tab = "profile" | "account" | "notifications";
 
 export function Configs() {
   const navigate = useNavigate();
@@ -46,14 +42,6 @@ export function Configs() {
   // Notification state
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(false);
-
-  // Preferences state
-  const [isPrivate, setIsPrivate] = useState(false);
-
-  // Delete account state
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState("");
-  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     getProfile()
@@ -136,20 +124,6 @@ export function Configs() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (deleteConfirmText !== "EXCLUIR") return;
-    setDeleting(true);
-    try {
-      await deleteAccount();
-      localStorage.clear();
-      toast.success("Conta excluída");
-      navigate("/auth");
-    } catch {
-      toast.error("Erro ao excluir conta");
-      setDeleting(false);
-    }
-  };
-
   return (
     <div className="max-w-5xl mx-auto w-full p-4 md:p-8">
       {/* CABEÇALHO */}
@@ -190,12 +164,6 @@ export function Configs() {
               onClick={() => setActiveTab("notifications")}
               icon={<Bell size={18} strokeWidth={2.5} />}
               label="Notificações"
-            />
-            <MenuButton
-              active={activeTab === "preferences"}
-              onClick={() => setActiveTab("preferences")}
-              icon={<Settings2 size={18} strokeWidth={2.5} />}
-              label="Preferências"
             />
           </nav>
         </aside>
@@ -386,101 +354,6 @@ export function Configs() {
             </div>
           )}
 
-          {/* ABA: PREFERÊNCIAS */}
-          {activeTab === "preferences" && (
-            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <h2 className="text-2xl font-black text-[var(--primary)] mb-6 tracking-tighter uppercase">
-                Preferências do App
-              </h2>
-
-              <div className="mb-8">
-                <h3 className="font-black text-xs text-[var(--black-muted)] mb-3 uppercase tracking-widest">
-                  Aparência
-                </h3>
-                <div className="flex gap-4">
-                  <button className="flex-1 flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-[var(--black)] bg-[var(--secondary)] text-[var(--primary)] shadow-[var(--neo-shadow-hover)] transition-transform hover:-translate-y-0.5">
-                    <Sun size={24} strokeWidth={2.5} />
-                    <span className="text-xs font-black uppercase tracking-wider">
-                      Modo Claro
-                    </span>
-                  </button>
-                  <button className="flex-1 flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-[var(--black)] bg-white text-[var(--black-muted)] hover:bg-black/5 transition-colors">
-                    <Moon size={24} strokeWidth={2.5} />
-                    <span className="text-xs font-black uppercase tracking-wider">
-                      Modo Escuro
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="pt-6 border-t-2 border-[var(--black)] border-dashed">
-                <h3 className="font-black text-xs text-[var(--black-muted)] mb-4 uppercase tracking-widest">
-                  Privacidade
-                </h3>
-                <ToggleRow
-                  title="Perfil Privado"
-                  description="Apenas seus amigos poderão ver seu apelido e conquistas."
-                  checked={isPrivate}
-                  onChange={() => setIsPrivate(!isPrivate)}
-                  disabled={isGuest}
-                />
-              </div>
-
-              {/* Zona de Perigo */}
-              {!isGuest && <div className="mt-8 pt-8 border-t-4 border-red-500">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle size={20} className="text-red-600" strokeWidth={2.5} />
-                  <h3 className="font-black text-xl text-red-600 uppercase tracking-tighter">
-                    Zona de Perigo
-                  </h3>
-                </div>
-                <p className="text-xs font-bold text-[var(--black-muted)] mb-5">
-                  Ao excluir sua conta, todos os seus dados serão apagados
-                  permanentemente. Esta ação não tem volta.
-                </p>
-
-                {!showDeleteConfirm ? (
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="px-5 py-3 bg-red-500 text-white font-black uppercase tracking-wider rounded-md border-2 border-[var(--black)] shadow-[var(--neo-shadow)] hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px] hover:bg-red-600 transition-all"
-                  >
-                    Excluir minha conta
-                  </button>
-                ) : (
-                  <div className="bg-red-50 border-2 border-red-500 rounded-xl p-5 space-y-4">
-                    <p className="text-sm font-black text-red-700">
-                      Digite <span className="bg-red-200 px-2 py-0.5 rounded">EXCLUIR</span> para confirmar:
-                    </p>
-                    <input
-                      type="text"
-                      value={deleteConfirmText}
-                      onChange={(e) => setDeleteConfirmText(e.target.value)}
-                      placeholder="EXCLUIR"
-                      className="w-full max-w-xs bg-white border-2 border-red-500 rounded-md px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-red-500 transition-all"
-                    />
-                    <div className="flex gap-3">
-                      <button
-                        onClick={handleDeleteAccount}
-                        disabled={deleteConfirmText !== "EXCLUIR" || deleting}
-                        className="px-5 py-3 bg-red-600 text-white font-black uppercase tracking-wider rounded-md border-2 border-[var(--black)] shadow-[var(--neo-shadow)] hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {deleting ? "Excluindo..." : "Confirmar Exclusão"}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowDeleteConfirm(false);
-                          setDeleteConfirmText("");
-                        }}
-                        className="px-5 py-3 bg-white text-[var(--primary)] font-black uppercase tracking-wider rounded-md border-2 border-[var(--black)] shadow-[var(--neo-shadow-hover)] hover:bg-black/5 transition-all"
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>}
-            </div>
-          )}
         </main>
       </div>
     </div>

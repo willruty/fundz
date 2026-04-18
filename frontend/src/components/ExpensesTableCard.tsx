@@ -27,6 +27,7 @@ import {
 import type { Category } from "../service/categories.service";
 import type { ApiAccount } from "../service/accounts.service";
 import { CategoryDropdown } from "./CategoryDropdown";
+import { useIsGuest } from "../hooks/useIsGuest";
 
 export type TransactionKind = "expense" | "income";
 export type TableMode = "expense" | "income" | "all";
@@ -345,6 +346,7 @@ export function TransactionTableCard({
 }: TransactionTableCardProps) {
   const defaultType: TransactionKind = mode === "income" ? "income" : "expense";
   const isAllMode = mode === "all";
+  const isGuest = useIsGuest();
 
   // Editing state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -812,14 +814,16 @@ export function TransactionTableCard({
               </AnimatePresence>
             </div>
 
-            <button
-              onClick={startCreate}
-              className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] shadow-[var(--neo-shadow-hover)] transition-all cursor-pointer"
-            >
-              <Plus size={14} strokeWidth={3} /> Nova
-            </button>
+            {!isGuest && (
+              <button
+                onClick={startCreate}
+                className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] shadow-[var(--neo-shadow-hover)] transition-all cursor-pointer"
+              >
+                <Plus size={14} strokeWidth={3} /> Nova
+              </button>
+            )}
 
-            {!hideImport && (
+            {!isGuest && !hideImport && (
               <button
                 onClick={() => setImportOpen(true)}
                 className="bg-white text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary)] transition-colors shadow-[var(--neo-shadow-hover)] cursor-pointer"
@@ -1082,6 +1086,10 @@ export function TransactionTableCard({
                           onChange={(catId) => setEditForm({ ...editForm, category_id: catId ?? "" })}
                           onCategoriesChange={onMutate}
                         />
+                      ) : isGuest ? (
+                        <span className="text-xs font-bold text-[var(--black-muted)] uppercase tracking-wider">
+                          {t.category}
+                        </span>
                       ) : (
                         <CategoryDropdown
                           value={t.categoryId}
@@ -1128,7 +1136,7 @@ export function TransactionTableCard({
                               <X size={14} strokeWidth={3} className="text-white" />
                             </button>
                           </>
-                        ) : (
+                        ) : !isGuest ? (
                           <>
                             <button
                               onClick={() => startEdit(t)}
@@ -1143,7 +1151,7 @@ export function TransactionTableCard({
                               <Trash2 size={15} strokeWidth={2.5} />
                             </button>
                           </>
-                        )}
+                        ) : null}
                       </div>
                     </td>
                   </tr>

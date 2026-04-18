@@ -13,6 +13,7 @@ import {
   getInvestments, createInvestment, updateInvestment, deleteInvestment,
   type ApiInvestment, type CreateInvestmentInput,
 } from "../service/investments.service";
+import { useIsGuest } from "../hooks/useIsGuest";
 
 // ── CATEGORIAS ────────────────────────────────────────────────────────────────
 
@@ -390,10 +391,12 @@ function InvestmentCard({
   inv,
   onEdit,
   onDelete,
+  isGuest,
 }: {
   inv: ApiInvestment;
   onEdit: () => void;
   onDelete: () => void;
+  isGuest?: boolean;
 }) {
   const meta    = getCategoryMeta(inv.category);
   const amount  = parseFloat(inv.amount);
@@ -414,14 +417,16 @@ function InvestmentCard({
           <span className="text-[10px] font-black uppercase tracking-widest text-white">{meta.label}</span>
         </div>
         {/* Action buttons — always visible on header */}
-        <div className="flex gap-1.5">
-          <button onClick={onEdit} className="p-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/25 transition-colors cursor-pointer" title="Editar">
-            <Pencil size={11} strokeWidth={2.5} />
-          </button>
-          <button onClick={onDelete} className="p-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-red-500/80 transition-colors cursor-pointer" title="Excluir">
-            <Trash2 size={11} strokeWidth={2.5} />
-          </button>
-        </div>
+        {!isGuest && (
+          <div className="flex gap-1.5">
+            <button onClick={onEdit} className="p-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/25 transition-colors cursor-pointer" title="Editar">
+              <Pencil size={11} strokeWidth={2.5} />
+            </button>
+            <button onClick={onDelete} className="p-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-red-500/80 transition-colors cursor-pointer" title="Excluir">
+              <Trash2 size={11} strokeWidth={2.5} />
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="p-4 flex flex-col gap-3">
@@ -486,6 +491,7 @@ function InvestmentCard({
 // ── PAGE ──────────────────────────────────────────────────────────────────────
 
 export function Investments() {
+  const isGuest = useIsGuest();
   const [loading,       setLoading]       = useState(true);
   const [investments,   setInvestments]   = useState<ApiInvestment[]>([]);
   const [modalOpen,     setModalOpen]     = useState(false);
@@ -940,12 +946,14 @@ export function Investments() {
                 </div>
               </div>
             )}
-            <button
-              onClick={() => { setEditingInv(null); setModalOpen(true); }}
-              className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] shadow-[var(--neo-shadow-hover)] transition-all cursor-pointer"
-            >
-              <Plus size={14} strokeWidth={3} /> Novo investimento
-            </button>
+            {!isGuest && (
+              <button
+                onClick={() => { setEditingInv(null); setModalOpen(true); }}
+                className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] shadow-[var(--neo-shadow-hover)] transition-all cursor-pointer"
+              >
+                <Plus size={14} strokeWidth={3} /> Novo investimento
+              </button>
+            )}
           </div>
         </div>
 
@@ -959,12 +967,14 @@ export function Investments() {
               <p className="text-xs font-bold text-[var(--black-muted)] text-center max-w-xs">
                 Adicione seus investimentos para acompanhar o patrimônio e as projeções de rendimento.
               </p>
-              <button
-                onClick={() => { setEditingInv(null); setModalOpen(true); }}
-                className="bg-[var(--primary)] text-[var(--secondary)] px-5 py-2.5 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 shadow-[var(--neo-shadow-hover)] hover:translate-y-[1px] hover:translate-x-[1px] transition-all cursor-pointer"
-              >
-                <Plus size={14} strokeWidth={3} /> Adicionar primeiro investimento
-              </button>
+              {!isGuest && (
+                <button
+                  onClick={() => { setEditingInv(null); setModalOpen(true); }}
+                  className="bg-[var(--primary)] text-[var(--secondary)] px-5 py-2.5 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 shadow-[var(--neo-shadow-hover)] hover:translate-y-[1px] hover:translate-x-[1px] transition-all cursor-pointer"
+                >
+                  <Plus size={14} strokeWidth={3} /> Adicionar primeiro investimento
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -974,6 +984,7 @@ export function Investments() {
                   inv={inv}
                   onEdit={() => handleEdit(inv)}
                   onDelete={() => setDeleteTarget(inv)}
+                  isGuest={isGuest}
                 />
               ))}
             </div>

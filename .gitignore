@@ -94,3 +94,4 @@ app-example
 # Legacy Go backend (kept in repo but untracked during Nest migration)
 backend-go/
 .vercel
+CLAUDE.md

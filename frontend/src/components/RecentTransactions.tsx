@@ -25,6 +25,7 @@ import {
   updateTransaction,
   deleteTransaction,
 } from "../service/transaction.service";
+import { useIsGuest } from "../hooks/useIsGuest";
 import type { Transaction } from "../service/transaction.service";
 import { getCategories, type Category } from "../service/categories.service";
 import { getAccounts, type ApiAccount } from "../service/accounts.service";
@@ -346,6 +347,7 @@ export function RecentTransactions() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+  const isGuest = useIsGuest();
 
   const inputClass =
     "bg-white border-2 border-[var(--black)] rounded-md outline-none focus:ring-2 focus:ring-[var(--primary)] shadow-[var(--neo-shadow-hover)]";
@@ -709,35 +711,39 @@ export function RecentTransactions() {
               </div>
 
               {/* New */}
-              <button
-                onClick={() => {
-                  if (accounts.length === 0) {
-                    showToast("Crie uma conta antes", "error");
-                    return;
-                  }
-                  setIsCreating(true);
-                  setEditingId("new");
-                  setEditForm({
-                    description: "",
-                    amount: "",
-                    type: "expense",
-                    occurred_at: new Date().toISOString().split("T")[0],
-                    account_id: accounts[0]?.id,
-                    category_id: "",
-                  });
-                }}
-                className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] transition-all shadow-[var(--neo-shadow-hover)]"
-              >
-                <Plus size={16} strokeWidth={3} /> Novo
-              </button>
+              {!isGuest && (
+                <button
+                  onClick={() => {
+                    if (accounts.length === 0) {
+                      showToast("Crie uma conta antes", "error");
+                      return;
+                    }
+                    setIsCreating(true);
+                    setEditingId("new");
+                    setEditForm({
+                      description: "",
+                      amount: "",
+                      type: "expense",
+                      occurred_at: new Date().toISOString().split("T")[0],
+                      account_id: accounts[0]?.id,
+                      category_id: "",
+                    });
+                  }}
+                  className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] transition-all shadow-[var(--neo-shadow-hover)]"
+                >
+                  <Plus size={16} strokeWidth={3} /> Novo
+                </button>
+              )}
 
               {/* Import */}
-              <button
-                onClick={() => setIsCsvModalOpen(true)}
-                className="bg-white text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary)] transition-colors shadow-[var(--neo-shadow-hover)]"
-              >
-                <Upload size={14} strokeWidth={2.5} /> Importar
-              </button>
+              {!isGuest && (
+                <button
+                  onClick={() => setIsCsvModalOpen(true)}
+                  className="bg-white text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary)] transition-colors shadow-[var(--neo-shadow-hover)]"
+                >
+                  <Upload size={14} strokeWidth={2.5} /> Importar
+                </button>
+              )}
             </div>
           </div>
 
@@ -922,7 +928,7 @@ export function RecentTransactions() {
                               <X size={16} strokeWidth={3} className="text-white" />
                             </button>
                           </>
-                        ) : (
+                        ) : !isGuest ? (
                           <>
                             <button
                               onClick={() => {
@@ -947,7 +953,7 @@ export function RecentTransactions() {
                               <Trash2 size={16} strokeWidth={2.5} />
                             </button>
                           </>
-                        )}
+                        ) : null}
                       </div>
                     </td>
 

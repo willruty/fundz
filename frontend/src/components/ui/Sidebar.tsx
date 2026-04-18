@@ -135,20 +135,32 @@ export function Sidebar() {
           {/* Divisória antes do Advisors */}
           <div className="mx-2 my-2 border-t border-white/10" />
 
-          {/* Advisors — destaque especial */}
+          {/* Advisors */}
           {(() => {
             const isActive = location.pathname.startsWith("/advisors");
             return (
               <button
                 onClick={() => navigate("/advisors")}
-                className={`w-full text-[var(--primary)] flex items-center p-3 rounded-xl transition-all duration-200 group relative cursor-pointer border-4 border-white bg-[var(--secondary)] ${
+                className={`w-full flex items-center p-3 rounded-xl transition-all duration-200 group relative cursor-pointer ${
                   isActive
-                    ? "shadow-none translate-x-[4px] translate-y-[4px]"
-                    : "shadow-[4px_4px_0px_0px_rgba(255,255,255,0.4)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px]"
+                    ? "bg-white/10 text-[var(--secondary)]"
+                    : "text-[var(--main-bg)] hover:bg-white/5 hover:text-[var(--secondary)]"
                 } ${!isExpanded ? "justify-center" : "justify-start px-4"}`}
               >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeBorder"
+                    className="absolute left-0 w-1.5 h-6 bg-[var(--secondary)] rounded-r-md"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
+
                 <div className="flex items-center justify-center min-w-[22px]">
-                  <Bot size={20} strokeWidth={2.5} className="text-[var(--primary)]" />
+                  <Bot
+                    size={20}
+                    strokeWidth={isActive ? 2.5 : 2}
+                    className={`${isActive ? "text-[var(--secondary)]" : "text-[var(--secondary)] opacity-70 group-hover:opacity-100 transition-opacity"}`}
+                  />
                 </div>
 
                 <AnimatePresence>
@@ -157,16 +169,15 @@ export function Sidebar() {
                       initial={{ opacity: 0, width: 0 }}
                       animate={{ opacity: 1, width: "auto" }}
                       exit={{ opacity: 0, width: 0 }}
-                      className="font-black text-[10px] uppercase tracking-widest overflow-hidden whitespace-nowrap ml-4 mt-0.5 text-[var(--primary)]"
+                      className="font-black text-[10px] uppercase tracking-widest overflow-hidden whitespace-nowrap ml-4 mt-0.5"
                     >
                       Advisors
                     </motion.span>
                   )}
                 </AnimatePresence>
 
-                {/* Badge AI */}
                 {isExpanded && (
-                  <span className="ml-auto text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border border-[var(--primary)]/30 text-[var(--primary)]/70">
+                  <span className="ml-auto text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border border-[var(--secondary)]/30 text-[var(--secondary)]/60">
                     AI
                   </span>
                 )}

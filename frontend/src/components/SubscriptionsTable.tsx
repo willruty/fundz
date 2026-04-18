@@ -22,11 +22,12 @@ interface SubscriptionTableProps {
   onNew: () => void;
   onEdit: (item: SubscriptionItem) => void;
   onDelete: (item: SubscriptionItem) => void;
+  isGuest?: boolean;
 }
 
 type FilterType = "all" | CommitmentType;
 
-export default function SubscriptionTable({ items, onNew, onEdit, onDelete }: SubscriptionTableProps) {
+export default function SubscriptionTable({ items, onNew, onEdit, onDelete, isGuest }: SubscriptionTableProps) {
   const [filter, setFilter] = useState<FilterType>("all");
 
   const fmt = (v: number) =>
@@ -72,12 +73,14 @@ export default function SubscriptionTable({ items, onNew, onEdit, onDelete }: Su
             ))}
           </div>
 
-          <button
-            onClick={onNew}
-            className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] transition-all shadow-[var(--neo-shadow-hover)] cursor-pointer"
-          >
-            <Plus size={14} strokeWidth={3} /> Novo
-          </button>
+          {!isGuest && (
+            <button
+              onClick={onNew}
+              className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] transition-all shadow-[var(--neo-shadow-hover)] cursor-pointer"
+            >
+              <Plus size={14} strokeWidth={3} /> Novo
+            </button>
+          )}
         </div>
       </div>
 
@@ -173,18 +176,22 @@ export default function SubscriptionTable({ items, onNew, onEdit, onDelete }: Su
 
                   <td className="p-4 sm:p-5">
                     <div className="flex justify-center gap-2">
-                      <button
-                        onClick={() => onEdit(item)}
-                        className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-[var(--primary)] cursor-pointer"
-                      >
-                        <Pencil size={16} strokeWidth={2.5} />
-                      </button>
-                      <button
-                        onClick={() => onDelete(item)}
-                        className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-red-500 cursor-pointer"
-                      >
-                        <Trash2 size={16} strokeWidth={2.5} />
-                      </button>
+                      {!isGuest && (
+                        <>
+                          <button
+                            onClick={() => onEdit(item)}
+                            className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-[var(--primary)] cursor-pointer"
+                          >
+                            <Pencil size={16} strokeWidth={2.5} />
+                          </button>
+                          <button
+                            onClick={() => onDelete(item)}
+                            className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-red-500 cursor-pointer"
+                          >
+                            <Trash2 size={16} strokeWidth={2.5} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>

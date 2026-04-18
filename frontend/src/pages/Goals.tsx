@@ -22,6 +22,7 @@ import {
   deleteGoal,
   type Goal,
 } from "../service/goals.service";
+import { useIsGuest } from "../hooks/useIsGuest";
 
 // ── CORES POR ÍNDICE ───────────────────────────────────────────────────────────
 
@@ -110,6 +111,7 @@ function RadialRing({ percentage }: { percentage: number }) {
 // ── PAGE ───────────────────────────────────────────────────────────────────────
 
 export function Goals() {
+  const isGuest = useIsGuest();
   const [loading, setLoading] = useState(true);
   const [rawGoals, setRawGoals] = useState<Goal[]>([]);
   const [goals, setGoals] = useState<MappedGoal[]>([]);
@@ -242,12 +244,14 @@ export function Goals() {
         <div className="text-center p-12 bg-white border-2 border-[var(--black)] rounded-[var(--radius-card)] shadow-[var(--neo-shadow)]">
           <p className="text-2xl font-black text-[var(--primary)] uppercase tracking-tight mb-4">Nenhuma meta cadastrada</p>
           <p className="text-sm text-[var(--black-muted)] font-bold uppercase tracking-wide mb-6">Crie sua primeira meta financeira.</p>
-          <button
-            onClick={handleNew}
-            className="bg-[var(--secondary)] text-[var(--primary)] px-6 py-3 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 mx-auto hover:bg-[var(--secondary-hover)] transition-all shadow-[var(--neo-shadow-hover)] cursor-pointer"
-          >
-            <Plus size={14} strokeWidth={3} /> Nova meta
-          </button>
+          {!isGuest && (
+            <button
+              onClick={handleNew}
+              className="bg-[var(--secondary)] text-[var(--primary)] px-6 py-3 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 mx-auto hover:bg-[var(--secondary-hover)] transition-all shadow-[var(--neo-shadow-hover)] cursor-pointer"
+            >
+              <Plus size={14} strokeWidth={3} /> Nova meta
+            </button>
+          )}
         </div>
 
         <GoalModal
@@ -494,12 +498,14 @@ export function Goals() {
               </h3>
               <h2 className="text-xl font-black text-white">Necessário por Meta</h2>
             </div>
-            <button
-              onClick={handleNew}
-              className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] transition-all shadow-[var(--neo-shadow-hover)] cursor-pointer"
-            >
-              <Plus size={14} strokeWidth={3} /> Nova meta
-            </button>
+            {!isGuest && (
+              <button
+                onClick={handleNew}
+                className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] transition-all shadow-[var(--neo-shadow-hover)] cursor-pointer"
+              >
+                <Plus size={14} strokeWidth={3} /> Nova meta
+              </button>
+            )}
           </div>
 
           <div className="h-[280px] p-5 pt-7">
@@ -565,18 +571,22 @@ export function Goals() {
                   <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 border-2 border-[var(--black)] rounded bg-[var(--secondary)] text-[var(--primary)]">
                     {progress}%
                   </span>
-                  <button
-                    onClick={() => handleEdit(goal)}
-                    className="p-1 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white/20 transition-all text-white/70 hover:text-white cursor-pointer opacity-0 group-hover:opacity-100"
-                  >
-                    <Pencil size={13} strokeWidth={2.5} />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteRequest(goal)}
-                    className="p-1 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white/20 transition-all text-white/70 hover:text-red-300 cursor-pointer opacity-0 group-hover:opacity-100"
-                  >
-                    <Trash2 size={13} strokeWidth={2.5} />
-                  </button>
+                  {!isGuest && (
+                    <>
+                      <button
+                        onClick={() => handleEdit(goal)}
+                        className="p-1 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white/20 transition-all text-white/70 hover:text-white cursor-pointer opacity-0 group-hover:opacity-100"
+                      >
+                        <Pencil size={13} strokeWidth={2.5} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteRequest(goal)}
+                        className="p-1 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white/20 transition-all text-white/70 hover:text-red-300 cursor-pointer opacity-0 group-hover:opacity-100"
+                      >
+                        <Trash2 size={13} strokeWidth={2.5} />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
 

@@ -26,6 +26,7 @@ import {
   deleteAccount,
   type ApiAccount,
 } from "../service/accounts.service";
+import { useIsGuest } from "../hooks/useIsGuest";
 import {
   getTransactions,
   type Transaction as ApiTransaction,
@@ -96,9 +97,10 @@ interface BankCardProps {
   hidden: boolean;
   onEdit: () => void;
   onDelete: () => void;
+  isGuest?: boolean;
 }
 
-function BankCard({ account, hidden, onEdit, onDelete }: BankCardProps) {
+function BankCard({ account, hidden, onEdit, onDelete, isGuest }: BankCardProps) {
   const isLight = account.color === "#F9D100";
 
   return (
@@ -116,22 +118,24 @@ function BankCard({ account, hidden, onEdit, onDelete }: BankCardProps) {
       />
 
       {/* Action buttons */}
-      <div className="absolute top-3 right-3 z-20 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          onClick={(e) => { e.stopPropagation(); onEdit(); }}
-          className="p-1.5 rounded-md border-2 border-[var(--black)] bg-white text-[var(--primary)] hover:bg-[var(--secondary)] shadow-[var(--neo-shadow-hover)] cursor-pointer"
-          title="Editar"
-        >
-          <Pencil size={12} strokeWidth={2.5} />
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          className="p-1.5 rounded-md border-2 border-[var(--black)] bg-red-500 text-white hover:bg-red-600 shadow-[var(--neo-shadow-hover)] cursor-pointer"
-          title="Excluir"
-        >
-          <Trash2 size={12} strokeWidth={2.5} />
-        </button>
-      </div>
+      {!isGuest && (
+        <div className="absolute top-3 right-3 z-20 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={(e) => { e.stopPropagation(); onEdit(); }}
+            className="p-1.5 rounded-md border-2 border-[var(--black)] bg-white text-[var(--primary)] hover:bg-[var(--secondary)] shadow-[var(--neo-shadow-hover)] cursor-pointer"
+            title="Editar"
+          >
+            <Pencil size={12} strokeWidth={2.5} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            className="p-1.5 rounded-md border-2 border-[var(--black)] bg-red-500 text-white hover:bg-red-600 shadow-[var(--neo-shadow-hover)] cursor-pointer"
+            title="Excluir"
+          >
+            <Trash2 size={12} strokeWidth={2.5} />
+          </button>
+        </div>
+      )}
 
       <div className="flex justify-between items-start relative z-10">
         <div className="flex items-center gap-3">
@@ -208,6 +212,8 @@ export function Accounts() {
   const [savingAccount, setSavingAccount] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Account | null>(null);
   const [showInvestNudge, setShowInvestNudge] = useState(false);
+
+  const isGuest = useIsGuest();
 
   const fetchData = useCallback(() => {
     return Promise.all([getAccounts(), getTransactions(), getCategories()])
@@ -432,12 +438,14 @@ export function Accounts() {
               {hidden ? <EyeOff size={13} strokeWidth={2.5} /> : <Eye size={13} strokeWidth={2.5} />}
               {hidden ? "Mostrar" : "Ocultar"}
             </button>
-            <button
-              onClick={handleNew}
-              className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] shadow-[var(--neo-shadow-hover)] transition-all cursor-pointer"
-            >
-              <Plus size={14} strokeWidth={3} /> Nova Conta
-            </button>
+            {!isGuest && (
+              <button
+                onClick={handleNew}
+                className="bg-[var(--secondary)] text-[var(--primary)] px-4 py-2 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 hover:bg-[var(--secondary-hover)] shadow-[var(--neo-shadow-hover)] transition-all cursor-pointer"
+              >
+                <Plus size={14} strokeWidth={3} /> Nova Conta
+              </button>
+            )}
           </div>
         </div>
 
@@ -450,12 +458,14 @@ export function Accounts() {
               <p className="text-sm font-black text-[var(--primary)] uppercase tracking-wider">
                 Nenhuma conta cadastrada
               </p>
-              <button
-                onClick={handleNew}
-                className="bg-[var(--primary)] text-[var(--secondary)] px-5 py-2.5 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 shadow-[var(--neo-shadow-hover)] hover:translate-y-[1px] hover:translate-x-[1px] transition-all cursor-pointer"
-              >
-                <Plus size={14} strokeWidth={3} /> Criar primeira conta
-              </button>
+              {!isGuest && (
+                <button
+                  onClick={handleNew}
+                  className="bg-[var(--primary)] text-[var(--secondary)] px-5 py-2.5 rounded-md border-2 border-[var(--black)] font-black text-xs uppercase flex items-center gap-2 shadow-[var(--neo-shadow-hover)] hover:translate-y-[1px] hover:translate-x-[1px] transition-all cursor-pointer"
+                >
+                  <Plus size={14} strokeWidth={3} /> Criar primeira conta
+                </button>
+              )}
             </div>
           ) : (
             accounts.map((account) => (
@@ -465,6 +475,7 @@ export function Accounts() {
                 hidden={hidden}
                 onEdit={() => handleEdit(account)}
                 onDelete={() => setDeleteTarget(account)}
+                isGuest={isGuest}
               />
             ))
           )}
