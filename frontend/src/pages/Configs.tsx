@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import {
   User,
   Lock,
@@ -21,7 +21,7 @@ import { useIsGuest } from "../hooks/useIsGuest";
 type Tab = "profile" | "account" | "notifications";
 
 export function Configs() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const isGuest = useIsGuest();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("profile");
