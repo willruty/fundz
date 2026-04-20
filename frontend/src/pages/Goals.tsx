@@ -279,14 +279,14 @@ export function Goals() {
   const milestoneGap = milestone ? milestone.target * 0.5 - milestone.current : 0;
 
   const progressData = goals.map((g) => ({
-    name:     g.name.split(" ").slice(0, 2).join(" "),
+    name:     g.name,
     fullName: g.name,
     progress: pct(g.current, g.target),
     color:    g.color,
   }));
 
   const ritmoData = goals.map((g) => ({
-    name:      g.name.split(" ").slice(0, 2).join(" "),
+    name:      g.name,
     necessario: g.requiredMonthly,
   }));
 
@@ -408,7 +408,7 @@ export function Goals() {
             {milestone ? (
               <p className="text-[10px] font-bold text-[var(--black-light)] uppercase tracking-wider leading-relaxed">
                 <span className="text-[var(--primary)] font-black">{fmt(milestoneGap)}</span> para{" "}
-                {milestone.name.split(" ")[0]} atingir 50%
+                {milestone.name} atingir 50%
               </p>
             ) : (
               <p className="text-[10px] font-bold text-[var(--black-light)] uppercase tracking-wider leading-relaxed">
@@ -482,7 +482,7 @@ export function Goals() {
                   style={{ backgroundColor: g.color }}
                 />
                 <span className="text-[10px] font-black text-[var(--primary)] uppercase tracking-wider">
-                  {g.name.split(" ").slice(0, 2).join(" ")}
+                  {g.name}
                 </span>
               </div>
             ))}
@@ -630,10 +630,10 @@ export function Goals() {
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t-2 border-[var(--black)] border-dashed">
-                  <span className="text-[9px] font-black text-[var(--primary)] bg-[var(--secondary)] px-2 py-0.5 rounded border-2 border-[var(--black)] uppercase tracking-wider">
+                  <span className="text-[12px] font-black text-[var(--primary)] bg-[var(--secondary)] px-2 py-0.5 rounded border-2 border-[var(--black)] uppercase tracking-wider">
                     {fmt(goal.requiredMonthly)}/mês
                   </span>
-                  <span className="text-[9px] font-black text-[var(--black-muted)] uppercase tracking-wider">
+                  <span className="text-[12px] font-black text-[var(--black-muted)] uppercase tracking-wider">
                     {goal.dueDate
                       ? ml > 0 ? `${ml}m restantes` : "Prazo expirado"
                       : "Sem prazo"}

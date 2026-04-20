@@ -154,7 +154,7 @@ export class UsersService {
   async getProfile(userId: string) {
     const profile = await this.prisma.profile.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, name: true, avatarUrl: true, createdAt: true },
+      select: { id: true, email: true, name: true, avatarUrl: true, createdAt: true, impulsiveItemName: true, impulsiveUnitPrice: true, impulsiveQuantity: true },
     });
 
     if (!profile) {
@@ -168,15 +168,21 @@ export class UsersService {
         name: profile.name,
         avatar_url: profile.avatarUrl,
         created_at: profile.createdAt,
+        impulsive_item_name: profile.impulsiveItemName,
+        impulsive_unit_price: profile.impulsiveUnitPrice ? Number(profile.impulsiveUnitPrice) : null,
+        impulsive_quantity: profile.impulsiveQuantity,
       },
     };
   }
 
-  /** Update profile (name, avatar_url) */
+  /** Update profile (name, avatar_url, impulsive card fields) */
   async updateProfile(userId: string, dto: UpdateProfileDto) {
-    const data: Record<string, string> = {};
+    const data: Record<string, unknown> = {};
     if (dto.name !== undefined) data.name = dto.name;
     if (dto.avatar_url !== undefined) data.avatarUrl = dto.avatar_url;
+    if (dto.impulsive_item_name !== undefined) data.impulsiveItemName = dto.impulsive_item_name;
+    if (dto.impulsive_unit_price !== undefined) data.impulsiveUnitPrice = dto.impulsive_unit_price;
+    if (dto.impulsive_quantity !== undefined) data.impulsiveQuantity = dto.impulsive_quantity;
 
     if (Object.keys(data).length === 0) {
       throw new BadRequestException('nenhum campo para atualizar');
@@ -185,6 +191,7 @@ export class UsersService {
     const profile = await this.prisma.profile.update({
       where: { id: userId },
       data,
+      select: { id: true, email: true, name: true, avatarUrl: true, createdAt: true, impulsiveItemName: true, impulsiveUnitPrice: true, impulsiveQuantity: true },
     });
 
     return {
@@ -194,6 +201,9 @@ export class UsersService {
         name: profile.name,
         avatar_url: profile.avatarUrl,
         created_at: profile.createdAt,
+        impulsive_item_name: profile.impulsiveItemName,
+        impulsive_unit_price: profile.impulsiveUnitPrice ? Number(profile.impulsiveUnitPrice) : null,
+        impulsive_quantity: profile.impulsiveQuantity,
       },
     };
   }

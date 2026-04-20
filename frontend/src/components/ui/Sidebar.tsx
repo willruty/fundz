@@ -12,16 +12,18 @@ import {
   Settings,
   TrendingUp,
   Bot,
+  Network,
 } from "lucide-react";
 
 const menuItems = [
-  { name: "Home",         path: "/home",         icon: Home },
-  { name: "Contas",       path: "/accounts",     icon: Wallet },
-  { name: "Despesas",     path: "/expenses",     icon: ArrowDownCircle },
-  { name: "Metas",        path: "/goals",        icon: Target },
-  { name: "Investimentos",path: "/investments",  icon: TrendingUp },
-  { name: "Assinaturas",  path: "/subscriptions",icon: CalendarClock },
-  { name: "Advisors",     path: "/advisors",     icon: Bot },
+  { name: "Home",          path: "/home",            icon: Home },
+  { name: "Contas",        path: "/accounts",        icon: Wallet },
+  { name: "Despesas",      path: "/expenses",        icon: ArrowDownCircle },
+  { name: "Metas",         path: "/goals",           icon: Target },
+  { name: "Investimentos", path: "/investments",     icon: TrendingUp },
+  { name: "Assinaturas",   path: "/subscriptions",   icon: CalendarClock },
+  { name: "Planejamento",  path: "/visual-planning", icon: Network },
+  { name: "Advisors",      path: "/advisors",        icon: Bot },
 ];
 
 export function Sidebar() {
@@ -82,7 +84,11 @@ export function Sidebar() {
 
         {/* Navegação */}
         <div className="flex flex-col gap-1 px-2 mt-2">
-          {menuItems.filter((item) => item.path !== "/advisors").map((item) => {
+          {menuItems.filter((item) =>
+            item.path !== "/advisors" &&
+            item.path !== "/investments" &&
+            item.path !== "/visual-planning"
+          ).map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <button
@@ -132,8 +138,87 @@ export function Sidebar() {
             );
           })}
 
-          {/* Divisória antes do Advisors */}
-          <div className="mx-2 my-2 border-t border-white/10" />
+          {/* Divisória — Avançados */}
+          <div className="mx-2 my-2 flex items-center gap-2">
+            <AnimatePresence>
+              {isExpanded && (
+                <motion.span
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "auto" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="text-[8px] font-black uppercase tracking-[0.22em] text-white/30 whitespace-nowrap overflow-hidden"
+                >
+                  Avançados
+                </motion.span>
+              )}
+            </AnimatePresence>
+            <div className="flex-1 border-t border-white/10" />
+          </div>
+
+          {/* Investimentos + Planejamento */}
+          {menuItems.filter((item) =>
+            item.path === "/investments" || item.path === "/visual-planning"
+          ).map((item) => {
+            const isActive = location.pathname === item.path;
+            const isDisabled = item.path === "/visual-planning";
+            return (
+              <button
+                key={item.path}
+                onClick={() => !isDisabled && navigate(item.path)}
+                disabled={isDisabled}
+                className={`w-full flex items-center p-3 rounded-xl transition-all duration-200 group relative ${
+                  isDisabled
+                    ? "opacity-35 cursor-not-allowed"
+                    : "cursor-pointer"
+                } ${
+                  isActive
+                    ? "bg-white/10 text-[var(--secondary)]"
+                    : "text-[var(--main-bg)] hover:bg-white/5 hover:text-[var(--secondary)]"
+                } ${!isExpanded ? "justify-center" : "justify-start px-4"}`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeBorder"
+                    className="absolute left-0 w-1.5 h-6 bg-[var(--secondary)] rounded-r-md"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
+
+                <div className="flex items-center justify-center min-w-[22px]">
+                  <item.icon
+                    size={20}
+                    strokeWidth={isActive ? 2.5 : 2}
+                    className={`${isActive ? "text-[var(--secondary)]" : "text-[var(--secondary)] opacity-70 group-hover:opacity-100 transition-opacity"}`}
+                  />
+                </div>
+
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.span
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: "auto" }}
+                      exit={{ opacity: 0, width: 0 }}
+                      className="font-black text-[10px] uppercase tracking-widest overflow-hidden whitespace-nowrap ml-4 mt-0.5"
+                    >
+                      {item.name}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+
+                {isExpanded && isDisabled && (
+                  <span className="ml-auto text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border border-white/20 text-white/30">
+                    Em breve
+                  </span>
+                )}
+
+                {!isExpanded && !isDisabled && (
+                  <div className="absolute left-16 bg-[var(--secondary)] text-[var(--primary)] px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 border-2 border-[var(--black)] shadow-[var(--neo-shadow)] z-[100] translate-x-2 group-hover:translate-x-4">
+                    {item.name}
+                  </div>
+                )}
+              </button>
+            );
+          })}
 
           {/* Advisors */}
           {(() => {

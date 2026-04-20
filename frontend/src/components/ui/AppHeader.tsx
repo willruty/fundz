@@ -2,7 +2,43 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Bell, ChevronDown, User, Settings, LogOut } from "lucide-react";
+import {
+  Bell,
+  ChevronDown,
+  User,
+  Settings,
+  LogOut,
+  TrendingDown,
+  TrendingUp,
+  AlertCircle,
+} from "lucide-react";
+
+const MOCK_NOTIFICATIONS = [
+  {
+    id: 1,
+    icon: TrendingDown,
+    iconColor: "text-red-500",
+    title: "Gasto acima do limite",
+    description: "Alimentação ultrapassou 80% do orçamento.",
+    time: "2h atrás",
+  },
+  {
+    id: 2,
+    icon: TrendingUp,
+    iconColor: "text-green-500",
+    title: "Meta atingida!",
+    description: "Reserva de emergência chegou a R$ 5.000.",
+    time: "5h atrás",
+  },
+  {
+    id: 3,
+    icon: AlertCircle,
+    iconColor: "text-yellow-500",
+    title: "Fatura próxima",
+    description: "Cartão Nubank vence em 3 dias.",
+    time: "1d atrás",
+  },
+];
 
 interface AppHeaderProps {
   title: ReactNode;
@@ -12,6 +48,7 @@ interface AppHeaderProps {
 export function AppHeader({ title, subtitle }: AppHeaderProps) {
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   // Simulação de dados do usuário
   const userName = localStorage.getItem("user_name") || "Usuário";
@@ -50,16 +87,94 @@ export function AppHeader({ title, subtitle }: AppHeaderProps) {
         </span>
 
         {/* Botão Notificação */}
-        <button className="relative p-2.5 bg-white border-2 border-[var(--black)] rounded-xl shadow-[var(--neo-shadow-hover)] hover:shadow-none hover:translate-y-[2px] hover:translate-x-[2px] transition-all cursor-pointer group">
-          <Bell size={22} strokeWidth={2.5} className="text-[var(--primary)]" />
-          {/* Bolinha de Alerta Neo-brutalista */}
-          <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 border-2 border-[var(--black)] rounded-full animate-bounce" />
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => {
+              setIsNotificationsOpen(!isNotificationsOpen);
+              setIsProfileOpen(false);
+            }}
+            className="relative p-2.5 bg-white border-2 border-[var(--black)] rounded-xl shadow-[var(--neo-shadow-hover)] hover:shadow-none hover:translate-y-[2px] hover:translate-x-[2px] transition-all cursor-pointer group"
+          >
+            <Bell
+              size={22}
+              strokeWidth={2.5}
+              className="text-[var(--primary)]"
+            />
+            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 border-2 border-[var(--black)] rounded-full animate-bounce" />
+          </button>
+
+          <AnimatePresence>
+            {isNotificationsOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-30"
+                  onClick={() => setIsNotificationsOpen(false)}
+                />
+                <motion.div
+                  initial={{ opacity: 0, height: 0, y: -10 }}
+                  animate={{
+                    opacity: 1,
+                    height: "auto",
+                    y: 0,
+                    transition: {
+                      height: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] },
+                      opacity: { duration: 0.25 },
+                      y: { type: "spring", stiffness: 300, damping: 25 },
+                    },
+                  }}
+                  exit={{
+                    opacity: 0,
+                    height: 0,
+                    y: -10,
+                    transition: {
+                      height: { duration: 0.3 },
+                      opacity: { duration: 0.2 },
+                    },
+                  }}
+                  style={{ originY: 0 }}
+                  className="absolute right-0 mt-3 w-100 bg-white border-2 border-[var(--black)] rounded-2xl shadow-[var(--neo-shadow)] z-40 overflow-hidden"
+                >
+                  <div className="p-2 flex flex-col gap-1">
+                    <p className="text-[10px] font-black text-[var(--black-muted)] uppercase tracking-widest px-3 pt-1 pb-2 border-b-2 border-dashed border-[var(--black)]">
+                      Notificações
+                    </p>
+                    {MOCK_NOTIFICATIONS.map((n) => (
+                      <button
+                        key={n.id}
+                        className="flex items-start gap-3 p-3 w-full rounded-lg border-2 border-transparent hover:border-[var(--black)] hover:bg-[var(--secondary)] transition-all text-left group cursor-pointer"
+                      >
+                        <n.icon
+                          size={18}
+                          strokeWidth={2.5}
+                          className={`${n.iconColor} mt-0.5 shrink-0`}
+                        />
+                        <div className="flex flex-col gap-0.5 min-w-0">
+                          <span className="text-xs font-black text-[var(--primary)] uppercase tracking-wide truncate">
+                            {n.title}
+                          </span>
+                          <span className="text-[10px] font-semibold text-[var(--black-muted)] leading-snug">
+                            {n.description}
+                          </span>
+                          <span className="text-[9px] font-black text-[var(--black-muted)] uppercase tracking-widest mt-0.5">
+                            {n.time}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Perfil Pilled */}
         <div className="relative">
           <button
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            onClick={() => {
+              setIsProfileOpen(!isProfileOpen);
+              setIsNotificationsOpen(false);
+            }}
             className="flex items-center gap-3 bg-white border-2 border-[var(--black)] p-1.5 pr-4 rounded-full shadow-[var(--neo-shadow)] hover:shadow-[var(--neo-shadow-hover)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all cursor-pointer relative z-40"
           >
             {/* Foto Redonda */}

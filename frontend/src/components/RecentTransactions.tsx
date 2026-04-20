@@ -329,7 +329,7 @@ function CsvImportModal({ onClose, onImport }: CsvModalProps) {
 
 export function RecentTransactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [accounts, setAccounts] = useState<ApiAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -788,17 +788,20 @@ export function RecentTransactions() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-white border-b-2 border-[var(--black)]">
-                <th className="p-4 sm:p-5 text-[10px] font-black uppercase text-[var(--black-light)] tracking-widest w-24">
-                  Ações
-                </th>
                 <th className="p-4 sm:p-5 text-[10px] font-black uppercase text-[var(--black-light)] tracking-widest whitespace-nowrap">
                   Data
                 </th>
                 <th className="p-4 sm:p-5 text-[10px] font-black uppercase text-[var(--black-light)] tracking-widest">
                   Descrição
                 </th>
+                <th className="p-4 sm:p-5 text-[10px] font-black uppercase text-[var(--black-light)] tracking-widest">
+                  Categoria
+                </th>
                 <th className="p-4 sm:p-5 text-[10px] font-black uppercase text-[var(--black-light)] tracking-widest text-right">
                   Valor
+                </th>
+                <th className="p-4 sm:p-5 text-[10px] font-black uppercase text-[var(--black-light)] tracking-widest w-24 text-center">
+                  Ações
                 </th>
               </tr>
             </thead>
@@ -806,25 +809,6 @@ export function RecentTransactions() {
               {/* New row */}
               {isCreating && (
                 <tr className="bg-emerald-50 border-b-2 border-[var(--black)]">
-                  <td className="p-4 sm:p-5">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleSave}
-                        className="bg-emerald-400 p-1.5 rounded border-2 border-[var(--black)] hover:bg-emerald-500 transition-colors shadow-[var(--neo-shadow-hover)]"
-                      >
-                        <Check size={16} strokeWidth={3} className="text-[var(--primary)]" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsCreating(false);
-                          setEditingId(null);
-                        }}
-                        className="bg-red-400 p-1.5 rounded border-2 border-[var(--black)] hover:bg-red-500 transition-colors shadow-[var(--neo-shadow-hover)]"
-                      >
-                        <X size={16} strokeWidth={3} className="text-white" />
-                      </button>
-                    </div>
-                  </td>
                   <td className="p-4 sm:p-5">
                     <input
                       type="date"
@@ -845,6 +829,18 @@ export function RecentTransactions() {
                       className={`w-full ${inputClass} px-3 py-1.5 text-xs font-black uppercase`}
                       autoFocus
                     />
+                  </td>
+                  <td className="p-4 sm:p-5">
+                    <select
+                      value={editForm.category_id ?? ""}
+                      onChange={(e) => setEditForm({ ...editForm, category_id: e.target.value })}
+                      className={`w-full ${inputClass} px-2 py-1.5 text-xs font-black uppercase`}
+                    >
+                      <option value="">Sem categoria</option>
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
                   </td>
                   <td className="p-4 sm:p-5 text-right">
                     <div className="flex gap-2 justify-end items-center">
@@ -869,6 +865,25 @@ export function RecentTransactions() {
                       />
                     </div>
                   </td>
+                  <td className="p-4 sm:p-5">
+                    <div className="flex gap-2 justify-center">
+                      <button
+                        onClick={handleSave}
+                        className="bg-emerald-400 p-1.5 rounded border-2 border-[var(--black)] hover:bg-emerald-500 transition-colors shadow-[var(--neo-shadow-hover)]"
+                      >
+                        <Check size={16} strokeWidth={3} className="text-[var(--primary)]" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsCreating(false);
+                          setEditingId(null);
+                        }}
+                        className="bg-red-400 p-1.5 rounded border-2 border-[var(--black)] hover:bg-red-500 transition-colors shadow-[var(--neo-shadow-hover)]"
+                      >
+                        <X size={16} strokeWidth={3} className="text-white" />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               )}
 
@@ -879,7 +894,7 @@ export function RecentTransactions() {
               {/* Empty state */}
               {!loading && currentData.length === 0 && !isCreating && (
                 <tr>
-                  <td colSpan={4} className="p-16 text-center">
+                  <td colSpan={5} className="p-16 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <div className="p-4 bg-white border-2 border-[var(--black)] rounded-full shadow-[var(--neo-shadow)]">
                         <FileX size={32} strokeWidth={2} className="text-[var(--black-muted)]" />
@@ -911,52 +926,6 @@ export function RecentTransactions() {
                       editingId === t.id ? "bg-black/5" : ""
                     }`}
                   >
-                    <td className="p-4 sm:p-5">
-                      <div className="flex gap-2">
-                        {editingId === t.id ? (
-                          <>
-                            <button
-                              onClick={handleSave}
-                              className="bg-emerald-400 p-1.5 rounded border-2 border-[var(--black)] hover:bg-emerald-500 transition-colors shadow-[var(--neo-shadow-hover)]"
-                            >
-                              <Check size={16} strokeWidth={3} className="text-[var(--primary)]" />
-                            </button>
-                            <button
-                              onClick={() => setEditingId(null)}
-                              className="bg-red-400 p-1.5 rounded border-2 border-[var(--black)] hover:bg-red-500 transition-colors shadow-[var(--neo-shadow-hover)]"
-                            >
-                              <X size={16} strokeWidth={3} className="text-white" />
-                            </button>
-                          </>
-                        ) : !isGuest ? (
-                          <>
-                            <button
-                              onClick={() => {
-                                setEditingId(t.id);
-                                setEditForm({
-                                  ...t,
-                                  account_id: (t as any).accountId ?? accounts[0]?.id,
-                                  category_id: (t as any).categoryId ?? "",
-                                });
-                              }}
-                              className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-[var(--primary)]"
-                            >
-                              <Pencil size={16} strokeWidth={2.5} />
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (window.confirm("Deseja deletar esta transação?"))
-                                  handleDelete(t.id);
-                              }}
-                              className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-red-500"
-                            >
-                              <Trash2 size={16} strokeWidth={2.5} />
-                            </button>
-                          </>
-                        ) : null}
-                      </div>
-                    </td>
-
                     <td className="p-4 sm:p-5 text-xs font-bold text-[var(--black-muted)] whitespace-nowrap">
                       {editingId === t.id ? (
                         <input
@@ -984,6 +953,25 @@ export function RecentTransactions() {
                       ) : (
                         <span className="text-sm font-black text-[var(--primary)] uppercase tracking-tight">
                           {t.description}
+                        </span>
+                      )}
+                    </td>
+
+                    <td className="p-4 sm:p-5">
+                      {editingId === t.id ? (
+                        <select
+                          value={editForm.category_id ?? ""}
+                          onChange={(e) => setEditForm({ ...editForm, category_id: e.target.value })}
+                          className={`w-full ${inputClass} px-2 py-1 text-xs font-black uppercase`}
+                        >
+                          <option value="">Sem categoria</option>
+                          {categories.map((c) => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className="text-xs font-bold text-[var(--black-muted)] uppercase tracking-wider">
+                          {categories.find((c) => c.id === t.categoryId)?.name ?? "—"}
                         </span>
                       )}
                     </td>
@@ -1024,6 +1012,56 @@ export function RecentTransactions() {
                           }).format(Number(t.amount))}
                         </span>
                       )}
+                    </td>
+
+                    <td className="p-4 sm:p-5">
+                      <div className="flex gap-2 justify-center">
+                        {editingId === t.id ? (
+                          <>
+                            <button
+                              onClick={handleSave}
+                              className="bg-emerald-400 p-1.5 rounded border-2 border-[var(--black)] hover:bg-emerald-500 transition-colors shadow-[var(--neo-shadow-hover)]"
+                            >
+                              <Check size={16} strokeWidth={3} className="text-[var(--primary)]" />
+                            </button>
+                            <button
+                              onClick={() => setEditingId(null)}
+                              className="bg-red-400 p-1.5 rounded border-2 border-[var(--black)] hover:bg-red-500 transition-colors shadow-[var(--neo-shadow-hover)]"
+                            >
+                              <X size={16} strokeWidth={3} className="text-white" />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => {
+                                if (isGuest) return;
+                                setEditingId(t.id);
+                                setEditForm({
+                                  ...t,
+                                  account_id: (t as any).accountId ?? accounts[0]?.id,
+                                  category_id: (t as any).categoryId ?? "",
+                                });
+                              }}
+                              disabled={isGuest}
+                              className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-[var(--primary)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-transparent disabled:hover:bg-transparent disabled:hover:shadow-none"
+                            >
+                              <Pencil size={16} strokeWidth={2.5} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (isGuest) return;
+                                if (window.confirm("Deseja deletar esta transação?"))
+                                  handleDelete(t.id);
+                              }}
+                              disabled={isGuest}
+                              className="p-1.5 rounded border-2 border-transparent hover:border-[var(--black)] hover:bg-white transition-all hover:shadow-[var(--neo-shadow-hover)] text-[var(--black-light)] hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-transparent disabled:hover:bg-transparent disabled:hover:shadow-none"
+                            >
+                              <Trash2 size={16} strokeWidth={2.5} />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

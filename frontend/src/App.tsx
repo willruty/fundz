@@ -14,6 +14,8 @@ import { Subscriptions } from "./pages/Subscriptions";
 import { Configs } from "./pages/Configs";
 import { Advisors } from "./pages/Advisors";
 import { AdvisorsChat } from "./pages/AdvisorsChat";
+import { Onboarding } from "./pages/Onboarding";
+import { VisualPlanning } from "./pages/VisualPlanning";
 import { Toaster } from "react-hot-toast";
 import Platform from "./components/ui/PlataformInterface";
 
@@ -25,6 +27,7 @@ function App() {
         {/* Rotas sem Sidebar */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/onboarding" element={<Onboarding />} />
 
         {/* Rotas com Sidebar */}
         <Route element={<Platform />}>
@@ -37,6 +40,7 @@ function App() {
           <Route path="/configs" element={<Configs />} />
           <Route path="/advisors" element={<Advisors />} />
           <Route path="/advisors/chat/:personaId" element={<AdvisorsChat />} />
+          <Route path="/visual-planning" element={<VisualPlanning />} />
         </Route>
       </Routes>
     </BrowserRouter>

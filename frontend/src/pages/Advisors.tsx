@@ -379,7 +379,7 @@ export function Advisors() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="flex flex-col h-full overflow-y-auto bg-[var(--main-bg)]"
+        className="flex flex-col h-full overflow-y-auto "
       >
         {/* Header */}
         <div className="sm:px-6 pt-10 md:pt-14 pb-8 mx-auto w-full text-center">
@@ -387,7 +387,8 @@ export function Advisors() {
             className="text-5xl md:text-7xl text-[var(--primary)] leading-[0.9] mb-8"
             style={{ fontFamily: "Catchland, sans-serif" }}
           >
-            Com <span className="text-[var(--secondary)]">quem</span> quer conversar hoje?
+            Com <span className="text-[var(--secondary)]">quem</span> quer
+            conversar hoje?
           </h1>
           <p className="text-sm md:text-base text-black/50 font-medium max-w-xl mx-auto">
             Três personalidades, três formas de olhar pro seu dinheiro. Escolha
@@ -396,7 +397,7 @@ export function Advisors() {
         </div>
 
         {/* Persona cards */}
-        <div className=" sm:px-6 pb-8 mx-auto w-full">
+        <div className="sm:px-6 pb-8 mx-auto w-full">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {PRESET_PERSONAS.map((persona, i) => (
               <PersonaCard
@@ -432,7 +433,7 @@ export function Advisors() {
         </div>
 
         {/* Custom personas */}
-        <div className="sm:px-6 md:px-10 pb-6  mx-auto w-full">
+        <div className="sm:px-6 pb-8 mx-auto w-full">
           <div className="flex items-center gap-3 mb-3">
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black/60">
               Advisors Personalizados
@@ -474,36 +475,49 @@ export function Advisors() {
                       className="p-1.5 rounded-md border-2 border-black bg-[var(--secondary)] hover:bg-[var(--secondary-hover)] cursor-pointer"
                       title="Editar"
                     >
-                      <Pencil size={10} strokeWidth={3} className="text-black" />
+                      <Pencil
+                        size={10}
+                        strokeWidth={3}
+                        className="text-black"
+                      />
                     </button>
                     <button
                       onClick={() => handleDeleteCustom(p.id)}
                       className="p-1.5 rounded-md border-2 border-black bg-red-500 hover:bg-red-600 cursor-pointer"
                       title="Excluir"
                     >
-                      <Trash2 size={10} strokeWidth={3} className="text-white" />
+                      <Trash2
+                        size={10}
+                        strokeWidth={3}
+                        className="text-white"
+                      />
                     </button>
                   </div>
                 )}
               </div>
             ))}
 
-            {!isGuest && (
-              <button
-                onClick={() => {
-                  setEditingPersona(null);
-                  setModalOpen(true);
-                }}
-                className="flex items-center gap-2 px-4 py-2 rounded-md border-2 border-dashed border-black/40 bg-transparent text-black/50 hover:text-black hover:border-black hover:bg-white transition-all cursor-pointer text-xs font-black uppercase tracking-widest"
-              >
-                <Plus size={13} strokeWidth={3} /> Novo Advisor
-              </button>
-            )}
+            <button
+              onClick={() => {
+                if (isGuest) return;
+                setEditingPersona(null);
+                setModalOpen(true);
+              }}
+              disabled={isGuest}
+              title={
+                isGuest
+                  ? "Crie uma conta para adicionar advisors personalizados"
+                  : undefined
+              }
+              className="flex items-center gap-2 px-4 py-2 rounded-md border-2 border-dashed border-black/40 bg-transparent text-black/50 transition-all text-xs font-black uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:text-black hover:enabled:border-black hover:enabled:bg-white cursor-pointer"
+            >
+              <Plus size={13} strokeWidth={3} /> Novo Advisor
+            </button>
           </div>
         </div>
 
         {/* Recent chat history */}
-        <div className="px-4 sm:px-6 md:px-10 pb-10  mx-auto w-full">
+        <div className="sm:px-6 pb-8 mx-auto w-full">
           <div className="flex items-center gap-3 mb-4">
             <History size={14} strokeWidth={2.5} className="text-black/70" />
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black/60">

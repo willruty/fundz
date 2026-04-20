@@ -7,6 +7,9 @@ export type Profile = {
   name: string | null;
   avatar_url: string | null;
   created_at: string | null;
+  impulsive_item_name: string | null;
+  impulsive_unit_price: number | null;
+  impulsive_quantity: number | null;
 };
 
 export async function getProfile(): Promise<Profile> {
@@ -17,6 +20,9 @@ export async function getProfile(): Promise<Profile> {
 export async function updateProfile(data: {
   name?: string;
   avatar_url?: string;
+  impulsive_item_name?: string;
+  impulsive_unit_price?: number;
+  impulsive_quantity?: number;
 }): Promise<Profile> {
   const response = await api.put<{ data: Profile }>("/user/profile", data);
   return response.data;

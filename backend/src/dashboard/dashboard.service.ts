@@ -52,17 +52,26 @@ export interface FinancialHealth {
   investimentos: FinancialHealthIndicator;
 }
 
+export interface SubscriptionSummary {
+  name: string;
+  category: string;
+  monthlyAmount: string;
+  billingCycle: string;
+  nextBillingDate: string | null;
+}
+
 @Injectable()
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getOverview(userId: string) {
-    const [accounts, goal, lastMonthTransactions, categories, financialHealth] = await Promise.all([
+    const [accounts, goal, lastMonthTransactions, categories, financialHealth, subscriptions] = await Promise.all([
       this.getAccountsSummary(userId),
       this.getNextGoal(userId),
       this.getLastMonthTransactions(userId),
       this.getCategorySummary(userId),
       this.getFinancialHealth(userId),
+      this.getSubscriptionsSummary(userId),
     ]);
 
     return {
@@ -72,6 +81,7 @@ export class DashboardService {
         last_month_transactions: lastMonthTransactions,
         categories,
         financial_health: financialHealth,
+        subscriptions,
       },
     };
   }
@@ -208,6 +218,31 @@ export class DashboardService {
         });
 
     return { most_used: mostUsed, distribution };
+  }
+
+  private async getSubscriptionsSummary(userId: string): Promise<SubscriptionSummary[]> {
+    const subs = await this.prisma.subscription.findMany({
+      where: { userId, active: true },
+      select: {
+        name: true,
+        amount: true,
+        billingCycle: true,
+        nextBillingDate: true,
+        category: { select: { name: true } },
+      },
+      orderBy: { nextBillingDate: 'asc' },
+    });
+
+    return subs.map((s) => ({
+      name: s.name,
+      category: s.category?.name ?? '',
+      monthlyAmount:
+        s.billingCycle === 'yearly'
+          ? new Decimal(s.amount.toString()).div(12).toDecimalPlaces(2).toString()
+          : s.amount.toString(),
+      billingCycle: s.billingCycle,
+      nextBillingDate: s.nextBillingDate?.toISOString() ?? null,
+    }));
   }
 
   private async getFinancialHealth(userId: string): Promise<FinancialHealth> {

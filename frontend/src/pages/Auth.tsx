@@ -1,15 +1,22 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 import { supabase } from "../lib/supabase";
+import { getProfile } from "../service/profile.service";
 
 type AuthMode = "login" | "register";
 
+
 export function Auth() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<AuthMode>("login");
+  const location = useLocation();
+  const initialMode: AuthMode =
+    (location.state as { mode?: AuthMode } | null)?.mode === "register"
+      ? "register"
+      : "login";
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -31,7 +38,7 @@ export function Auth() {
 
       localStorage.setItem("user_name", "Visitante");
       toast.success("Entrando como visitante...");
-      navigate("/home");
+      navigate(localStorage.getItem("fundz_guest_onboarded") ? "/home" : "/onboarding");
     } catch (_) {
       toast.error("Não foi possível entrar como visitante.");
     } finally {
@@ -52,12 +59,12 @@ export function Auth() {
 
         if (error) throw error;
 
-        const userName =
-          data.user?.user_metadata?.name ||
-          data.user?.email?.split("@")[0] ||
-          "";
-
-        localStorage.setItem("user_name", userName);
+        try {
+          const profile = await getProfile();
+          localStorage.setItem("user_name", profile.name || data.user?.email?.split("@")[0] || "");
+        } catch {
+          localStorage.setItem("user_name", data.user?.email?.split("@")[0] || "");
+        }
         toast.success("Login realizado com sucesso!");
       } else {
         // Registra via backend (admin API — sem verificação de email)
@@ -89,7 +96,7 @@ export function Auth() {
         toast.success("Cadastro realizado com sucesso!");
       }
 
-      navigate("/home");
+      navigate(mode === "register" ? "/onboarding" : "/home");
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Erro inesperado.";

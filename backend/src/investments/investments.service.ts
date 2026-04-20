@@ -15,6 +15,7 @@ export class InvestmentsService {
         category: dto.category,
         amount: dto.amount,
         annualRate: dto.annualRate,
+        ...(dto.monthlyAport !== undefined && { monthlyAport: dto.monthlyAport }),
         ...(dto.startDate && { startDate: new Date(dto.startDate) }),
         ...(dto.notes && { notes: dto.notes }),
       },
@@ -48,8 +49,9 @@ export class InvestmentsService {
     if (dto.name !== undefined)       data.name = dto.name;
     if (dto.category !== undefined)   data.category = dto.category;
     if (dto.amount !== undefined)     data.amount = dto.amount;
-    if (dto.annualRate !== undefined) data.annualRate = dto.annualRate;
-    if (dto.startDate !== undefined)  data.startDate = new Date(dto.startDate);
+    if (dto.annualRate !== undefined)   data.annualRate = dto.annualRate;
+    if (dto.monthlyAport !== undefined) data.monthlyAport = dto.monthlyAport;
+    if (dto.startDate !== undefined)    data.startDate = new Date(dto.startDate);
     if (dto.notes !== undefined)      data.notes = dto.notes;
 
     const result = await this.prisma.investment.updateMany({

@@ -23,6 +23,12 @@ export class CreateInvestmentDto {
   annualRate!: number;
 
   @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  monthlyAport?: number;
+
+  @IsOptional()
   @IsDateString()
   startDate?: string;
 

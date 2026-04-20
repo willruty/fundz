@@ -4,6 +4,7 @@ export type DashboardDTO = {
   last_month_transactions: TransactionSummary[];
   categories: CategorySummary;
   financial_health: FinancialHealth;
+  subscriptions: SubscriptionSummary[];
 };
 
 export type AccountSummary = {
@@ -39,6 +40,14 @@ export type CategoryDistribution = {
   name: string;
   amount: string;
   percentage: string;
+};
+
+export type SubscriptionSummary = {
+  name: string;
+  category: string;
+  monthlyAmount: string;
+  billingCycle: string;
+  nextBillingDate: string | null;
 };
 
 export type HealthLevel = 'bom' | 'atenção' | 'crítico' | 'moderado' | 'alto' | 'baixo' | 'ruim' | 'sem dados';

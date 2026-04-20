@@ -7,6 +7,7 @@ export interface ApiInvestment {
   category: string;
   amount: string;
   annualRate: string;
+  monthlyAport: string | null;
   startDate: string;
   notes: string | null;
   createdAt: string;
@@ -24,6 +25,7 @@ export interface CreateInvestmentInput {
   category: string;
   amount: number;
   annualRate: number;
+  monthlyAport?: number;
   startDate?: string;
   notes?: string;
 }
@@ -34,6 +36,7 @@ export interface UpdateInvestmentInput {
   category?: string;
   amount?: number;
   annualRate?: number;
+  monthlyAport?: number;
   startDate?: string;
   notes?: string;
 }

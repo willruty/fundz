@@ -42,6 +42,10 @@ model Profile {
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
 
+  impulsiveItemName  String?  @default("Energético") @map("impulsive_item_name") @db.VarChar
+  impulsiveUnitPrice Decimal? @default(12.5) @map("impulsive_unit_price") @db.Decimal
+  impulsiveQuantity  Int?     @default(3) @map("impulsive_quantity")
+
   accounts      Account[]
   advisors      Advisor[]
   categories    Category[]
@@ -171,10 +175,11 @@ model Investment {
   userId     String    @map("user_id") @db.Uuid
   name       String    @db.VarChar
   category   String    @db.VarChar
-  amount     Decimal   @db.Decimal
-  annualRate Decimal   @map("annual_rate") @db.Decimal
-  startDate  DateTime  @default(now()) @map("start_date") @db.Date
-  notes      String?   @db.VarChar
+  amount          Decimal   @db.Decimal
+  annualRate      Decimal   @map("annual_rate") @db.Decimal
+  monthlyAport    Decimal?  @map("monthly_aport") @db.Decimal
+  startDate       DateTime  @default(now()) @map("start_date") @db.Date
+  notes           String?   @db.VarChar
   createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt  DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
 

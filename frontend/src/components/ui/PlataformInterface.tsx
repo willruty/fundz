@@ -5,9 +5,10 @@ import { MobileNav } from "./MobileNav";
 
 function Platform() {
   const location = useLocation();
-  const isProfilePage  = ["/profile", "/configs"].includes(location.pathname);
-  const isAdvisorsPage = location.pathname.startsWith("/advisors");
-  const isAdvisorsChat = location.pathname.startsWith("/advisors/chat");
+  const isProfilePage       = ["/profile", "/configs"].includes(location.pathname);
+  const isAdvisorsPage      = location.pathname.startsWith("/advisors");
+  const isAdvisorsChat      = location.pathname.startsWith("/advisors/chat");
+  const isVisualPlanningPage = location.pathname === "/visual-planning";
 
   // Busca o nome do usuário do LocalStorage
   const userName = localStorage.getItem("user_name") || "";
@@ -77,6 +78,12 @@ function Platform() {
             "Controle seus serviços recorrentes, evite cobranças esquecidas e elimine vazamentos silenciosos do seu orçamento.",
         };
 
+      case "/visual-planning":
+        return {
+          title: "Planejamento Visual",
+          subtitle: "Distribua sua receita entre categorias e veja o dinheiro fluir em tempo real.",
+        };
+
       default:
         return { title: "", subtitle: "" };
     }
@@ -85,17 +92,25 @@ function Platform() {
   const { title, subtitle } = getHeaderInfo();
 
   return (
-    <div className="flex h-screen w-full bg-[#F8FAFC] overflow-hidden font-manrope">
+    <div
+      className="flex h-screen w-full bg-[#F8FAFC] overflow-hidden font-manrope"
+      style={{
+        backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.10) 2px, transparent 1px)',
+        backgroundSize: '24px 24px',
+      }}
+    >
       {!isAdvisorsChat && <Sidebar />}
 
       <main className={`flex-1 h-full flex flex-col overflow-hidden ${
-        isAdvisorsPage
+        isAdvisorsPage || isVisualPlanningPage
           ? "pb-[4.5rem] md:pb-0"
           : "overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-8 pb-24 md:pb-8"
       }`}>
-        {!isProfilePage && !isAdvisorsPage && <AppHeader title={title} subtitle={subtitle} />}
+        {!isProfilePage && !isAdvisorsPage && !isVisualPlanningPage && (
+          <AppHeader title={title} subtitle={subtitle} />
+        )}
 
-        <div className={isAdvisorsPage ? "flex-1 h-full overflow-hidden" : "flex-1"}>
+        <div className={isAdvisorsPage || isVisualPlanningPage ? "flex-1 h-full overflow-hidden" : "flex-1"}>
           <Outlet />
         </div>
       </main>

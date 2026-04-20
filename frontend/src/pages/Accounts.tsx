@@ -333,7 +333,7 @@ export function Accounts() {
   const maxCatExpense = topCategories[0]?.[1] ?? 1;
 
   return (
-    <main className="flex flex-col gap-6 bg-[var(--main-bg)] min-h-screen">
+    <main className="flex flex-col gap-6 min-h-screen">
 
       {/* Account modal */}
       <AccountModal
